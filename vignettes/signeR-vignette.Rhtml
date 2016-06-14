@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>signeR</title>
+    <style type='text/css'>
+    * {
+        font-family: sans-serif;
+    }
+    body {
+        margin: auto;
+        width: 80%;
+    }
+    h1 {
+        text-align: center;
+    }
+    h2 {
+        margin-top: 2em;
+        border-bottom: solid 1px gray;
+    }
+    a:link {
+        color: #0087BD;
+    }
+    a:visited {
+        color: #009F6B;
+    }
+    img {
+        display: block;
+        margin: auto;
+    }
+    code, .rcode, .rcode * {
+        font-family: monospace;
+    }
+    #table_of_contents {
+        position: fixed;
+        right: 0;
+        top: 0;
+        padding: 0.5em;
+        background-color: white;
+        border-bottom: solid 1px black;
+        border-left: solid 1px black;
+    }
+    #table_of_contents li {
+        list-style-type: none;
+    }
+    #table_of_contents a {
+        text-decoration: none;
+    }
+    #table_of_contents #full {
+        display: none;
+    }
+    #table_of_contents:hover #full {
+        display: block;
+    }
+    </style>
+</head>
+<body>
+<!--
+%\VignetteEngine{knitr::knitr}
+%\VignetteIndexEntry{signeR}
+%\VignettePackage{signeR}
+-->
+
+<div id="table_of_contents">
+<h4>Table of contents</h4>
+<div id="full">
+<ul>
+<li><a href="#toc1">1: Introduction</a></li>
+<li><a href="#toc2">2: Installation</a></li>
+<li><a href="#toc3">3: Preparing the input</a>
+    <ul>
+    <li><a href="#toc3.1">3.1: Pre-made dataset</a></i>
+    <li><a href="#toc3.2">3.2: Input from VCF</a></i>
+    </ul>
+</li>
+<li><a href="#toc4">4: Generate the signatures</a>
+    <ul>
+    <li><a href="#toc4.1">4.1: Number of signatures</a></li>
+    </ul>
+</li>
+<li><a href="#toc5">5: Signatures visualization</a>
+    <ul>
+    <li><a href="#toc5.1">5.1: Plot the signatures</a></li>
+    <li><a href="#toc5.2">5.2: Plot the exposures</a></li>
+    <li><a href="#toc5.3">5.3: Differential Exposure Analysis</a></li>
+    <li><a href="#toc5.4">5.4: Sample Classification</a></li>
+    <li><a href="#toc5.5">5.5: Plot the paths</a></li>
+    </ul>
+</li>
+<li><a href="#toc6">6: Further analysis</a></li>
+</ul>
+</div>
+</div>
+
+<!--begin.rcode echo=FALSE, message=FALSE, results='hide'
+library(base64)
+bi <- function(file,type) {
+    con = textConnection(object=NULL,"w")
+    encode(file, con,linebreaks=FALSE)
+    out <- textConnectionValue(con)
+    close(con)
+    return(sprintf("<img src=\"data:image/%s;base64,\n%s\" />",type,out))
+}
+end.rcode-->
+
+<h1>signeR</h1>
+<h4 style='text-align:center'><em>Rafael Rosales, Rodrigo Drummond, Renan Valieris, Israel Tojal da Silva</em></h4>
+
+<h2 id="toc1">1: Introduction</h2>
+
+<p>Motivation: Cancer is an evolutionary process driven by continuous acquisition of genetic variations in individual cells. The diversity and complexity of somatic mutational processes is a conspicuous feature orchestrated by DNA damage agents and repair processes, including exogenous or endogenous mutagen exposures, defects in DNA mismatch repair and enzymatic modification of DNA. The identification of the underlying mutational processes is central to understanding of cancer origin and evolution.</p>
+<p>signeR package focus on the characterization and analysis of mutational processes. Its functionalities can be divided in three steps. Firstly, it provides tools to process VCF files and generate matrices of SNV mutation counts and mutational opportunities, both divided according to a 3bp context (mutation site and its neighboring bases). Secondly, the main part of the package takes those matrices as input and applies a Bayesian approach to estimate the number of underlying signatures and their mutational profiles. Thirdly, the package provides tools to correlate the activities of those signatures with other relevant information, e.g. clinical data, in order to infer conclusions about the analyzed genome samples, which can be useful for clinical applications.</p>
+
+<h2 id="toc2">2: Installation</h2>
+
+<p>Before installing, please make sure your R version is <b>3.2</b> or superior and that <a href="http://bioconductor.org/install">Bioconductor</a> is installed:</p>
+
+<!--begin.rcode eval=FALSE
+source("https://bioconductor.org/biocLite.R")
+biocLite()
+end.rcode-->
+
+<p>signeR will soon be available on Bioconductor, in the meantime it can be installed from the github repository:</p>
+
+<!--begin.rcode eval=FALSE
+library(devtools) # install.packages("devtools") if necessary
+devtools::install_github("rvalieris/signeR")
+end.rcode-->
+
+<p>If devtools is not available, you can install the dependencies directly with this command:</p>
+
+<!--begin.rcode eval=FALSE
+source("https://bioconductor.org/biocLite.R")
+biocLite(c("BiocGenerics","Biostrings","BSgenome","class","GenomicRanges","nloptr","NMF","plot3D","R.methodsS3","R.oo","tensorA","VariantAnnotation","Rcpp","RcppArmadillo"))
+install.packages("http://rvalieris.github.io/signeR/signeR_0.99.0.tar.gz")
+end.rcode-->
+
+<p>Once installed we can load the library:</p>
+
+<!--begin.rcode results='hide', message=FALSE
+library(signeR)
+end.rcode-->
+
+<h2 id="toc3">3: Preparing the input</h2>
+
+<h3 id="toc3.1">3.1: Pre-made dataset</h3>
+
+<p>For this example we are using as input the 21 breast cancer dataset from <a href="http://dx.doi.org/10.1016/j.cell.2012.04.023">Nik-Zainal et al 2012</a> paper.</p>
+<p>signeR takes as input a count matrix of samples x features. In this case each feature is a SNV mutation with a 3bp context, a (21 samples)x(96 features) matrix.</p>
+<p>We are also supplying a opportunity matrix, it contains the count frequency of the features in the whole region analyzed for each sample, this argument isn't necessary but it is highly recommended because it allows signeR to normalize the features frequency over the region analyzed.</p>
+
+<p>For the sake of convenience we included this dataset with the package, it can be accessed by using the <code>system.file</code> function:</p>
+
+<!--begin.rcode
+mut <- read.table(system.file("extdata","21_breast_cancers.mutations.txt",package="signeR"))
+opp <- read.table(system.file("extdata","21_breast_cancers.opportunity.txt",package="signeR"))
+end.rcode-->
+
+<p>The matrix can contain <code>colnames</code> that identify each feature, if the header is not present, <code>Mheader==FALSE</code>, it is assumed the features are SNV mutations with a 3bp context, in the following order:</p>
+
+<!--begin.rcode
+# is equivalent to not setting a header, and passing the Mheader=FALSE argument
+colnames(mut) <- c(
+    "C>A:ACA","C>A:ACC","C>A:ACG","C>A:ACT","C>A:CCA","C>A:CCC","C>A:CCG","C>A:CCT",
+    "C>A:GCA","C>A:GCC","C>A:GCG","C>A:GCT","C>A:TCA","C>A:TCC","C>A:TCG","C>A:TCT",
+    "C>G:ACA","C>G:ACC","C>G:ACG","C>G:ACT","C>G:CCA","C>G:CCC","C>G:CCG","C>G:CCT",
+    "C>G:GCA","C>G:GCC","C>G:GCG","C>G:GCT","C>G:TCA","C>G:TCC","C>G:TCG","C>G:TCT",
+    "C>T:ACA","C>T:ACC","C>T:ACG","C>T:ACT","C>T:CCA","C>T:CCC","C>T:CCG","C>T:CCT",
+    "C>T:GCA","C>T:GCC","C>T:GCG","C>T:GCT","C>T:TCA","C>T:TCC","C>T:TCG","C>T:TCT",
+    "T>A:ATA","T>A:ATC","T>A:ATG","T>A:ATT","T>A:CTA","T>A:CTC","T>A:CTG","T>A:CTT",
+    "T>A:GTA","T>A:GTC","T>A:GTG","T>A:GTT","T>A:TTA","T>A:TTC","T>A:TTG","T>A:TTT",
+    "T>C:ATA","T>C:ATC","T>C:ATG","T>C:ATT","T>C:CTA","T>C:CTC","T>C:CTG","T>C:CTT",
+    "T>C:GTA","T>C:GTC","T>C:GTG","T>C:GTT","T>C:TTA","T>C:TTC","T>C:TTG","T>C:TTT",
+    "T>G:ATA","T>G:ATC","T>G:ATG","T>G:ATT","T>G:CTA","T>G:CTC","T>G:CTG","T>G:CTT",
+    "T>G:GTA","T>G:GTC","T>G:GTG","T>G:GTT","T>G:TTA","T>G:TTC","T>G:TTG","T>G:TTT"
+)
+end.rcode-->
+
+<p>We can also name each sample in the matrix by setting the <code>rownames</code>:</p>
+<!--begin.rcode
+rownames(mut) <- c(
+    "PD3851a","PD3890a","PD3904a","PD3905a","PD3945a","PD4005a","PD4006a",
+    "PD4085a","PD4086a","PD4088a","PD4103a","PD4107a","PD4109a","PD4115a",
+    "PD4116a","PD4120a","PD4192a","PD4194a","PD4198a","PD4199a","PD4248a"
+)
+end.rcode-->
+
+<h3 id="toc3.2">3.2: Input from VCF</h3>
+
+<p>The <a href="http://www.1000genomes.org/wiki/Analysis/vcf4.0">VCF</a> file format is the most common format for storing genetic variations, so we included a utility function for generating a count matrix from the VCF:</p>
+
+<!--begin.rcode eval=FALSE
+library(BSgenome.Hsapiens.UCSC.hg19) # BSgenome, equivalent to the one used on the variant call
+library(VariantAnnotation)
+
+vcfobj <- readVcf("/path/to/a/file.vcf", "hg19")
+mut <- genCountMatrixFromVcf(BSgenome.Hsapiens.UCSC.hg19, vcfobj)
+end.rcode-->
+
+<p>This function will generate a matrix of counts change:triplet for each sample in the VCF given.</p>
+
+<p>We can also generate the opportunity matrix similarly:</p>
+
+<!--begin.rcode eval=FALSE
+library(rtracklayer)
+
+target_regions <- import(con="/path/to/a/target.bed", format="bed")
+opp <- genOpportunityFromGenome(BSgenome.Hsapiens.UCSC.hg19, target_regions, nsamples=nrows(mut))
+end.rcode-->
+
+<p>Where <code>target.bed</code> is a <a href="https://genome.ucsc.edu/FAQ/FAQformat.html#format1">bed file</a> containing the genomic regions analyzed by the variant caller.</p>
+
+<h2 id="toc4">4: Generating the signatures</h2>
+
+<p>To generate the signatures the <code>signeR</code> function takes a count matrix as its only required parameter, here we are also passing the opportunity matrix</p>
+
+<!--begin.rcode eval=FALSE
+signatures <- signeR(M=mut, Opport=opp, Mheader=FALSE)
+end.rcode-->
+
+<h3 id="toc4.1">4.1: Number of signatures</h3>
+<!--begin.rcode eval=FALSE
+signatures$Nsign
+end.rcode-->
+<pre class='rcode'>[1] 5</pre>
+
+<p>With <code>nsig=NA</code>, the default, signeR will calculate the optimal number of signatures for the dataset, we could also limit the search of optimal signatures to a given interval with <code>nlim=c(a,b)</code>.</p>
+
+<p>The parameters <code>testing_burn</code> and <code>testing_eval</code> control the number of iterations used to estimate the number of signatures.</p>
+
+<p>To decide which number of signatures is optimal, signeR will search for the Nsig that maximizes the BIC, after the processing is done we can plot this information:<p>
+
+<!--begin.rcode eval=FALSE
+BICboxplot(signatures)
+end.rcode-->
+
+<b>Model_selection_BICs.pdf</b>:
+<!--begin.rcode echo=FALSE, results='asis'
+cat(bi("Model_selection_BICs.png","png"))
+end.rcode-->
+
+<h2 id="toc5">5: Evaluating the results</h2>
+
+<h3 id="toc5.1">5.1: Plot the signatures</h3>
+
+<p>Once the processing is done we can plot the signatures profiles:</p>
+
+<!--begin.rcode eval=FALSE
+SignPlot(signatures$SignExposures)
+end.rcode-->
+
+<b>Signature_plot.pdf</b>:
+<!--begin.rcode echo=FALSE, results='asis'
+cat(bi("Signature_plot.png","png"))
+end.rcode-->
+
+<h3 id="toc5.2">5.2: Plot the exposures</h3>
+
+<p>We can also plot the levels of exposure to each signature in all genome samples:</p>
+
+<!--begin.rcode eval=FALSE
+ExposureBoxplot(signatures$SignExposures)
+end.rcode-->
+
+<b>Exposure_boxplot.pdf:</b>
+<!--begin.rcode echo=FALSE, results='asis'
+cat(bi("Exposure_boxplot.png","png"))
+end.rcode-->
+
+<h3 id="toc5.3">5.3: Differential Exposure Analysis</h3>
+
+<p>signeR can determine which signatures are differentially exposed between groups of samples used in the analysis, that is find signatures that are present in only a subset of the samples.</p>
+<p>To to that we need a vector with group labels, in this example we are dividing the samples between the groups <code>wt</code> and <code>BRCA+</code>.</p>
+
+<!--begin.rcode eval=FALSE
+# group labels, respective to each row of the mutation count matrix
+BRCA_labels <- c("wt","BRCA+","BRCA+","BRCA+","BRCA+","BRCA+","BRCA+","wt","wt","wt","wt","BRCA+","wt","BRCA+","BRCA+","wt","wt","wt","wt","wt","wt")
+
+diff_exposure <- DiffExp(signatures$SignExposures, labels=BRCA_labels, plotfile="Diffexp_boxplot.pdf")
+
+# pvalues
+diff_exposure$Pvquant
+
+# most exposed group
+diff_exposure$MostExposed
+end.rcode-->
+<pre class='rcode'>
+[1] 0.8869743120 0.2269944187 0.0003803649 0.0001242361 0.0085516693
+
+[1] NA      NA      "BRCA+" "BRCA+" "BRCA+"
+</pre>
+
+<p>The Pvquant vector holds the pvalues quantile of the test for each signature, signatures with a pvquant smaller that the cutoff, 0.05 by default, are considered "differentially exposed", the respective group is found on the MostExposed vector.</p>
+
+<b>Diffexp_boxplot.pdf</b>:
+
+<!--begin.rcode echo=FALSE, results='asis'
+cat(bi("Diffexp_boxplot.png","png"))
+end.rcode-->
+
+<p>This plot shows that signatures S3, S4 and S5 were significantly more exposed in the BRCA+ samples.</p>
+
+<h3 id="toc5.4">5.4: Sample Classification</h3>
+
+<p>signeR can also classify unknown samples based on the given labels, by passing <code>NA</code> values in the labels vector we can use the <code>Classify</code> function, to classify the unknowns according with the given groups.</p>
+
+<!--begin.rcode eval=FALSE
+# note that BRCA_labels [15],[20] and [21] are set to NA
+BRCA_labels <- c("wt","BRCA+","BRCA+","BRCA+","BRCA+","BRCA+","BRCA+","wt","wt","wt","wt","BRCA+","wt","BRCA+",NA,"wt","wt","wt","wt",NA,NA)
+
+Class <- Classify(signatures$SignExposures, labels=BRCA_labels, plotfile="Sample_classification.pdf")
+Class
+end.rcode-->
+<pre class='rcode'>
+$class
+sample_15 sample_20 sample_21 
+  "BRCA+"      "wt"      "wt" 
+
+$freq
+sample_15 sample_20 sample_21 
+    1.000     0.994     1.000 
+
+$allfreqs
+     sample_15-BRCA+ sample_20-wt sample_21-wt
+[1,]            2000           12            0
+[2,]               0         1988         2000
+</pre>
+<b>Sample_classification.pdf</b>:
+<!--begin.rcode echo=FALSE, results='asis'
+cat(bi("Sample_classification.png","png")) 
+end.rcode-->
+
+<h3 id="toc5.5">5.5: Plot the paths</h3>
+
+<p>Plots of signatures and exposures individual entries along successive iterations of the Gibbs sampler. Useful to check sampler convergence.</p>
+
+<!--begin.rcode eval=FALSE
+Paths(signatures$SignExposures)
+end.rcode-->
+
+<b>Exposure_paths.pdf</b>:
+<!--begin.rcode echo=FALSE, results='asis'
+cat(bi("Exposure_paths.jpg","jpg"))
+end.rcode-->
+
+<b>Signature_paths.pdf</b>:
+<!--begin.rcode echo=FALSE, results='asis'
+cat(bi("Signature_paths.jpg","jpg"))
+end.rcode-->
+
+</body>
+</html>
