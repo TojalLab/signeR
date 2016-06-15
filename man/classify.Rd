@@ -9,15 +9,23 @@
 }
 
 \usage{
-\S3method{Classify}{SignExp}(this, labels, method="knn", k=3, plotfile="Classification_barplot.pdf", ...)
+\S3method{Classify}{SignExp}(this, labels, method="knn", k=3, 
+    plotfile="Classification_barplot.pdf", colors=NA, ...)
 }
 
 \arguments{
     \item{this}{a SignExp object returned by signeR function.}
     \item{labels}{sample labels. Every sample labeled as NA will be classified according to its mutational profile and the profiles of labeled samples.}
-    \item{method}{classification algorithm used. Default is k-Nearest Neighbors (kNN). }
+    \item{method}{Classification algorithm used. Default is k-Nearest Neighbors (kNN). 
+Any other algorithm may be used, as long as it is customized to satisfy the following conditions:\cr
+        Input: a matrix of labeled samples, with one sample per line and one feature per column;
+                  a matrix of unlabeled samples to classify, with the same structure;
+                  an array of labels, with one entry for each labeled sample.\cr
+        Output: an array of assigned labels, one for each unlabeled sample.
+}
     \item{k}{number of nearest neighbors considered for classification, used only if method="kNN". Default is 3.}
     \item{plotfile}{file that will be generated with classification graphic output.}
+    \item{colors}{Array of color names, one for each sample class. Colors will be recycled if the length of this array is less than the number of classes.}
     \item{...}{additional parameters for classification algorithm (defined by "method" above).}
 }
 

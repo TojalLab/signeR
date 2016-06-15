@@ -73,12 +73,12 @@
     <li><a href="#toc3.2">3.2: Input from VCF</a></i>
     </ul>
 </li>
-<li><a href="#toc4">4: Generate the signatures</a>
+<li><a href="#toc4">4: Generating the signatures</a>
     <ul>
     <li><a href="#toc4.1">4.1: Number of signatures</a></li>
     </ul>
 </li>
-<li><a href="#toc5">5: Signatures visualization</a>
+<li><a href="#toc5">5: Results and further analyses</a>
     <ul>
     <li><a href="#toc5.1">5.1: Plot the signatures</a></li>
     <li><a href="#toc5.2">5.2: Plot the exposures</a></li>
@@ -87,7 +87,6 @@
     <li><a href="#toc5.5">5.5: Plot the paths</a></li>
     </ul>
 </li>
-<li><a href="#toc6">6: Further analysis</a></li>
 </ul>
 </div>
 </div>
@@ -113,26 +112,13 @@ end.rcode-->
 
 <h2 id="toc2">2: Installation</h2>
 
-<p>Before installing, please make sure your R version is <b>3.2</b> or superior and that <a href="http://bioconductor.org/install">Bioconductor</a> is installed:</p>
+<p>Before installing, please make sure your R version is <b>3.2.2</b> or superior.</p>
+
+<p>signeR will soon be available on <a href="http://bioconductor.org/">Bioconductor</a> but in the meantime it must be installed manually, to make the installation process easier we have created a <a target="_blank" href="https://github.com/rvalieris/signeR/blob/gh-pages/install_signeR.R">installer script</a>:
 
 <!--begin.rcode eval=FALSE
-source("https://bioconductor.org/biocLite.R")
-biocLite()
-end.rcode-->
-
-<p>signeR will soon be available on Bioconductor, in the meantime it can be installed from the github repository:</p>
-
-<!--begin.rcode eval=FALSE
-library(devtools) # install.packages("devtools") if necessary
-devtools::install_github("rvalieris/signeR")
-end.rcode-->
-
-<p>If devtools is not available, you can install the dependencies directly with this command:</p>
-
-<!--begin.rcode eval=FALSE
-source("https://bioconductor.org/biocLite.R")
-biocLite(c("BiocGenerics","Biostrings","BSgenome","class","GenomicRanges","nloptr","NMF","plot3D","R.methodsS3","R.oo","tensorA","VariantAnnotation","Rcpp","RcppArmadillo"))
-install.packages("http://rvalieris.github.io/signeR/signeR_0.99.0.tar.gz")
+# this will install all dependencies and signeR
+source("http://rvalieris.github.io/signeR/install_signeR.R")
 end.rcode-->
 
 <p>Once installed we can load the library:</p>
@@ -145,7 +131,7 @@ end.rcode-->
 
 <h3 id="toc3.1">3.1: Pre-made dataset</h3>
 
-<p>For this example we are using as input the 21 breast cancer dataset from <a href="http://dx.doi.org/10.1016/j.cell.2012.04.023">Nik-Zainal et al 2012</a> paper.</p>
+<p>For this example we are using as input the 21 breast cancer dataset from <a target="_blank" href="http://dx.doi.org/10.1016/j.cell.2012.04.023">Nik-Zainal et al 2012</a> paper.</p>
 <p>signeR takes as input a count matrix of samples x features. In this case each feature is a SNV mutation with a 3bp context, a (21 samples)x(96 features) matrix.</p>
 <p>We are also supplying a opportunity matrix, it contains the count frequency of the features in the whole region analyzed for each sample, this argument isn't necessary but it is highly recommended because it allows signeR to normalize the features frequency over the region analyzed.</p>
 
@@ -187,7 +173,7 @@ end.rcode-->
 
 <h3 id="toc3.2">3.2: Input from VCF</h3>
 
-<p>The <a href="http://www.1000genomes.org/wiki/Analysis/vcf4.0">VCF</a> file format is the most common format for storing genetic variations, so we included a utility function for generating a count matrix from the VCF:</p>
+<p>The <a target="_blank" href="http://www.1000genomes.org/wiki/Analysis/vcf4.0">VCF</a> file format is the most common format for storing genetic variations, so we included a utility function for generating a count matrix from the VCF:</p>
 
 <!--begin.rcode eval=FALSE
 library(BSgenome.Hsapiens.UCSC.hg19) # BSgenome, equivalent to the one used on the variant call
@@ -205,10 +191,10 @@ end.rcode-->
 library(rtracklayer)
 
 target_regions <- import(con="/path/to/a/target.bed", format="bed")
-opp <- genOpportunityFromGenome(BSgenome.Hsapiens.UCSC.hg19, target_regions, nsamples=nrows(mut))
+opp <- genOpportunityFromGenome(BSgenome.Hsapiens.UCSC.hg19, target_regions, nsamples=nrow(mut))
 end.rcode-->
 
-<p>Where <code>target.bed</code> is a <a href="https://genome.ucsc.edu/FAQ/FAQformat.html#format1">bed file</a> containing the genomic regions analyzed by the variant caller.</p>
+<p>Where <code>target.bed</code> is a <a target="_blank" href="https://genome.ucsc.edu/FAQ/FAQformat.html#format1">bed file</a> containing the genomic regions analyzed by the variant caller.</p>
 
 <h2 id="toc4">4: Generating the signatures</h2>
 
@@ -239,7 +225,7 @@ end.rcode-->
 cat(bi("Model_selection_BICs.png","png"))
 end.rcode-->
 
-<h2 id="toc5">5: Evaluating the results</h2>
+<h2 id="toc5">5: Results and further analyses</h2>
 
 <h3 id="toc5.1">5.1: Plot the signatures</h3>
 
@@ -270,7 +256,7 @@ end.rcode-->
 <h3 id="toc5.3">5.3: Differential Exposure Analysis</h3>
 
 <p>signeR can determine which signatures are differentially exposed between groups of samples used in the analysis, that is find signatures that are present in only a subset of the samples.</p>
-<p>To to that we need a vector with group labels, in this example we are dividing the samples between the groups <code>wt</code> and <code>BRCA+</code>.</p>
+<p>To do that we need a vector with group labels, in this example we are dividing the samples between the groups <code>wt</code> and <code>BRCA+</code>.</p>
 
 <!--begin.rcode eval=FALSE
 # group labels, respective to each row of the mutation count matrix
@@ -290,7 +276,7 @@ end.rcode-->
 [1] NA      NA      "BRCA+" "BRCA+" "BRCA+"
 </pre>
 
-<p>The Pvquant vector holds the pvalues quantile of the test for each signature, signatures with a pvquant smaller that the cutoff, 0.05 by default, are considered "differentially exposed", the respective group is found on the MostExposed vector.</p>
+<p>The <code>Pvquant</code> vector holds the pvalues quantile of the test for each signature, signatures with a <code>Pvquant</code> smaller that the cutoff, 0.05 by default, are considered "differentially exposed", the respective group is found on the <code>MostExposed</code> vector.</p>
 
 <b>Diffexp_boxplot.pdf</b>:
 

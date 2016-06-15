@@ -36,7 +36,7 @@ Each feature is a SNV change with a 3bp context.
     mut <- genCountMatrixFromVcf(BSgenome.Hsapiens.UCSC.hg19, vcfobj)
     
     target_regions <- import(con="/path/to/a/target.bed", format="bed")
-    opp <- genOpportunityFromGenome(BSgenome.Hsapiens.UCSC.hg19, target_regions, nsamples=nrows(mut))
+    opp <- genOpportunityFromGenome(BSgenome.Hsapiens.UCSC.hg19, target_regions, nsamples=nrow(mut))
 }
 
 # see also

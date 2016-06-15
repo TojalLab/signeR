@@ -9,7 +9,8 @@
 }
 
 \usage{
-\S3method{DiffExp}{SignExp}(this, labels, method='kw', contrast="all", quant=0.5, cutoff=0.05, plotfile="Diffexp_boxplot.pdf", pal="color", ...)
+\S3method{DiffExp}{SignExp}(this, labels, method='kw', contrast="all", quant=0.5,
+    cutoff=0.05, plotfile="Diffexp_boxplot.pdf", colored=TRUE, ...)
 }
 
 \arguments{
@@ -20,7 +21,7 @@
     \item{quant}{the p-values quantile which, after log-transform, will be used as DES (Differental Exposure Score). Deafult is 0.5, which means the median log-transformed p-value will be considered as DES.}
     \item{cutoff}{threshold for p-values quantile for signatures to be considered as showing differential exposure.}
     \item{plotfile}{Output file to export p-values boxplot.}
-    \item{pal}{Color palette.}
+    \item{colored}{Boolean variable, if TRUE boxplots of differentially exposed signatures will be colored in green, cutoff line will be colored in red and line segments showing the transformed p-value quantile used for DE evaluation will be colored in blue. Otherwise the plot will be black & white.}
     \item{...}{additional parameters for test algorithm defined by the method parameter.}
 }
 
