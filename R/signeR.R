@@ -5,7 +5,7 @@ signeR<-function(M, Mheader=TRUE, samples = "rows",
                  var.ap=10,var.ae=10,
                  testing_burn=1000,testing_eval=1000,
                  main_burn=10000,main_eval=2000,
-                 start='lee',estimate_hyper=FALSE){
+                 start='lee',estimate_hyper=FALSE,EMit_lim=100){
   ####################################################################################################################
   # Parameters:
   #
@@ -40,7 +40,7 @@ signeR<-function(M, Mheader=TRUE, samples = "rows",
   # start: NMF algorithm used to generate initial values for signatures and exposures, 
   #        options: "brunet","KL","lee","Frobenius","offset","nsNMF","ls-nmf","pe-nmf","siNMF","snmf/r" or "snmf/l".
   # estimate_hyper: if TRUE, algorithm estimates optimal values of ap,bp,ae,be,lp,le. Start values can still be provided.
-  #
+  # EMit_lim: limit of EM iterations for the estimation of ap,bp,ae,be,lp,le.
   ####################################################################################################################
   if(is.character(M)){ 
     Mread<-as.matrix(read.table(M,header=Mheader))
@@ -102,15 +102,14 @@ signeR<-function(M, Mheader=TRUE, samples = "rows",
     if(try_all){
       step0 <- 1
     }else{
-      step0 <- 2^(floor(log2(Nmax-Nmin+1)-2))
+      step0 <- 2^max((floor(log2(Nmax-Nmin+1))-2),0)
     }
     cat(paste("Step0 = ",step0,".\n",sep=""))
     Ops<-Optimal_sigs(function(n){
         ebNMF<-eBayesNMF(M,W,n,ap,bp,ae,be,lp,le,
                        var.ap,var.ae,
                        burn_it=testing_burn,eval_it=testing_eval,
-                       minor_burn=testing_burn,minor_eval=testing_eval,
-                       start=start,estimate_hyper=eh,
+                       start=start,estimate_hyper=eh, EM_lim=EMit_lim,
                        keep_param=FALSE)
         bics<-ebNMF[[3]]
         HH<-ebNMF[[9]]
@@ -126,7 +125,6 @@ signeR<-function(M, Mheader=TRUE, samples = "rows",
       HH[[k]]<-Ops[[4]][[k]][[2]]
     }
     cat(paste("The number of signatures is ",nopt,".\n",sep=""))
-    #Testing: recovery of hyperparameters for use in last run
     BestHH<-HH[[which(Ops[[2]]==nopt)]]
     best_hyperparam<-BestHH[NROW(BestHH),]
     ap<-best_hyperparam$ap
@@ -136,7 +134,6 @@ signeR<-function(M, Mheader=TRUE, samples = "rows",
     lp<-best_hyperparam$lp
     le<-best_hyperparam$le
     eh<-FALSE
-    #
   }else{
     nopt<-nsig
     Ops<-list(NA,NA,NA,NA)
@@ -146,8 +143,7 @@ signeR<-function(M, Mheader=TRUE, samples = "rows",
   Final_run<-eBayesNMF(M,W,n=nopt,ap,bp,ae,be,lp,le,
                        var.ap,var.ae,
                        burn_it=main_burn,eval_it=main_eval,
-                       minor_burn=testing_burn,minor_eval=testing_eval,
-                       start=start,estimate_hyper=eh,
+                       start=start,estimate_hyper=eh, EM_lim=EMit_lim,
                        keep_param=TRUE)
   SE<-Final_run[[4]]
   SE$.samples<-samplenames

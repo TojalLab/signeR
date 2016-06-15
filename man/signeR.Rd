@@ -11,7 +11,7 @@
         lp = NA, le = NA, var.ap = 10, var.ae = 10,
         testing_burn = 1000, testing_eval = 1000, main_burn =
         10000, main_eval = 2000, start = "lee", estimate_hyper
-        = FALSE)
+        = FALSE, EMit_lim=100)
 }
 \arguments{
     \item{M}{mutation counts matrix of samples x features.}
@@ -36,6 +36,7 @@
     \item{main_eval}{number of iterations of the final Gibbs sampler.}
     \item{start}{NMF algorithm used to generate initial values for signatures and exposures,options: "brunet","KL","lee","Frobenius","offset","nsNMF","ls-nmf","pe-nmf","siNMF","snmf/r" or "snmf/l".}
     \item{estimate_hyper}{if TRUE, algorithm estimates optimal values of ap,bp,ae,be,lp,le. Start values can still be provided.}
+    \item{EMit_lim}{Limit of EM iterations for the estimation of hyper-hyperparameters ap,bp,ae,be,lp,le. Default is 100.}
 }
 \value{
     signeR output is a list with the following items:\cr

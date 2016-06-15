@@ -5,9 +5,8 @@ library(nloptr)
 eBayesNMF<-function(M,W,n,ap,bp,ae,be,lp,le,
                     var.ap=10,var.ae=10,
                     burn_it=500,eval_it=1000,
-                    minor_burn=100,minor_eval=500,
                     start='random',estimate_hyper=FALSE,
-                    keep_param=FALSE){
+                    EM_lim=100, keep_param=FALSE){
     ####################################################################################################################
     # Parameters:
     # M: matrix of mutation counts, each column corresponds to one sample (96 x nsamples)
@@ -21,11 +20,10 @@ eBayesNMF<-function(M,W,n,ap,bp,ae,be,lp,le,
     # var.ae: variance of the gamma distribution used to generate proposals for shape parameters of exposures
     # burn_it: number of burning iterations of the Gibbs sampler
     # eval_it: number of iterations of the Gibbs sampler
-    # minor_burn: number of burning iterations of the Gibbs sampler with any fixed variables
-    # minor_eval: number of iterations of the Gibbs sampler with any fixed variables
     # start: NMF algorithm used to generate initial values for signatures and exposures, 
     #        options: "brunet","KL","lee","Frobenius","offset","nsNMF","ls-nmf","pe-nmf","siNMF","snmf/r" or "snmf/l".
     # estimate_hyper: if TRUE, algorithm estimates optimal values of ap,bp,ae,be,lp,le. Start values are still required.
+    # EM_lim: limit of EM iterations for the estimation of ap,bp,ae,be,lp,le.
     # keep_param: if TRUE, algorithm export hyperparameters
     ####################################################################################################################
     #Start
@@ -76,7 +74,7 @@ eBayesNMF<-function(M,W,n,ap,bp,ae,be,lp,le,
       burn_HO<-burn_it
       upgrade<-100
       it<-0
-      while(upgrade>0.05 & it <100){
+      while(upgrade>0.05 & it < EM_lim){
         SamplesHO <- GibbsSamplerCpp(M,W,Z,P,E,Ap,Bp,Ae,Be,ap,bp,ae,be,lp,le,var.ap,var.ae,
                                      burn=burn_HO,eval=100,Zfixed=FALSE,Thetafixed=FALSE,Afixed=FALSE,keep_par=TRUE)
         Zs <- to.tensor(SamplesHO[[1]])
