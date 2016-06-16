@@ -69,8 +69,8 @@
 <li><a href="#toc2">2: Installation</a></li>
 <li><a href="#toc3">3: Preparing the input</a>
     <ul>
-    <li><a href="#toc3.1">3.1: Pre-made dataset</a></i>
-    <li><a href="#toc3.2">3.2: Input from VCF</a></i>
+    <li><a href="#toc3.1">3.1: Pre-made dataset</a></li>
+    <li><a href="#toc3.2">3.2: Input from VCF</a></li>
     </ul>
 </li>
 <li><a href="#toc4">4: Generating the signatures</a>
@@ -93,12 +93,12 @@
 
 <!--begin.rcode echo=FALSE, message=FALSE, results='hide'
 library(base64)
-bi <- function(file,type) {
+bi <- function(file,type,alt="") {
     con = textConnection(object=NULL,"w")
     encode(file, con,linebreaks=FALSE)
     out <- textConnectionValue(con)
     close(con)
-    return(sprintf("<img src=\"data:image/%s;base64,\n%s\" />",type,out))
+    return(sprintf("<img alt=\"%s\" src=\"data:image/%s;base64,%s\" />",alt,type,out))
 }
 end.rcode-->
 
@@ -271,7 +271,7 @@ diff_exposure$Pvquant
 diff_exposure$MostExposed
 end.rcode-->
 <pre class='rcode'>
-[1] 0.8869743120 0.2269944187 0.0003803649 0.0001242361 0.0085516693
+[1] 0.8869743120 0.2269944187 0.0001242361 0.0003803649 0.0156802231
 
 [1] NA      NA      "BRCA+" "BRCA+" "BRCA+"
 </pre>
@@ -294,26 +294,26 @@ end.rcode-->
 # note that BRCA_labels [15],[20] and [21] are set to NA
 BRCA_labels <- c("wt","BRCA+","BRCA+","BRCA+","BRCA+","BRCA+","BRCA+","wt","wt","wt","wt","BRCA+","wt","BRCA+",NA,"wt","wt","wt","wt",NA,NA)
 
-Class <- Classify(signatures$SignExposures, labels=BRCA_labels, plotfile="Sample_classification.pdf")
+Class <- Classify(signatures$SignExposures, labels=BRCA_labels)
 Class
 end.rcode-->
 <pre class='rcode'>
 $class
-sample_15 sample_20 sample_21 
-  "BRCA+"      "wt"      "wt" 
+PD4116a PD4199a PD4248a
+"BRCA+"    "wt"    "wt"
 
 $freq
-sample_15 sample_20 sample_21 
-    1.000     0.994     1.000 
+PD4116a PD4199a PD4248a
+  1.000   0.999   1.000
 
 $allfreqs
-     sample_15-BRCA+ sample_20-wt sample_21-wt
-[1,]            2000           12            0
-[2,]               0         1988         2000
+      PD4116a-BRCA+ PD4199a-wt PD4248a-wt
+BRCA+          2000          2          0
+wt                0       1998       2000
 </pre>
-<b>Sample_classification.pdf</b>:
+<b>Classification_barplot.pdf</b>:
 <!--begin.rcode echo=FALSE, results='asis'
-cat(bi("Sample_classification.png","png")) 
+cat(bi("Classification_barplot.png","png"))
 end.rcode-->
 
 <h3 id="toc5.5">5.5: Plot the paths</h3>
