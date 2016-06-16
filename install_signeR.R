@@ -1,23 +1,39 @@
 #
 # this helper script will install signeR and its dependencies
+# run it on the R console:
+# source("http://rvalieris.github.io/signeR/install_signeR.R")
 #
 
 local({
-	target_R <- "3.2.2"
-	if(getRversion() < target_R) {
-		warning(paste0("R version detected (",getRversion(),") is below the recommended (",target_R,"), consider upgrading R."))
-	}
+	targetR <- "3.2"
+	targetBioc <- "3.2"
+	deps <- c(
+		"R.oo", "VariantAnnotation", "RcppArmadillo",
+		"nloptr", "NMF", "class", "tensorA", "devtools"
+	)
 
-	# dependencies
-	deps <- c("R.oo", "VariantAnnotation", "RcppArmadillo", "nloptr", "NMF", "class", "tensorA", "devtools")
+	# check R version
+	if(getRversion() < targetR) {
+		stop(paste0("R version (",getRversion(),") ",
+		"is below the recommended (",targetR,"), ",
+		"see http://bioconductor.org/install/ for help."))
+	}
 
 	# load bioconductor
 	source("http://bioconductor.org/biocLite.R")
+	library(BiocInstaller)
+
+	# check bioconductor version
+	if(biocVersion() < targetBioc) {
+		stop(paste0("Bionconductor version (",biocVersion(),") ",
+		"is below the recommended (",targetBioc,"), ",
+		"see http://bioconductor.org/install/ for help."))
+	}
 
 	# attempt to install missing packages
 	for(p in deps[!(deps %in% installed.packages())]) {
 		biocLite(p, suppressUpdates=TRUE)
-		if(length(find.package(p, quiet=TRUE)) == 0) { # installation failed
+		if(length(find.package(p, quiet=TRUE)) == 0) {
 			stop(paste0("failed to install package: ",p,"."))
 		}
 	}
