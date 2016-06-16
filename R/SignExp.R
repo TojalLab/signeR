@@ -140,7 +140,8 @@ setMethodS3("Paths",class="SignExp",function(this,file_suffix="plot.pdf",plots_p
   }
   #P matrix plot
   cols<-terrain.colors(i)
-  pdf(file=paste("Signature_paths",file_suffix,sep="_"),width=7,height=1.75*plots_per_page)
+  P_file <- paste("Signature_paths",file_suffix,sep="_")
+  pdf(file=P_file,width=7,height=1.75*plots_per_page)
   par(mfrow=c(plots_per_page,1))
   for (k in 1:n){
     if(k %% plots_per_page == 1){
@@ -156,9 +157,12 @@ setMethodS3("Paths",class="SignExp",function(this,file_suffix="plot.pdf",plots_p
     for (s in 1:i) lines(as.vector(this$.Sign[s, k, ]), col=cols[s], ...)
   }
   dev.off()
+  outmessage<-paste("Signature plots were exported to the file",P_file,"on the current directory.",sep=" ")
+  cat(outmessage,"\n")
   #E matrix plot
   cols<-terrain.colors(j)
-  pdf(file=paste("Exposure_paths",file_suffix,sep="_"),width=7,height=1.75*plots_per_page)
+  E_file <- paste("Exposure_paths",file_suffix,sep="_")
+  pdf(file=E_file,width=7,height=1.75*plots_per_page)
   par(mfrow=c(plots_per_page,1))
   for (k in 1:n){
     if(k %% plots_per_page == 1){
@@ -174,6 +178,8 @@ setMethodS3("Paths",class="SignExp",function(this,file_suffix="plot.pdf",plots_p
     for (g in 1:j) lines(as.vector(this$.Exp[k,g, ]), col=cols[g], ...)
   }
   dev.off()
+  outmessage2<-paste("Exposure plots were exported to the file",E_file,"on the current directory.",sep=" ")
+  cat(outmessage2,"\n")
 })
 
 setMethodS3("SignPlot",class="SignExp",function(this,plotfile="Signature_plot.pdf",pal='bcr1',
@@ -340,6 +346,8 @@ setMethodS3("SignPlot",class="SignExp",function(this,plotfile="Signature_plot.pd
     text(98.5*(1+gap),y.max/2,labels=paste("S",k,sep=""),cex=0.9)
   }
   dev.off()
+  outmessage<-paste("Signature barplots were exported to the file",plotfile,"on the current directory.",sep=" ")
+  cat(outmessage,"\n")
 })
 
 setMethodS3("ExposureBoxplot",class="SignExp",function(this,plotfile="Exposure_boxplot.pdf", col='tan2',
@@ -419,6 +427,8 @@ setMethodS3("ExposureBoxplot",class="SignExp",function(this,plotfile="Exposure_b
     text(1.02*j+1,y.max/2,labels=paste("S",k,sep=""),cex=0.9)
   }
   dev.off()
+  outmessage<-paste("Exposure boxplots were exported to the file",plotfile,"on the current directory.",sep=" ")
+  cat(outmessage,"\n")
 })
 
 setMethodS3("SignHeat",class="SignExp",function(this,plotfile="Signature_heatmap.pdf",nbins=20,...){
@@ -460,6 +470,8 @@ setMethodS3("SignHeat",class="SignExp",function(this,plotfile="Signature_heatmap
     text(0.5,i-1,round(lims[i],2),cex=0.5)
   }
   dev.off()
+  outmessage<-paste("Signatures heatmap was exported to the file",plotfile,"on the current directory.",sep=" ")
+  cat(outmessage,"\n")
 })
 
 setMethodS3("DiffExp",class="SignExp",function(this,labels,method="kw",contrast="all",quant=0.5,
@@ -548,6 +560,8 @@ setMethodS3("DiffExp",class="SignExp",function(this,labels,method="kw",contrast=
       segments(k-0.39,Lpmed[k],k+0.39,Lpmed[k],col=col3,lwd=2)
     }
     dev.off()
+    outmessage<-paste("Differential exposure analysis results were plotted to the file",plotfile,"on the current directory.",sep=" ")
+    cat(outmessage,"\n")
   }
   Pmed<-apply(Pval,1,quantile,quant)
   signif <- Pmed<=cutoff
@@ -635,6 +649,8 @@ setMethodS3("Classify",class="SignExp",function(this,labels,method="knn",k=3,plo
       text(2,nclass+k-1.8,classes[k])
     }
     dev.off()
+    outmessage<-paste("Classification results were plotted to the file",plotfile,"on the current directory.",sep=" ")
+    cat(outmessage,"\n")
   }
   colnames(Freqs)<-paste(testsamples,result,sep="-")
   return(list(class=result,freq=prob,allfreqs=Freqs))
@@ -665,6 +681,8 @@ BICboxplot<-function(signeRout,plotfile="Model_selection_BICs.pdf"){
   boxplot(Test_BICs,add=TRUE,at=tested_n,names=tested_n,xaxt="s",yaxt="n",cex=0.7)
   abline(v=nopt,lty=3)
   dev.off()
+  outmessage<-paste("BIC boxplots were exported to the file",plotfile,"on the current directory.",sep=" ")
+  cat(outmessage,"\n")
 }
 
 read.mutation<-function(stvet){
@@ -710,5 +728,3 @@ read.mutation<-function(stvet){
   }
   return(list(triplets,mutations))
 }
-  
-###

@@ -115,8 +115,8 @@ eBayesNMF<-function(M,W,n,ap,bp,ae,be,lp,le,
         it <- it+1
         burn_HO<-200
       }
-      cat("Optimal Parameters are: ",ap,",",bp,",",ae,",",be,",",lp,",",le,".\n")
-      cat("Obtained after ",it," iterations.\n")
+      #cat("Optimal Parameters are: ",ap,",",bp,",",ae,",",be,",",lp,",",le,".\n")
+      #cat("Obtained after ",it," iterations.\n")
     }
     #Sampler 
     Samples <- GibbsSamplerCpp(M,W,Z,P,E,Ap,Bp,Ae,Be,ap,bp,ae,be,lp,le,var.ap,var.ae,
@@ -131,7 +131,7 @@ eBayesNMF<-function(M,W,n,ap,bp,ae,be,lp,le,
     }
     Ps <- to.tensor(Samples[[3]])
     Es <- to.tensor(Samples[[4]])
-    cat("GibbsSampler finished.\n")
+    #cat("GibbsSampler finished.\n")
     rm(Samples)
     Phat<-matrix(0,i,n)
     Ehat<-matrix(0,n,j)
@@ -141,7 +141,7 @@ eBayesNMF<-function(M,W,n,ap,bp,ae,be,lp,le,
       Ecut<-matrix(as.vector(Es[k,,]),j,eval_it)
       Ehat[k,]<-apply(Ecut,1,median)
     }
-    cat('Estimators obtained.\n')
+    #cat('Estimators obtained.\n')
     ######### BICs calculation############
     lgM<-lgamma(M+1)
     loglikes<-sapply(1:eval_it,function(r){
