@@ -571,7 +571,8 @@ setMethodS3("DiffExp",class="SignExp",function(this,labels,method="kw",contrast=
 })
 
 
-setMethodS3("Classify",class="SignExp",function(this,labels,method="knn",k=3,plotfile="Classification_barplot.pdf",colors=NA,...){
+setMethodS3("Classify",class="SignExp",function(this,labels,method="knn",k=3,plotfile="Classification_barplot.pdf",
+                                                colors=NA,min_agree=0.75,...){
   if(!this$.normalized) Normalize(this)
   dp <- dim(this$.Sign) #[i,n,r]
   de <- dim(this$.Exp) #[n,j,r]
@@ -614,7 +615,9 @@ setMethodS3("Classify",class="SignExp",function(this,labels,method="knn",k=3,plo
     result[k] <- classes[which(counts==max(counts))][1]
     prob[k]   <- max(counts)/sum(counts)
   }
-  colnames(Freqs)<-paste(testsamples,result,sep="\n")
+  result_final<-result
+  result_final[prob < min_agree] <- "undefined"
+  colnames(Freqs)<-paste(testsamples,result_final,sep="\n")
   names(result)<-testsamples
   names(prob)<-testsamples
   if(is.na(colors[1])){
@@ -630,7 +633,7 @@ setMethodS3("Classify",class="SignExp",function(this,labels,method="knn",k=3,plo
     if(length(grep("\\.pdf$",plotfile))==0){
       plotfile<-paste(plotfile,"pdf",sep=".")
     }
-    pdf(file=plotfile,width=7,height=7)
+    pdf(file=plotfile,width=max(5,2*ntest),height=7)
     layout(matrix(1:2,1,2),widths=c(4,1),heights=1)
     bpl<-barplot(Freqs,main="Sample Classification", ylab="Frequencies",col=cols)
     for(k in 1:ntest){
@@ -652,8 +655,8 @@ setMethodS3("Classify",class="SignExp",function(this,labels,method="knn",k=3,plo
     outmessage<-paste("Classification results were plotted to the file",plotfile,"on the current directory.",sep=" ")
     cat(outmessage,"\n")
   }
-  colnames(Freqs)<-paste(testsamples,result,sep="-")
-  return(list(class=result,freq=prob,allfreqs=Freqs))
+  colnames(Freqs)<-paste(testsamples,result_final,sep="-")
+  return(list(class=result_final,freq=prob,allfreqs=Freqs))
 })
 
 BICboxplot<-function(signeRout,plotfile="Model_selection_BICs.pdf"){

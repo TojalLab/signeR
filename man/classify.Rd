@@ -10,7 +10,7 @@
 
 \usage{
 \S3method{Classify}{SignExp}(this, labels, method="knn", k=3, 
-    plotfile="Classification_barplot.pdf", colors=NA, ...)
+    plotfile="Classification_barplot.pdf", colors=NA, min_agree=0.75, ...)
 }
 
 \arguments{
@@ -26,6 +26,7 @@ Any other algorithm may be used, as long as it is customized to satisfy the foll
     \item{k}{number of nearest neighbors considered for classification, used only if method="kNN". Default is 3.}
     \item{plotfile}{file that will be generated with classification graphic output.}
     \item{colors}{Array of color names, one for each sample class. Colors will be recycled if the length of this array is less than the number of classes.}
+    \item{min_agree}{Minimum frequency of agreement among individual classifications. Samples showing a frequency of agreement below this value are considered as "undefined". Default is 0.75.}
     \item{...}{additional parameters for classification algorithm (defined by "method" above).}
 }
 

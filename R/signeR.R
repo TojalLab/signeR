@@ -158,6 +158,7 @@ signeR<-function(M, Mheader=TRUE, samples = "rows",
                SignExposures=SE,
                BICs=Final_run[[3]],
                Hyper_paths=HH)
+  cat("Done.\n")
   return(result)
 }
 
