@@ -15,13 +15,13 @@
 }
 \arguments{
     \item{M}{mutation counts matrix of samples x features.}
-    \item{Mheader}{If M have colnames defined use TRUE, if FALSE a default order will be assumed.}
-    \item{samples}{If the samples are row-wise or column-wise in M, default is "row".}
+    \item{Mheader}{if M have colnames defined use TRUE, if FALSE a default order will be assumed.}
+    \item{samples}{if the samples are row-wise or column-wise in M, default is "row".}
     \item{Opport}{context count matrix of samples x features in the target genome or region.}
-    \item{Oppheader}{If Opport have header defined.}
-    \item{nsig}{Number of signatures, which can be provided or estimated by the algorithm.}
-    \item{nlim}{Define a interval to search for the optimal number of signatures.}
-    \item{try_all}{If true, all possible values for nsig will be tested}
+    \item{Oppheader}{if Opport have header defined.}
+    \item{nsig}{number of signatures, which can be provided or estimated by the algorithm.}
+    \item{nlim}{define a interval to search for the optimal number of signatures.}
+    \item{try_all}{if true, all possible values for nsig will be tested}
     \item{ap}{shape parameter of the gamma distribution used to generate the entries of a matrix of rate parameters of the gamma distributions which generate signatures.}
     \item{bp}{rate parameter of the gamma distribution used to generate the entries of a matrix of rate parameters of the gamma distributions which generate signatures.}
     \item{ae}{shape parameter of the gamma distribution used to generate the entries of a matrix of rate parameters of the gamma distributions which generate exposures.}
@@ -30,14 +30,14 @@
     \item{le}{parameter of the exponential distribution used to generate the entries of a matrix of shape parameters of the gamma distributions which generate exposures.}
     \item{var.ap}{variance of the gamma distribution used to generate proposals for shape parameters of signatures}
     \item{var.ae}{variance of the gamma distribution used to generate proposals for shape parameters of exposures}
-    \item{testing_burn}{number of burning iterations of the Gibbs sampler used to estimate the number of signatures in data.}
-    \item{testing_eval}{number of iterations of the Gibbs sampler used to estimate the number of signatures in data.}
-    \item{EM_eval}{Number of samples generated at each iteration of the EM algorithm.}
+    \item{testing_burn}{number of burning iterations of the Gibbs sampler used to estimate the number of signatures in data. Corresponds to R0 at Algorithm 1 on signeR paper.}
+    \item{testing_eval}{number of iterations of the Gibbs sampler used to estimate the number of signatures in data. Corresponds to R2 at Algorithm 1 on signeR paper.}
+    \item{EM_eval}{number of samples generated at each iteration of the EM algorithm. Corresponds to R1 at Algorithm 1 on signeR paper.}
     \item{main_burn}{number of burning iterations of the final Gibbs sampler.}
     \item{main_eval}{number of iterations of the final Gibbs sampler.}
     \item{start}{NMF algorithm used to generate initial values for signatures and exposures,options: "brunet","KL","lee","Frobenius","offset","nsNMF","ls-nmf","pe-nmf","siNMF","snmf/r" or "snmf/l".}
     \item{estimate_hyper}{if TRUE, algorithm estimates optimal values of ap,bp,ae,be,lp,le. Start values can still be provided.}
-    \item{EMit_lim}{Limit of EM iterations for the estimation of hyper-hyperparameters ap,bp,ae,be,lp,le. Default is 100.}
+    \item{EMit_lim}{limit of EM iterations for the estimation of hyper-hyperparameters ap,bp,ae,be,lp,le. Default is 100. Corresponds to U at Algorithm 1 on signeR paper.}
 }
 \value{
     signeR output is a list with the following items:\cr

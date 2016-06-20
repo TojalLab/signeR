@@ -16,7 +16,18 @@ Rodrigo Drummond, Rafael Rosales, Renan Valieris, Israel Tojal da Silva
 Maintainer: \packageMaintainer{signeR}
 }
 \references{
-here be references
+  This work has been submitted to Bioinformatics under the title
+  "signeR: An empirical Bayesian approach to mutational signature discovery".
+
+  L. B. Alexandrov, S. Nik-Zainal, D. C. Wedge, P. J. Campbell, and M.
+  R. Stratton. Deciphering Signatures of Mutational Processes Operative in
+  Human Cancer. Cell Reports, 3(1):246-259, Jan. 2013.
+  doi:10.1016/j.celrep.2012.12.008.
+
+  A. Fischer, C. J. Illingworth, P. J. Campbell, and V. Mustonen.
+  EMu: probabilistic inference of mutational processes and their
+  localization in the cancer genome. Genome biology, 14(4):R39, Apr. 2013.
+  doi:10.1186/gb-2013-14-4-r39.
 }
 \examples{
 vignette(package="signeR")
