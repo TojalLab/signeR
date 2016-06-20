@@ -3,7 +3,7 @@ signeR<-function(M, Mheader=TRUE, samples = "rows",
                  nsig=NA,nlim=c(NA,NA),try_all=FALSE,
                  ap=NA,bp=NA,ae=NA,be=NA,lp=NA,le=NA,
                  var.ap=10,var.ae=10,
-                 testing_burn=1000,testing_eval=1000,
+                 testing_burn=1000,testing_eval=1000,EM_eval=100,
                  main_burn=10000,main_eval=2000,
                  start='lee',estimate_hyper=FALSE,EMit_lim=100){
   ####################################################################################################################
@@ -108,7 +108,7 @@ signeR<-function(M, Mheader=TRUE, samples = "rows",
     Ops<-Optimal_sigs(function(n){
         ebNMF<-eBayesNMF(M,W,n,ap,bp,ae,be,lp,le,
                        var.ap,var.ae,
-                       burn_it=testing_burn,eval_it=testing_eval,
+                       burn_it=testing_burn,eval_it=testing_eval,EM_eval_it=EM_eval,
                        start=start,estimate_hyper=eh, EM_lim=EMit_lim,
                        keep_param=FALSE)
         bics<-ebNMF[[3]]
@@ -143,7 +143,7 @@ signeR<-function(M, Mheader=TRUE, samples = "rows",
   cat(paste("Running Gibbs sampler for ",nopt," signatures.\n",sep=""))
   Final_run<-eBayesNMF(M,W,n=nopt,ap,bp,ae,be,lp,le,
                        var.ap,var.ae,
-                       burn_it=main_burn,eval_it=main_eval,
+                       burn_it=main_burn,eval_it=main_eval,EM_eval_it=EM_eval,
                        start=start,estimate_hyper=eh, EM_lim=EMit_lim,
                        keep_param=TRUE)
   SE<-Final_run[[4]]

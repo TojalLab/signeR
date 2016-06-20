@@ -4,7 +4,7 @@ library(nloptr)
   
 eBayesNMF<-function(M,W,n,ap,bp,ae,be,lp,le,
                     var.ap=10,var.ae=10,
-                    burn_it=500,eval_it=1000,
+                    burn_it=500,eval_it=1000, EM_eval_it=100,
                     start='random',estimate_hyper=FALSE,
                     EM_lim=100, keep_param=FALSE){
     ####################################################################################################################
@@ -76,7 +76,7 @@ eBayesNMF<-function(M,W,n,ap,bp,ae,be,lp,le,
       it<-0
       while(upgrade>0.05 & it < EM_lim){
         SamplesHO <- GibbsSamplerCpp(M,W,Z,P,E,Ap,Bp,Ae,Be,ap,bp,ae,be,lp,le,var.ap,var.ae,
-                                     burn=burn_HO,eval=100,Zfixed=FALSE,Thetafixed=FALSE,Afixed=FALSE,keep_par=TRUE)
+                                     burn=burn_HO,eval=EM_eval_it,Zfixed=FALSE,Thetafixed=FALSE,Afixed=FALSE,keep_par=TRUE)
         Zs <- to.tensor(SamplesHO[[1]])
         Ps <- to.tensor(SamplesHO[[3]])
         Es <- to.tensor(SamplesHO[[4]])

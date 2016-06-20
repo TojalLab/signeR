@@ -9,9 +9,9 @@
         Oppheader = FALSE, nsig = NA, nlim = c(NA, NA),
         try_all = FALSE, ap = NA, bp = NA, ae = NA, be = NA,
         lp = NA, le = NA, var.ap = 10, var.ae = 10,
-        testing_burn = 1000, testing_eval = 1000, main_burn =
-        10000, main_eval = 2000, start = "lee", estimate_hyper
-        = FALSE, EMit_lim=100)
+        testing_burn = 1000, testing_eval = 1000, EM_eval = 100,
+        main_burn = 10000, main_eval = 2000, start = "lee",
+        estimate_hyper = FALSE, EMit_lim=100)
 }
 \arguments{
     \item{M}{mutation counts matrix of samples x features.}
@@ -32,6 +32,7 @@
     \item{var.ae}{variance of the gamma distribution used to generate proposals for shape parameters of exposures}
     \item{testing_burn}{number of burning iterations of the Gibbs sampler used to estimate the number of signatures in data.}
     \item{testing_eval}{number of iterations of the Gibbs sampler used to estimate the number of signatures in data.}
+    \item{EM_eval}{Number of samples generated at each iteration of the EM algorithm.}
     \item{main_burn}{number of burning iterations of the final Gibbs sampler.}
     \item{main_eval}{number of iterations of the final Gibbs sampler.}
     \item{start}{NMF algorithm used to generate initial values for signatures and exposures,options: "brunet","KL","lee","Frobenius","offset","nsNMF","ls-nmf","pe-nmf","siNMF","snmf/r" or "snmf/l".}
