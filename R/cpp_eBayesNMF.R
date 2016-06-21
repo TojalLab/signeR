@@ -45,11 +45,17 @@ eBayesNMF<-function(M,W,n,ap,bp,ae,be,lp,le,
         }
       }
     }else{
-        nnegfact = nmf(M/W,n,method=start) 
-        #start can be the name of one NMF algorithm ("brunet","KL","lee","Frobenius","offset","nsNMF","ls-nmf","pe-nmf","siNMF","snmf/r","snmf/l")
-        P = basis(nnegfact)
-        E = coef(nnegfact)
-        rm(nnegfact)
+      Mcor<-M
+      if (min(colSums(Mcor))==0 | min(rowSums(Mcor))==0){
+        Mcor[Mcor==0] <- 0.01
+      }
+      Wcor<-W
+      Wcor[Wcor==0] <- 0.01
+      nnegfact = nmf(Mcor/Wcor,n,method=start) 
+      #start can be the name of one NMF algorithm ("brunet","KL","lee","Frobenius","offset","nsNMF","ls-nmf","pe-nmf","siNMF","snmf/r","snmf/l")
+      P = basis(nnegfact)
+      E = coef(nnegfact)
+      rm(nnegfact)
     }
     #Initial guess for Z
     Z <- to.tensor(0,c('i'=i,'j'=j,'n'=n))
