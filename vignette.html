@@ -131,15 +131,11 @@
 <li><a href="#toc2">2: Installation</a></li>
 <li><a href="#toc3">3: Preparing the input</a>
     <ul>
-    <li><a href="#toc3.1">3.1: Pre-made dataset</a></li>
-    <li><a href="#toc3.2">3.2: Input from VCF</a></li>
+    <li><a href="#toc3.1">3.1: Input from VCF</a></li>
+    <li><a href="#toc3.2">3.2: Input from tab-delimited file</a></li>
     </ul>
 </li>
-<li><a href="#toc4">4: Generating the signatures</a>
-    <ul>
-    <li><a href="#toc4.1">4.1: Number of signatures</a></li>
-    </ul>
-</li>
+<li><a href="#toc4">4: Generating the signatures</a></li>
 <li><a href="#toc5">5: Results and further analyses</a>
     <ul>
     <li><a href="#toc5.1">5.1: Plot the signatures</a></li>
@@ -183,53 +179,15 @@
 
 <h2 id="toc3">3: Preparing the input</h2>
 
-<h3 id="toc3.1">3.1: Pre-made dataset</h3>
+<p>signeR takes as input a count matrix of samples x features. Each feature is usually a SNV mutation within a 3bp context (96 features). Optionally, an opportunity matrix can also be provided containing the count frequency of the features in the whole analyzed region for each sample. Although not required, this argument is highly recommended because it allows signeR to normalize the features frequency over the analyzed region.</p>
 
-<p>For this example we are using as input the 21 breast cancer dataset from <a target="_blank" href="http://dx.doi.org/10.1016/j.cell.2012.04.023">Nik-Zainal et al 2012</a> paper.</p>
-<p>signeR takes as input a count matrix of samples x features. In this case each feature is a SNV mutation with a 3bp context, a (21 samples)x(96 features) matrix.</p>
-<p>We are also supplying a opportunity matrix, it contains the count frequency of the features in the whole region analyzed for each sample, this argument isn't necessary but it is highly recommended because it allows signeR to normalize the features frequency over the region analyzed.</p>
+<p>Input matrices can be read both from a VCF or a tab-delimited files, as described next.</p>
 
-<p>For the sake of convenience we included this dataset with the package, it can be accessed by using the <code>system.file</code> function:</p>
-
-<div class="chunk" id="unnamed-chunk-4"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl std">mut</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">read.table</span><span class="hl std">(</span><span class="hl kwd">system.file</span><span class="hl std">(</span><span class="hl str">&quot;extdata&quot;</span><span class="hl std">,</span><span class="hl str">&quot;21_breast_cancers.mutations.txt&quot;</span><span class="hl std">,</span><span class="hl kwc">package</span><span class="hl std">=</span><span class="hl str">&quot;signeR&quot;</span><span class="hl std">))</span>
-<span class="hl std">opp</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">read.table</span><span class="hl std">(</span><span class="hl kwd">system.file</span><span class="hl std">(</span><span class="hl str">&quot;extdata&quot;</span><span class="hl std">,</span><span class="hl str">&quot;21_breast_cancers.opportunity.txt&quot;</span><span class="hl std">,</span><span class="hl kwc">package</span><span class="hl std">=</span><span class="hl str">&quot;signeR&quot;</span><span class="hl std">))</span>
-</pre></div>
-</div></div>
-
-<p>The matrix can contain <code>colnames</code> that identify each feature, if the header is not present, <code>Mheader==FALSE</code>, it is assumed the features are SNV mutations with a 3bp context, in the following order:</p>
-
-<div class="chunk" id="unnamed-chunk-5"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl com"># is equivalent to not setting a header, and passing the Mheader=FALSE argument</span>
-<span class="hl kwd">colnames</span><span class="hl std">(mut)</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">c</span><span class="hl std">(</span>
-    <span class="hl str">&quot;C&gt;A:ACA&quot;</span><span class="hl std">,</span><span class="hl str">&quot;C&gt;A:ACC&quot;</span><span class="hl std">,</span><span class="hl str">&quot;C&gt;A:ACG&quot;</span><span class="hl std">,</span><span class="hl str">&quot;C&gt;A:ACT&quot;</span><span class="hl std">,</span><span class="hl str">&quot;C&gt;A:CCA&quot;</span><span class="hl std">,</span><span class="hl str">&quot;C&gt;A:CCC&quot;</span><span class="hl std">,</span><span class="hl str">&quot;C&gt;A:CCG&quot;</span><span class="hl std">,</span><span class="hl str">&quot;C&gt;A:CCT&quot;</span><span class="hl std">,</span>
-    <span class="hl str">&quot;C&gt;A:GCA&quot;</span><span class="hl std">,</span><span class="hl str">&quot;C&gt;A:GCC&quot;</span><span class="hl std">,</span><span class="hl str">&quot;C&gt;A:GCG&quot;</span><span class="hl std">,</span><span class="hl str">&quot;C&gt;A:GCT&quot;</span><span class="hl std">,</span><span class="hl str">&quot;C&gt;A:TCA&quot;</span><span class="hl std">,</span><span class="hl str">&quot;C&gt;A:TCC&quot;</span><span class="hl std">,</span><span class="hl str">&quot;C&gt;A:TCG&quot;</span><span class="hl std">,</span><span class="hl str">&quot;C&gt;A:TCT&quot;</span><span class="hl std">,</span>
-    <span class="hl str">&quot;C&gt;G:ACA&quot;</span><span class="hl std">,</span><span class="hl str">&quot;C&gt;G:ACC&quot;</span><span class="hl std">,</span><span class="hl str">&quot;C&gt;G:ACG&quot;</span><span class="hl std">,</span><span class="hl str">&quot;C&gt;G:ACT&quot;</span><span class="hl std">,</span><span class="hl str">&quot;C&gt;G:CCA&quot;</span><span class="hl std">,</span><span class="hl str">&quot;C&gt;G:CCC&quot;</span><span class="hl std">,</span><span class="hl str">&quot;C&gt;G:CCG&quot;</span><span class="hl std">,</span><span class="hl str">&quot;C&gt;G:CCT&quot;</span><span class="hl std">,</span>
-    <span class="hl str">&quot;C&gt;G:GCA&quot;</span><span class="hl std">,</span><span class="hl str">&quot;C&gt;G:GCC&quot;</span><span class="hl std">,</span><span class="hl str">&quot;C&gt;G:GCG&quot;</span><span class="hl std">,</span><span class="hl str">&quot;C&gt;G:GCT&quot;</span><span class="hl std">,</span><span class="hl str">&quot;C&gt;G:TCA&quot;</span><span class="hl std">,</span><span class="hl str">&quot;C&gt;G:TCC&quot;</span><span class="hl std">,</span><span class="hl str">&quot;C&gt;G:TCG&quot;</span><span class="hl std">,</span><span class="hl str">&quot;C&gt;G:TCT&quot;</span><span class="hl std">,</span>
-    <span class="hl str">&quot;C&gt;T:ACA&quot;</span><span class="hl std">,</span><span class="hl str">&quot;C&gt;T:ACC&quot;</span><span class="hl std">,</span><span class="hl str">&quot;C&gt;T:ACG&quot;</span><span class="hl std">,</span><span class="hl str">&quot;C&gt;T:ACT&quot;</span><span class="hl std">,</span><span class="hl str">&quot;C&gt;T:CCA&quot;</span><span class="hl std">,</span><span class="hl str">&quot;C&gt;T:CCC&quot;</span><span class="hl std">,</span><span class="hl str">&quot;C&gt;T:CCG&quot;</span><span class="hl std">,</span><span class="hl str">&quot;C&gt;T:CCT&quot;</span><span class="hl std">,</span>
-    <span class="hl str">&quot;C&gt;T:GCA&quot;</span><span class="hl std">,</span><span class="hl str">&quot;C&gt;T:GCC&quot;</span><span class="hl std">,</span><span class="hl str">&quot;C&gt;T:GCG&quot;</span><span class="hl std">,</span><span class="hl str">&quot;C&gt;T:GCT&quot;</span><span class="hl std">,</span><span class="hl str">&quot;C&gt;T:TCA&quot;</span><span class="hl std">,</span><span class="hl str">&quot;C&gt;T:TCC&quot;</span><span class="hl std">,</span><span class="hl str">&quot;C&gt;T:TCG&quot;</span><span class="hl std">,</span><span class="hl str">&quot;C&gt;T:TCT&quot;</span><span class="hl std">,</span>
-    <span class="hl str">&quot;T&gt;A:ATA&quot;</span><span class="hl std">,</span><span class="hl str">&quot;T&gt;A:ATC&quot;</span><span class="hl std">,</span><span class="hl str">&quot;T&gt;A:ATG&quot;</span><span class="hl std">,</span><span class="hl str">&quot;T&gt;A:ATT&quot;</span><span class="hl std">,</span><span class="hl str">&quot;T&gt;A:CTA&quot;</span><span class="hl std">,</span><span class="hl str">&quot;T&gt;A:CTC&quot;</span><span class="hl std">,</span><span class="hl str">&quot;T&gt;A:CTG&quot;</span><span class="hl std">,</span><span class="hl str">&quot;T&gt;A:CTT&quot;</span><span class="hl std">,</span>
-    <span class="hl str">&quot;T&gt;A:GTA&quot;</span><span class="hl std">,</span><span class="hl str">&quot;T&gt;A:GTC&quot;</span><span class="hl std">,</span><span class="hl str">&quot;T&gt;A:GTG&quot;</span><span class="hl std">,</span><span class="hl str">&quot;T&gt;A:GTT&quot;</span><span class="hl std">,</span><span class="hl str">&quot;T&gt;A:TTA&quot;</span><span class="hl std">,</span><span class="hl str">&quot;T&gt;A:TTC&quot;</span><span class="hl std">,</span><span class="hl str">&quot;T&gt;A:TTG&quot;</span><span class="hl std">,</span><span class="hl str">&quot;T&gt;A:TTT&quot;</span><span class="hl std">,</span>
-    <span class="hl str">&quot;T&gt;C:ATA&quot;</span><span class="hl std">,</span><span class="hl str">&quot;T&gt;C:ATC&quot;</span><span class="hl std">,</span><span class="hl str">&quot;T&gt;C:ATG&quot;</span><span class="hl std">,</span><span class="hl str">&quot;T&gt;C:ATT&quot;</span><span class="hl std">,</span><span class="hl str">&quot;T&gt;C:CTA&quot;</span><span class="hl std">,</span><span class="hl str">&quot;T&gt;C:CTC&quot;</span><span class="hl std">,</span><span class="hl str">&quot;T&gt;C:CTG&quot;</span><span class="hl std">,</span><span class="hl str">&quot;T&gt;C:CTT&quot;</span><span class="hl std">,</span>
-    <span class="hl str">&quot;T&gt;C:GTA&quot;</span><span class="hl std">,</span><span class="hl str">&quot;T&gt;C:GTC&quot;</span><span class="hl std">,</span><span class="hl str">&quot;T&gt;C:GTG&quot;</span><span class="hl std">,</span><span class="hl str">&quot;T&gt;C:GTT&quot;</span><span class="hl std">,</span><span class="hl str">&quot;T&gt;C:TTA&quot;</span><span class="hl std">,</span><span class="hl str">&quot;T&gt;C:TTC&quot;</span><span class="hl std">,</span><span class="hl str">&quot;T&gt;C:TTG&quot;</span><span class="hl std">,</span><span class="hl str">&quot;T&gt;C:TTT&quot;</span><span class="hl std">,</span>
-    <span class="hl str">&quot;T&gt;G:ATA&quot;</span><span class="hl std">,</span><span class="hl str">&quot;T&gt;G:ATC&quot;</span><span class="hl std">,</span><span class="hl str">&quot;T&gt;G:ATG&quot;</span><span class="hl std">,</span><span class="hl str">&quot;T&gt;G:ATT&quot;</span><span class="hl std">,</span><span class="hl str">&quot;T&gt;G:CTA&quot;</span><span class="hl std">,</span><span class="hl str">&quot;T&gt;G:CTC&quot;</span><span class="hl std">,</span><span class="hl str">&quot;T&gt;G:CTG&quot;</span><span class="hl std">,</span><span class="hl str">&quot;T&gt;G:CTT&quot;</span><span class="hl std">,</span>
-    <span class="hl str">&quot;T&gt;G:GTA&quot;</span><span class="hl std">,</span><span class="hl str">&quot;T&gt;G:GTC&quot;</span><span class="hl std">,</span><span class="hl str">&quot;T&gt;G:GTG&quot;</span><span class="hl std">,</span><span class="hl str">&quot;T&gt;G:GTT&quot;</span><span class="hl std">,</span><span class="hl str">&quot;T&gt;G:TTA&quot;</span><span class="hl std">,</span><span class="hl str">&quot;T&gt;G:TTC&quot;</span><span class="hl std">,</span><span class="hl str">&quot;T&gt;G:TTG&quot;</span><span class="hl std">,</span><span class="hl str">&quot;T&gt;G:TTT&quot;</span>
-<span class="hl std">)</span>
-</pre></div>
-</div></div>
-
-<p>We can also name each sample in the matrix by setting the <code>rownames</code>:</p>
-<div class="chunk" id="unnamed-chunk-6"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl kwd">rownames</span><span class="hl std">(mut)</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">c</span><span class="hl std">(</span>
-    <span class="hl str">&quot;PD3851a&quot;</span><span class="hl std">,</span><span class="hl str">&quot;PD3890a&quot;</span><span class="hl std">,</span><span class="hl str">&quot;PD3904a&quot;</span><span class="hl std">,</span><span class="hl str">&quot;PD3905a&quot;</span><span class="hl std">,</span><span class="hl str">&quot;PD3945a&quot;</span><span class="hl std">,</span><span class="hl str">&quot;PD4005a&quot;</span><span class="hl std">,</span><span class="hl str">&quot;PD4006a&quot;</span><span class="hl std">,</span>
-    <span class="hl str">&quot;PD4085a&quot;</span><span class="hl std">,</span><span class="hl str">&quot;PD4086a&quot;</span><span class="hl std">,</span><span class="hl str">&quot;PD4088a&quot;</span><span class="hl std">,</span><span class="hl str">&quot;PD4103a&quot;</span><span class="hl std">,</span><span class="hl str">&quot;PD4107a&quot;</span><span class="hl std">,</span><span class="hl str">&quot;PD4109a&quot;</span><span class="hl std">,</span><span class="hl str">&quot;PD4115a&quot;</span><span class="hl std">,</span>
-    <span class="hl str">&quot;PD4116a&quot;</span><span class="hl std">,</span><span class="hl str">&quot;PD4120a&quot;</span><span class="hl std">,</span><span class="hl str">&quot;PD4192a&quot;</span><span class="hl std">,</span><span class="hl str">&quot;PD4194a&quot;</span><span class="hl std">,</span><span class="hl str">&quot;PD4198a&quot;</span><span class="hl std">,</span><span class="hl str">&quot;PD4199a&quot;</span><span class="hl std">,</span><span class="hl str">&quot;PD4248a&quot;</span>
-<span class="hl std">)</span>
-</pre></div>
-</div></div>
-
-<h3 id="toc3.2">3.2: Input from VCF</h3>
+<h3 id="toc3.1">3.1: Input from VCF</h3>
 
 <p>The <a target="_blank" href="http://www.1000genomes.org/wiki/Analysis/vcf4.0">VCF</a> file format is the most common format for storing genetic variations, so we included a utility function for generating a count matrix from the VCF:</p>
 
-<div class="chunk" id="unnamed-chunk-7"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl kwd">library</span><span class="hl std">(BSgenome.Hsapiens.UCSC.hg19)</span> <span class="hl com"># BSgenome, equivalent to the one used on the variant call</span>
+<div class="chunk" id="unnamed-chunk-4"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl kwd">library</span><span class="hl std">(BSgenome.Hsapiens.UCSC.hg19)</span> <span class="hl com"># BSgenome, equivalent to the one used on the variant call</span>
 <span class="hl kwd">library</span><span class="hl std">(VariantAnnotation)</span>
 
 <span class="hl std">vcfobj</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">readVcf</span><span class="hl std">(</span><span class="hl str">&quot;/path/to/a/file.vcf&quot;</span><span class="hl std">,</span> <span class="hl str">&quot;hg19&quot;</span><span class="hl std">)</span>
@@ -237,11 +195,9 @@
 </pre></div>
 </div></div>
 
-<p>This function will generate a matrix of counts change:triplet for each sample in the VCF given.</p>
+<p>This function will generate a matrix of mutation counts for each sample in the provided VCF. We can also generate the opportunity matrix from the reference genome (hg19 in the following case):</p>
 
-<p>We can also generate the opportunity matrix similarly:</p>
-
-<div class="chunk" id="unnamed-chunk-8"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl kwd">library</span><span class="hl std">(rtracklayer)</span>
+<div class="chunk" id="unnamed-chunk-5"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl kwd">library</span><span class="hl std">(rtracklayer)</span>
 
 <span class="hl std">target_regions</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">import</span><span class="hl std">(</span><span class="hl kwc">con</span><span class="hl std">=</span><span class="hl str">&quot;/path/to/a/target.bed&quot;</span><span class="hl std">,</span> <span class="hl kwc">format</span><span class="hl std">=</span><span class="hl str">&quot;bed&quot;</span><span class="hl std">)</span>
 <span class="hl std">opp</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">genOpportunityFromGenome</span><span class="hl std">(BSgenome.Hsapiens.UCSC.hg19, target_regions,</span> <span class="hl kwc">nsamples</span><span class="hl std">=</span><span class="hl kwd">nrow</span><span class="hl std">(mut))</span>
@@ -250,27 +206,47 @@
 
 <p>Where <code>target.bed</code> is a <a target="_blank" href="https://genome.ucsc.edu/FAQ/FAQformat.html#format1">bed file</a> containing the genomic regions analyzed by the variant caller.</p>
 
+
+
+<h3 id="toc3.2">3.2: Input from tab-delimited file</h3>
+
+<p>By convention, the input file should be tab-delimited with sample names as row names and features as column names. Features should be refered in the format "base change:triplet", e.g. "C&gt;A:TCG", as can be seen in the example below. Similarly, the opportunity matrix can be provided in a tab-delimited file with the same structure as the mutation counts file.</p>
+
+
+<p>For this example we are using as input the 21 breast cancer dataset from <a target="_blank" href="http://dx.doi.org/10.1016/j.cell.2012.04.023">Nik-Zainal et al 2012</a> paper. For the sake of convenience we included this dataset with the package, it can be accessed by using the <code>system.file</code> function:</p>
+
+<div class="chunk" id="unnamed-chunk-6"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl std">mut</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">read.table</span><span class="hl std">(</span><span class="hl kwd">system.file</span><span class="hl std">(</span><span class="hl str">&quot;extdata&quot;</span><span class="hl std">,</span><span class="hl str">&quot;21_breast_cancers.mutations.txt&quot;</span><span class="hl std">,</span><span class="hl kwc">package</span><span class="hl std">=</span><span class="hl str">&quot;signeR&quot;</span><span class="hl std">),</span> <span class="hl kwc">header</span><span class="hl std">=</span><span class="hl num">TRUE</span><span class="hl std">,</span> <span class="hl kwc">check.names</span><span class="hl std">=</span><span class="hl num">FALSE</span><span class="hl std">)</span>
+<span class="hl std">opp</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">read.table</span><span class="hl std">(</span><span class="hl kwd">system.file</span><span class="hl std">(</span><span class="hl str">&quot;extdata&quot;</span><span class="hl std">,</span><span class="hl str">&quot;21_breast_cancers.opportunity.txt&quot;</span><span class="hl std">,</span><span class="hl kwc">package</span><span class="hl std">=</span><span class="hl str">&quot;signeR&quot;</span><span class="hl std">))</span>
+</pre></div>
+</div></div>
+
+<p>An example of the required matrix format can be seen <a target="_blank" href="https://github.com/rvalieris/signeR/blob/master/inst/extdata/21_breast_cancers.mutations.txt">here</a>.</p>
+
 <h2 id="toc4">4: Generating the signatures</h2>
 
-<p>To generate the signatures the <code>signeR</code> function takes a count matrix as its only required parameter, here we are also passing the opportunity matrix</p>
+<p>To generate the signatures the signeR function takes the count matrix as its only required parameter, but the user can provide the opportunity matrix as well. The algorithm allows the assessment of the number of signatures by three options, as following.</p>
 
-<div class="chunk" id="unnamed-chunk-9"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl std">signatures</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">signeR</span><span class="hl std">(</span><span class="hl kwc">M</span><span class="hl std">=mut,</span> <span class="hl kwc">Opport</span><span class="hl std">=opp,</span> <span class="hl kwc">Mheader</span><span class="hl std">=</span><span class="hl num">FALSE</span><span class="hl std">)</span>
+<ol type="i">
+<li>signeR detects the number of signatures at run time:
+<div class="chunk" id="unnamed-chunk-7"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl std">signatures</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">signeR</span><span class="hl std">(</span><span class="hl kwc">M</span><span class="hl std">=mut,</span> <span class="hl kwc">Opport</span><span class="hl std">=opp)</span>
 </pre></div>
 </div></div>
-
-<h3 id="toc4.1">4.1: Number of signatures</h3>
-<div class="chunk" id="unnamed-chunk-10"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl std">signatures</span><span class="hl opt">$</span><span class="hl std">Nsign</span>
+</li>
+<li>The user can give a interval of the possible numbers of signatures as the parameter nlim. signeR will calculate the optimal number of signatures within this range, for example:
+<div class="chunk" id="unnamed-chunk-8"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl std">signatures</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">signeR</span><span class="hl std">(</span><span class="hl kwc">M</span><span class="hl std">=mut,</span> <span class="hl kwc">Opport</span><span class="hl std">=opp,</span> <span class="hl kwc">nlim</span><span class="hl std">=</span><span class="hl kwd">c</span><span class="hl std">(</span><span class="hl num">3</span><span class="hl std">,</span><span class="hl num">9</span><span class="hl std">))</span>
 </pre></div>
 </div></div>
-<pre class='rcode'>[1] 5</pre>
+</li>
+<li>Finally, signeR can also be run by passing the number of signatures as the parameter nsig. In this setting, the algorithm is faster. For example, the following command will make signeR consider only the rank N=5 to estimate the signatures and their exposures:
+<div class="chunk" id="unnamed-chunk-9"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl std">signatures</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">signeR</span><span class="hl std">(</span><span class="hl kwc">M</span><span class="hl std">=mut,</span> <span class="hl kwc">Opport</span><span class="hl std">=opp,</span> <span class="hl kwc">nsig</span><span class="hl std">=</span><span class="hl num">5</span><span class="hl std">)</span>
+</pre></div>
+</div></div>
+</li>
+</ol>
 
-<p>With <code>nsig=NA</code>, the default, signeR will calculate the optimal number of signatures for the dataset, we could also limit the search of optimal signatures to a given interval with <code>nlim=c(a,b)</code>.</p>
+<p>The parameters <code>testing_burn</code> and <code>testing_eval</code> control the number of iterations used to estimate the number of signatures. Whenever signeR is left to decide which number of signatures is optimal, it will search for the rank Nsig that maximizes the median BIC. After the processing is done, this information can be plotted by the following command:</p>
 
-<p>The parameters <code>testing_burn</code> and <code>testing_eval</code> control the number of iterations used to estimate the number of signatures.</p>
-
-<p>To decide which number of signatures is optimal, signeR will search for the Nsig that maximizes the BIC, after the processing is done we can plot this information:<p>
-
-<div class="chunk" id="unnamed-chunk-11"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl kwd">BICboxplot</span><span class="hl std">(signatures)</span>
+<div class="chunk" id="unnamed-chunk-10"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl kwd">BICboxplot</span><span class="hl std">(signatures)</span>
 </pre></div>
 </div></div>
 
@@ -281,9 +257,9 @@
 
 <h3 id="toc5.1">5.1: Plot the signatures</h3>
 
-<p>Once the processing is done we can plot the signatures profiles:</p>
+<p>Once the processing is done, estimated signatures can be visualized by issuing the following command:</p>
 
-<div class="chunk" id="unnamed-chunk-13"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl kwd">SignPlot</span><span class="hl std">(signatures</span><span class="hl opt">$</span><span class="hl std">SignExposures)</span>
+<div class="chunk" id="unnamed-chunk-12"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl kwd">SignPlot</span><span class="hl std">(signatures</span><span class="hl opt">$</span><span class="hl std">SignExposures)</span>
 </pre></div>
 </div></div>
 
@@ -292,9 +268,9 @@
 
 <h3 id="toc5.2">5.2: Plot the exposures</h3>
 
-<p>We can also plot the levels of exposure to each signature in all genome samples:</p>
+<p>The levels of exposure to each signature in all genome samples can also be plotted:</p>
 
-<div class="chunk" id="unnamed-chunk-15"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl kwd">ExposureBoxplot</span><span class="hl std">(signatures</span><span class="hl opt">$</span><span class="hl std">SignExposures)</span>
+<div class="chunk" id="unnamed-chunk-14"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl kwd">ExposureBoxplot</span><span class="hl std">(signatures</span><span class="hl opt">$</span><span class="hl std">SignExposures)</span>
 </pre></div>
 </div></div>
 
@@ -303,10 +279,11 @@
 
 <h3 id="toc5.3">5.3: Differential Exposure Analysis</h3>
 
-<p>signeR can determine which signatures are differentially exposed between groups of samples used in the analysis, that is find signatures that are present in only a subset of the samples.</p>
-<p>To do that we need a vector with group labels, in this example we are dividing the samples between the groups <code>wt</code> and <code>BRCA+</code>.</p>
+<p>signeR can determine which signatures are differentially active among previously defined groups of genome samples, that is find signatures to which a subset of the samples has been significantly more exposed then the others.</p>
 
-<div class="chunk" id="unnamed-chunk-17"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl com"># group labels, respective to each row of the mutation count matrix</span>
+<p>To perform this task signeR needs a vector of group labels. In this example we are dividing the samples according to germline mutations at BRCA genes: groups <code>wt</code> and <code>BRCA+</code>, taken from the description of the 21 breast cancer data set:</p>
+
+<div class="chunk" id="unnamed-chunk-16"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl com"># group labels, respective to each row of the mutation count matrix</span>
 <span class="hl std">BRCA_labels</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">c</span><span class="hl std">(</span><span class="hl str">&quot;wt&quot;</span><span class="hl std">,</span><span class="hl str">&quot;BRCA+&quot;</span><span class="hl std">,</span><span class="hl str">&quot;BRCA+&quot;</span><span class="hl std">,</span><span class="hl str">&quot;BRCA+&quot;</span><span class="hl std">,</span><span class="hl str">&quot;BRCA+&quot;</span><span class="hl std">,</span><span class="hl str">&quot;BRCA+&quot;</span><span class="hl std">,</span><span class="hl str">&quot;BRCA+&quot;</span><span class="hl std">,</span><span class="hl str">&quot;wt&quot;</span><span class="hl std">,</span><span class="hl str">&quot;wt&quot;</span><span class="hl std">,</span><span class="hl str">&quot;wt&quot;</span><span class="hl std">,</span><span class="hl str">&quot;wt&quot;</span><span class="hl std">,</span><span class="hl str">&quot;BRCA+&quot;</span><span class="hl std">,</span><span class="hl str">&quot;wt&quot;</span><span class="hl std">,</span><span class="hl str">&quot;BRCA+&quot;</span><span class="hl std">,</span><span class="hl str">&quot;BRCA+&quot;</span><span class="hl std">,</span><span class="hl str">&quot;wt&quot;</span><span class="hl std">,</span><span class="hl str">&quot;wt&quot;</span><span class="hl std">,</span><span class="hl str">&quot;wt&quot;</span><span class="hl std">,</span><span class="hl str">&quot;wt&quot;</span><span class="hl std">,</span><span class="hl str">&quot;wt&quot;</span><span class="hl std">,</span><span class="hl str">&quot;wt&quot;</span><span class="hl std">)</span>
 
 <span class="hl std">diff_exposure</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">DiffExp</span><span class="hl std">(signatures</span><span class="hl opt">$</span><span class="hl std">SignExposures,</span> <span class="hl kwc">labels</span><span class="hl std">=BRCA_labels,</span> <span class="hl kwc">plotfile</span><span class="hl std">=</span><span class="hl str">&quot;Diffexp_boxplot.pdf&quot;</span><span class="hl std">)</span>
@@ -324,7 +301,7 @@
 [1] NA      NA      "BRCA+" "BRCA+" "BRCA+"
 </pre>
 
-<p>The <code>Pvquant</code> vector holds the pvalues quantile of the test for each signature, signatures with a <code>Pvquant</code> smaller that the cutoff, 0.05 by default, are considered "differentially exposed", the respective group is found on the <code>MostExposed</code> vector.</p>
+<p>The <code>Pvquant</code> vector holds the pvalues quantile of the test for each signature (by default, the 0.5 quantile, i.e. the median). The logarithms of those are considered the Differential Exposure Scores (DES). Signatures with <code>Pvquant</code> smaller that the cutoff, 0.05 by default, are considered "differentially exposed". In this case, the group in which each signature shows the highest levels of activity is found on the <code>MostExposed</code> vector.</p>
 
 <b>Diffexp_boxplot.pdf</b>:
 
@@ -334,9 +311,9 @@
 
 <h3 id="toc5.4">5.4: Sample Classification</h3>
 
-<p>signeR can also classify unknown samples based on the given labels, by passing <code>NA</code> values in the labels vector we can use the <code>Classify</code> function, to classify the unknowns according with the given groups.</p>
+<p>signeR can also classify unlabeled samples based on the given labels. In order to do this, those samples must correspond to <code>NA</code> values in the labels vector and the Classify function can be used to assign them to one of the defined groups. In this example, we use the sample labels defined in the DES analysis performed previously.</p>
 
-<div class="chunk" id="unnamed-chunk-19"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl com"># note that BRCA_labels [15],[20] and [21] are set to NA</span>
+<div class="chunk" id="unnamed-chunk-18"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl com"># note that BRCA_labels [15],[20] and [21] are set to NA</span>
 <span class="hl std">BRCA_labels</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">c</span><span class="hl std">(</span><span class="hl str">&quot;wt&quot;</span><span class="hl std">,</span><span class="hl str">&quot;BRCA+&quot;</span><span class="hl std">,</span><span class="hl str">&quot;BRCA+&quot;</span><span class="hl std">,</span><span class="hl str">&quot;BRCA+&quot;</span><span class="hl std">,</span><span class="hl str">&quot;BRCA+&quot;</span><span class="hl std">,</span><span class="hl str">&quot;BRCA+&quot;</span><span class="hl std">,</span><span class="hl str">&quot;BRCA+&quot;</span><span class="hl std">,</span><span class="hl str">&quot;wt&quot;</span><span class="hl std">,</span><span class="hl str">&quot;wt&quot;</span><span class="hl std">,</span><span class="hl str">&quot;wt&quot;</span><span class="hl std">,</span><span class="hl str">&quot;wt&quot;</span><span class="hl std">,</span><span class="hl str">&quot;BRCA+&quot;</span><span class="hl std">,</span><span class="hl str">&quot;wt&quot;</span><span class="hl std">,</span><span class="hl str">&quot;BRCA+&quot;</span><span class="hl std">,</span><span class="hl num">NA</span><span class="hl std">,</span><span class="hl str">&quot;wt&quot;</span><span class="hl std">,</span><span class="hl str">&quot;wt&quot;</span><span class="hl std">,</span><span class="hl str">&quot;wt&quot;</span><span class="hl std">,</span><span class="hl str">&quot;wt&quot;</span><span class="hl std">,</span><span class="hl num">NA</span><span class="hl std">,</span><span class="hl num">NA</span><span class="hl std">)</span>
 
 <span class="hl std">Class</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">Classify</span><span class="hl std">(signatures</span><span class="hl opt">$</span><span class="hl std">SignExposures,</span> <span class="hl kwc">labels</span><span class="hl std">=BRCA_labels)</span>
@@ -364,7 +341,7 @@ wt                0       1998       2000
 
 <p>Plots of signatures and exposures individual entries along successive iterations of the Gibbs sampler. Useful to check sampler convergence.</p>
 
-<div class="chunk" id="unnamed-chunk-21"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl kwd">Paths</span><span class="hl std">(signatures</span><span class="hl opt">$</span><span class="hl std">SignExposures)</span>
+<div class="chunk" id="unnamed-chunk-20"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl kwd">Paths</span><span class="hl std">(signatures</span><span class="hl opt">$</span><span class="hl std">SignExposures)</span>
 </pre></div>
 </div></div>
 
