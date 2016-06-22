@@ -204,6 +204,8 @@ end.rcode-->
 
 <h2 id="toc5">5: Results and further analyses</h2>
 
+<p>All analyses described in this section generate plots, which are saved as PDF files in the current directory. Default file names are shown before each plot, although they can be changed by setting the parameter <code>plotfile</code>.</p>
+
 <h3 id="toc5.1">5.1: Plot the signatures</h3>
 
 <p>Once the processing is done, estimated signatures can be visualized by issuing the following command:</p>
@@ -254,7 +256,7 @@ end.rcode-->
 [1] NA      NA      "BRCA+" "BRCA+" "BRCA+"
 </pre>
 
-<p>The <code>Pvquant</code> vector holds the pvalues quantile of the test for each signature (by default, the 0.5 quantile, i.e. the median). The logarithms of those are considered the Differential Exposure Scores (DES). Signatures with <code>Pvquant</code> smaller that the cutoff, 0.05 by default, are considered "differentially exposed". In this case, the group in which each signature shows the highest levels of activity is found on the <code>MostExposed</code> vector.</p>
+<p>The <code>Pvquant</code> vector holds the pvalues quantile of the test for each signature (by default, the 0.5 quantile, i.e. the median). The logarithms of those are considered the Differential Exposure Scores (DES). Signatures with <code>Pvquant</code> smaller that the cutoff, 0.05 by default, are considered differentially exposed. In this case, the group in which each signature shows the highest levels of activity is found on the <code>MostExposed</code> vector.</p>
 
 <b>Diffexp_boxplot.pdf</b>:
 
@@ -262,7 +264,7 @@ end.rcode-->
 cat(bi("Diffexp_boxplot.png","png"))
 end.rcode-->
 
-<p>This plot shows that signatures S3, S4 and S5 were significantly more exposed in the BRCA+ samples.</p>
+<p>DES plot showing that the BRCA+ samples were significantly more exposed to signatures S3, S4 and S5.</p>
 
 <h3 id="toc5.4">5.4: Sample Classification</h3>
 
