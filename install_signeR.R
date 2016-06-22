@@ -39,7 +39,7 @@ local({
 	}
 
 	# install the latest signeR package
-	devtools::install_url("https://github.com/rvalieris/signeR/releases/download/v0.99.6/signeR_0.99.6.tar.gz")
+	devtools::install_url("https://github.com/rvalieris/signeR/releases/download/v0.99.7/signeR_0.99.7.tar.gz")
 
 	# update bioconductor
 	biocLite()
