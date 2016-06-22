@@ -52,6 +52,9 @@
     #table_of_contents:hover #full {
         display: block;
     }
+    p {
+        text-align: justify;
+    }
     </style>
 </head>
 <body>
@@ -105,13 +108,13 @@ end.rcode-->
 <h2 id="toc1">1: Introduction</h2>
 
 <p>Motivation: Cancer is an evolutionary process driven by continuous acquisition of genetic variations in individual cells. The diversity and complexity of somatic mutational processes is a conspicuous feature orchestrated by DNA damage agents and repair processes, including exogenous or endogenous mutagen exposures, defects in DNA mismatch repair and enzymatic modification of DNA. The identification of the underlying mutational processes is central to understanding of cancer origin and evolution.</p>
-<p>signeR package focus on the characterization and analysis of mutational processes. Its functionalities can be divided in three steps. Firstly, it provides tools to process VCF files and generate matrices of SNV mutation counts and mutational opportunities, both divided according to a 3bp context (mutation site and its neighboring bases). Secondly, the main part of the package takes those matrices as input and applies a Bayesian approach to estimate the number of underlying signatures and their mutational profiles. Thirdly, the package provides tools to correlate the activities of those signatures with other relevant information, e.g. clinical data, in order to infer conclusions about the analyzed genome samples, which can be useful for clinical applications.</p>
+<p>The <b>signeR</b> package focus on the characterization and analysis of mutational processes. Its functionalities can be divided in three steps. Firstly, it provides tools to process VCF files and generate matrices of SNV mutation counts and mutational opportunities, both divided according to a 3bp context (mutation site and its neighboring bases). Secondly, the main part of the package takes those matrices as input and applies a Bayesian approach to estimate the number of underlying signatures and their mutational profiles. Thirdly, the package provides tools to correlate the activities of those signatures with other relevant information, e.g. clinical data, in order to infer conclusions about the analyzed genome samples, which can be useful for clinical applications.</p>
 
 <h2 id="toc2">2: Installation</h2>
 
 <p>Before installing, please make sure your R version is <b>3.2.2</b> or superior.</p>
 
-<p>signeR will soon be available on <a href="http://bioconductor.org/">Bioconductor</a> but in the meantime it must be installed manually, to make the installation process easier we have created a <a target="_blank" href="https://github.com/rvalieris/signeR/blob/gh-pages/install_signeR.R">installer script</a>:
+<p><b>signeR</b> will soon be available on <a href="http://bioconductor.org/">Bioconductor</a> but in the meantime it must be installed manually, to make the installation process easier we have created a <a target="_blank" href="https://github.com/rvalieris/signeR/blob/gh-pages/install_signeR.R">installer script</a>:
 
 <!--begin.rcode eval=FALSE
 # this will install all dependencies and signeR
@@ -126,7 +129,7 @@ end.rcode-->
 
 <h2 id="toc3">3: Preparing the input</h2>
 
-<p>signeR takes as input a count matrix of samples x features. Each feature is usually a SNV mutation within a 3bp context (96 features). Optionally, an opportunity matrix can also be provided containing the count frequency of the features in the whole analyzed region for each sample. Although not required, this argument is highly recommended because it allows signeR to normalize the features frequency over the analyzed region.</p>
+<p><b>signeR</b> takes as input a count matrix of samples x features. Each feature is usually a SNV mutation within a 3bp context (96 features). Optionally, an opportunity matrix can also be provided containing the count frequency of the features in the whole analyzed region for each sample. Although not required, this argument is highly recommended because it allows <b>signeR</b> to normalize the features frequency over the analyzed region.</p>
 
 <p>Input matrices can be read both from a VCF or a tab-delimited files, as described next.</p>
 
@@ -157,21 +160,19 @@ end.rcode-->
 
 <h3 id="toc3.2">3.2: Input from tab-delimited file</h3>
 
-<p>By convention, the input file should be tab-delimited with sample names as row names and features as column names. Features should be refered in the format "base change:triplet", e.g. "C&gt;A:TCG", as can be seen in the example below. Similarly, the opportunity matrix can be provided in a tab-delimited file with the same structure as the mutation counts file.</p>
+<p>By convention, the input file should be tab-delimited with sample names as row names and features as column names. Features should be refered in the format "base change:triplet", e.g. "C&gt;A:TCG", as can be seen in the example below. Similarly, the opportunity matrix can be provided in a tab-delimited file with the same structure as the mutation counts file. An example of the required matrix format can be seen <a target="_blank" href="https://github.com/rvalieris/signeR/blob/master/inst/extdata/21_breast_cancers.mutations.txt">here</a>.</p>
 
 
-<p>For this example we are using as input the 21 breast cancer dataset from <a target="_blank" href="http://dx.doi.org/10.1016/j.cell.2012.04.023">Nik-Zainal et al 2012</a> paper. For the sake of convenience we included this dataset with the package, it can be accessed by using the <code>system.file</code> function:</p>
+<p>For this tutorial we are using as input the 21 breast cancer dataset from <a target="_blank" href="http://dx.doi.org/10.1016/j.cell.2012.04.023">Nik-Zainal et al 2012</a> paper. For the sake of convenience we included this dataset with the package, it can be accessed by using the <code>system.file</code> function:</p>
 
 <!--begin.rcode
 mut <- read.table(system.file("extdata","21_breast_cancers.mutations.txt",package="signeR"), header=TRUE, check.names=FALSE)
 opp <- read.table(system.file("extdata","21_breast_cancers.opportunity.txt",package="signeR"))
 end.rcode-->
 
-<p>An example of the required matrix format can be seen <a target="_blank" href="https://github.com/rvalieris/signeR/blob/master/inst/extdata/21_breast_cancers.mutations.txt">here</a>.</p>
-
 <h2 id="toc4">4: Generating the signatures</h2>
 
-<p>To generate the signatures the signeR function takes the count matrix as its only required parameter, but the user can provide the opportunity matrix as well. The algorithm allows the assessment of the number of signatures by three options, as following.</p>
+<p><b>signeR</b> takes a count matrix as its only required parameter, but the user can provide an opportunity matrix as well. The algorithm allows the assessment of the number of signatures by three options, as following.</p>
 
 <ol type="i">
 <li>signeR detects the number of signatures at run time:
@@ -179,21 +180,21 @@ end.rcode-->
 signatures <- signeR(M=mut, Opport=opp)
 end.rcode-->
 </li>
-<li>The user can give a interval of the possible numbers of signatures as the parameter nlim. signeR will calculate the optimal number of signatures within this range, for example:
+<li>The user can give a interval of the possible numbers of signatures as the parameter nlim. <b>signeR</b> will calculate the optimal number of signatures within this range, for example:
 <!--begin.rcode eval=FALSE
 signatures <- signeR(M=mut, Opport=opp, nlim=c(3,9))
 end.rcode-->
 </li>
-<li>Finally, signeR can also be run by passing the number of signatures as the parameter nsig. In this setting, the algorithm is faster. For example, the following command will make signeR consider only the rank N=5 to estimate the signatures and their exposures:
-<!--begin.rcode eval=FALSE
+<li>Finally, <b>signeR</b> can also be run by passing the number of signatures as the parameter nsig. In this setting, the algorithm is faster. For example, the following command will make <b>signeR</b> consider only the rank N=5 to estimate the signatures and their exposures:
+<!--begin.rcode
 signatures <- signeR(M=mut, Opport=opp, nsig=5)
 end.rcode-->
 </li>
 </ol>
 
-<p>The parameters <code>testing_burn</code> and <code>testing_eval</code> control the number of iterations used to estimate the number of signatures. Whenever signeR is left to decide which number of signatures is optimal, it will search for the rank Nsig that maximizes the median BIC. After the processing is done, this information can be plotted by the following command:</p>
+<p>The parameters <code>testing_burn</code> and <code>testing_eval</code> control the number of iterations used to estimate the number of signatures (default value is 1000 for both parameters). Whenever <b>signeR</b> is left to decide which number of signatures is optimal, it will search for the rank Nsig that maximizes the median BIC. After the processing is done, this information can be plotted by the following command:</p>
 
-<!--begin.rcode eval=FALSE
+<!--begin.rcode
 BICboxplot(signatures)
 end.rcode-->
 
@@ -201,6 +202,8 @@ end.rcode-->
 <!--begin.rcode echo=FALSE, results='asis'
 cat(bi("Model_selection_BICs.png","png"))
 end.rcode-->
+
+<p>Boxplot of BIC values, showing that the optimal number of signatures for this dataset is 5.</p>
 
 <h2 id="toc5">5: Results and further analyses</h2>
 
@@ -210,7 +213,7 @@ end.rcode-->
 
 <p>Once the processing is done, estimated signatures can be visualized by issuing the following command:</p>
 
-<!--begin.rcode eval=FALSE
+<!--begin.rcode
 SignPlot(signatures$SignExposures)
 end.rcode-->
 
@@ -219,11 +222,13 @@ end.rcode-->
 cat(bi("Signature_plot.png","png"))
 end.rcode-->
 
+<p>Signatures barplot with error bars reflecting the sample percentiles 0.05, 0.25, 0.75, and 0.95 for each entry.</p>
+
 <h3 id="toc5.2">5.2: Plot the exposures</h3>
 
 <p>The levels of exposure to each signature in all genome samples can also be plotted:</p>
 
-<!--begin.rcode eval=FALSE
+<!--begin.rcode
 ExposureBoxplot(signatures$SignExposures)
 end.rcode-->
 
@@ -234,29 +239,30 @@ end.rcode-->
 
 <h3 id="toc5.3">5.3: Differential Exposure Analysis</h3>
 
-<p>signeR can determine which signatures are differentially active among previously defined groups of genome samples, that is find signatures to which a subset of the samples has been significantly more exposed then the others.</p>
+<p><b>signeR</b> can highlight signatures that are differentially active among previously defined groups of samples. To perform this task <b>signeR</b> needs a vector of group labels. In this example we are dividing the samples according to germline mutations at BRCA genes: groups <code>wt</code> and <code>BRCA+</code>, taken from the description of the 21 breast cancer data set:</p>
 
-<p>To perform this task signeR needs a vector of group labels. In this example we are dividing the samples according to germline mutations at BRCA genes: groups <code>wt</code> and <code>BRCA+</code>, taken from the description of the 21 breast cancer data set:</p>
-
-<!--begin.rcode eval=FALSE
+<!--begin.rcode
 # group labels, respective to each row of the mutation count matrix
 BRCA_labels <- c("wt","BRCA+","BRCA+","BRCA+","BRCA+","BRCA+","BRCA+","wt","wt","wt","wt","BRCA+","wt","BRCA+","BRCA+","wt","wt","wt","wt","wt","wt")
 
 diff_exposure <- DiffExp(signatures$SignExposures, labels=BRCA_labels, plotfile="Diffexp_boxplot.pdf")
+end.rcode-->
 
+<p>The <code>Pvquant</code> vector holds the pvalues quantile of the test for each signature (by default, the 0.5 quantile, i.e. the median). The logarithms of those are considered the Differential Exposure Scores (DES). Signatures with <code>Pvquant</code> values below the cutoff, 0.05 by default, are considered as differentially exposed.</p>
+
+<!--begin.rcode
 # pvalues
 diff_exposure$Pvquant
+end.rcode-->
+<!-- ## [1] 0.8869743120 0.2269944187 0.0001242361 0.0003803649 0.0156802231 -->
 
+<p>The <code>MostExposed</code> vector contains the name of the group where each differentially exposed signature showed the highest levels of activity.</p>
+
+<!--begin.rcode
 # most exposed group
 diff_exposure$MostExposed
 end.rcode-->
-<pre class='rcode'>
-[1] 0.8869743120 0.2269944187 0.0001242361 0.0003803649 0.0156802231
-
-[1] NA      NA      "BRCA+" "BRCA+" "BRCA+"
-</pre>
-
-<p>The <code>Pvquant</code> vector holds the pvalues quantile of the test for each signature (by default, the 0.5 quantile, i.e. the median). The logarithms of those are considered the Differential Exposure Scores (DES). Signatures with <code>Pvquant</code> smaller that the cutoff, 0.05 by default, are considered differentially exposed. In this case, the group in which each signature shows the highest levels of activity is found on the <code>MostExposed</code> vector.</p>
+<!-- ## [1] NA      NA      "BRCA+" "BRCA+" "BRCA+" -->
 
 <b>Diffexp_boxplot.pdf</b>:
 
@@ -268,45 +274,49 @@ end.rcode-->
 
 <h3 id="toc5.4">5.4: Sample Classification</h3>
 
-<p>signeR can also classify unlabeled samples based on the given labels. In order to do this, those samples must correspond to <code>NA</code> values in the labels vector and the Classify function can be used to assign them to one of the defined groups. In this example, we use the sample labels defined in the DES analysis performed previously.</p>
+<p><b>signeR</b> can also classify unlabeled samples based on the given labels. In order to do this, those samples must correspond to <code>NA</code> values in the labels vector and the Classify function can be used to assign them to one of the defined groups. In this example, we used the sample labels defined in the DES analysis performed previously.</p>
 
-<!--begin.rcode eval=FALSE
+<!--begin.rcode
 # note that BRCA_labels [15],[20] and [21] are set to NA
 BRCA_labels <- c("wt","BRCA+","BRCA+","BRCA+","BRCA+","BRCA+","BRCA+","wt","wt","wt","wt","BRCA+","wt","BRCA+",NA,"wt","wt","wt","wt",NA,NA)
 
 Class <- Classify(signatures$SignExposures, labels=BRCA_labels)
-Class
+
+# Final assignments
+Class$class
+
+# Relative frequencies of assignment to selected groups
+Class$freq
+
+# All assigment frequencies
+Class$allfreqs
 end.rcode-->
-<pre class='rcode'>
-$class
-PD4116a PD4199a PD4248a
-"BRCA+"    "wt"    "wt"
+<!-- 
+## PD4116a PD4199a PD4248a
+## "BRCA+"    "wt"    "wt"
 
-$freq
-PD4116a PD4199a PD4248a
-  1.000   0.999   1.000
+## PD4116a PD4199a PD4248a
+##   1.000   0.999   1.000
 
-$allfreqs
-      PD4116a-BRCA+ PD4199a-wt PD4248a-wt
-BRCA+          2000          2          0
-wt                0       1998       2000
-</pre>
+##       PD4116a-BRCA+ PD4199a-wt PD4248a-wt
+## BRCA+          2000          2          0
+## wt                0       1998       2000
+-->
+
+
 <b>Classification_barplot.pdf</b>:
 <!--begin.rcode echo=FALSE, results='asis'
 cat(bi("Classification_barplot.png","png"))
 end.rcode-->
 
+<p>Barplot showing the relative frequencies of assignment of each unlabeled sample to the selected group.</p>
+
 <h3 id="toc5.5">5.5: Plot the paths</h3>
 
-<p>Plots of signatures and exposures individual entries along successive iterations of the Gibbs sampler. Useful to check sampler convergence.</p>
+<p>Plots of signatures and exposures individual entries along successive iterations of the Gibbs sampler. Useful to check if entries have leveled off, what reflects the sampler convergence.</p>
 
-<!--begin.rcode eval=FALSE
+<!--begin.rcode
 Paths(signatures$SignExposures)
-end.rcode-->
-
-<b>Exposure_paths.pdf</b>:
-<!--begin.rcode echo=FALSE, results='asis'
-cat(bi("Exposure_paths.jpg","jpg"))
 end.rcode-->
 
 <b>Signature_paths.pdf</b>:
@@ -314,15 +324,22 @@ end.rcode-->
 cat(bi("Signature_paths.jpg","jpg"))
 end.rcode-->
 
+<p>Each plot shows the entries of one extracted signature along sampler iterations.</p>
+
+<b>Exposure_paths.pdf</b>:
+<!--begin.rcode echo=FALSE, results='asis'
+cat(bi("Exposure_paths.jpg","jpg"))
+end.rcode-->
+
+<p>Each plot shows the exposures of one signature along sampler iterations.</p>
+
 <h2 id="toc6">6: References</h2>
 
-<span style="font-family:serif">
 <p>This work has been submitted to Bioinformatics under the title "signeR: An empirical Bayesian approach to mutational signature discovery".</p>
 
 <p>L. B. Alexandrov, S. Nik-Zainal, D. C. Wedge, P. J. Campbell, and M. R. Stratton. Deciphering Signatures of Mutational Processes Operative in Human Cancer. Cell Reports, 3(1):246-259, Jan. 2013. [ <a href="http://dx.doi.org/10.1016/j.celrep.2012.12.008">DOI</a> ]</p>
 
 <p>A. Fischer, C. J. Illingworth, P. J. Campbell, and V. Mustonen. EMu: probabilistic inference of mutational processes and their localization in the cancer genome. Genome biology, 14(4):R39, Apr. 2013. [ <a href="http://dx.doi.org/10.1186/gb-2013-14-4-r39">DOI</a> ]</p>
-</span>
 
 <div style="margin-bottom:5em"></div>
 
