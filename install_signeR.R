@@ -38,8 +38,11 @@ local({
 		}
 	}
 
+	# get latest release url
+	latest_release <- jsonlite::fromJSON("https://api.github.com/repos/rvalieris/signeR/releases/latest")
+
 	# install the latest signeR package
-	devtools::install_url("https://github.com/rvalieris/signeR/releases/download/v0.99.7/signeR_0.99.7.tar.gz")
+	devtools::install_url(latest_release$assets$browser_download_url)
 
 	# update bioconductor
 	biocLite()
