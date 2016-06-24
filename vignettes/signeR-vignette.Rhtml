@@ -114,14 +114,14 @@ end.rcode-->
 
 <p>Before installing, please make sure your R version is <b>3.2.2</b> or superior.</p>
 
-<p><b>signeR</b> will soon be available on <a href="http://bioconductor.org/">Bioconductor</a> but in the meantime it must be installed manually, to make the installation process easier we have created a <a target="_blank" href="https://github.com/rvalieris/signeR/blob/gh-pages/install_signeR.R">installer script</a>:
+<p><b>signeR</b> will soon be available on <a href="http://bioconductor.org/">Bioconductor</a> but in the meantime it must be installed manually. A <a target="_blank" href="https://github.com/rvalieris/signeR/blob/gh-pages/install_signeR.R">installer script</a> is available to make the installation process easier:
 
 <!--begin.rcode eval=FALSE
 # this will install all dependencies and signeR
 source("http://rvalieris.github.io/signeR/install_signeR.R")
 end.rcode-->
 
-<p>Once installed we can load the library:</p>
+<p>Once installed the library can be loaded:</p>
 
 <!--begin.rcode results='hide', message=FALSE
 library(signeR)
@@ -135,7 +135,7 @@ end.rcode-->
 
 <h3 id="toc3.1">3.1: Input from VCF</h3>
 
-<p>The <a target="_blank" href="http://www.1000genomes.org/wiki/Analysis/vcf4.0">VCF</a> file format is the most common format for storing genetic variations, so we included a utility function for generating a count matrix from the VCF:</p>
+<p>The <a target="_blank" href="http://www.1000genomes.org/wiki/Analysis/vcf4.0">VCF</a> file format is the most common format for storing genetic variations, the <b>signeR</b> package includes a utility function for generating a count matrix from the VCF:</p>
 
 <!--begin.rcode eval=FALSE
 library(BSgenome.Hsapiens.UCSC.hg19) # BSgenome, equivalent to the one used on the variant call
@@ -145,7 +145,7 @@ vcfobj <- readVcf("/path/to/a/file.vcf", "hg19")
 mut <- genCountMatrixFromVcf(BSgenome.Hsapiens.UCSC.hg19, vcfobj)
 end.rcode-->
 
-<p>This function will generate a matrix of mutation counts for each sample in the provided VCF. We can also generate the opportunity matrix from the reference genome (hg19 in the following case):</p>
+<p>This function will generate a matrix of mutation counts for each sample in the provided VCF. The opportunity matrix can also be generated from the reference genome (hg19 in the following case):</p>
 
 <!--begin.rcode eval=FALSE
 library(rtracklayer)
@@ -156,14 +156,11 @@ end.rcode-->
 
 <p>Where <code>target.bed</code> is a <a target="_blank" href="https://genome.ucsc.edu/FAQ/FAQformat.html#format1">bed file</a> containing the genomic regions analyzed by the variant caller.</p>
 
-
-
 <h3 id="toc3.2">3.2: Input from tab-delimited file</h3>
 
 <p>By convention, the input file should be tab-delimited with sample names as row names and features as column names. Features should be refered in the format "base change:triplet", e.g. "C&gt;A:TCG", as can be seen in the example below. Similarly, the opportunity matrix can be provided in a tab-delimited file with the same structure as the mutation counts file. An example of the required matrix format can be seen <a target="_blank" href="https://github.com/rvalieris/signeR/blob/master/inst/extdata/21_breast_cancers.mutations.txt">here</a>.</p>
 
-
-<p>For this tutorial we are using as input the 21 breast cancer dataset from <a target="_blank" href="http://dx.doi.org/10.1016/j.cell.2012.04.023">Nik-Zainal et al 2012</a> paper. For the sake of convenience we included this dataset with the package, it can be accessed by using the <code>system.file</code> function:</p>
+<p>This tutorial uses as input the 21 breast cancer dataset from <a target="_blank" href="http://dx.doi.org/10.1016/j.cell.2012.04.023">Nik-Zainal et al 2012</a> paper. For the sake of convenience this dataset is included with the package and can be accessed by using the <code>system.file</code> function:</p>
 
 <!--begin.rcode
 mut <- read.table(system.file("extdata","21_breast_cancers.mutations.txt",package="signeR"), header=TRUE, check.names=FALSE)
@@ -239,7 +236,7 @@ end.rcode-->
 
 <h3 id="toc5.3">5.3: Differential Exposure Analysis</h3>
 
-<p><b>signeR</b> can highlight signatures that are differentially active among previously defined groups of samples. To perform this task <b>signeR</b> needs a vector of group labels. In this example we are dividing the samples according to germline mutations at BRCA genes: groups <code>wt</code> and <code>BRCA+</code>, taken from the description of the 21 breast cancer data set:</p>
+<p><b>signeR</b> can highlight signatures that are differentially active among previously defined groups of samples. To perform this task <b>signeR</b> needs a vector of group labels. In this example the samples were divided according to germline mutations at BRCA genes: groups <code>wt</code> and <code>BRCA+</code>, taken from the description of the 21 breast cancer data set.</p>
 
 <!--begin.rcode
 # group labels, respective to each row of the mutation count matrix
@@ -274,7 +271,7 @@ end.rcode-->
 
 <h3 id="toc5.4">5.4: Sample Classification</h3>
 
-<p><b>signeR</b> can also classify unlabeled samples based on the given labels. In order to do this, those samples must correspond to <code>NA</code> values in the labels vector and the Classify function can be used to assign them to one of the defined groups. In this example, we used the sample labels defined in the DES analysis performed previously.</p>
+<p><b>signeR</b> can also classify unlabeled samples based on the given labels. In order to do this, those samples must correspond to <code>NA</code> values in the labels vector and the Classify function can be used to assign them to one of the defined groups. This example uses the sample labels defined in the DES analysis performed previously.</p>
 
 <!--begin.rcode
 # note that BRCA_labels [15],[20] and [21] are set to NA
