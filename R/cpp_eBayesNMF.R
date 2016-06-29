@@ -76,10 +76,12 @@ eBayesNMF<-function(M,W,n,ap,bp,ae,be,lp,le,
     bevet<-be
     lpvet<-lp
     levet<-le
-    if(estimate_hyper){#Testing: Hyperparameter optimization
+    if(estimate_hyper){#Hyperparameter optimization
       burn_HO<-burn_it
       upgrade<-100
       it<-0
+      cat("EM algorithm:\n")
+      progbar <- txtProgressBar(style=3)
       while(upgrade>0.05 & it < EM_lim){
         SamplesHO <- GibbsSamplerCpp(M,W,Z,P,E,Ap,Bp,Ae,Be,ap,bp,ae,be,lp,le,var.ap,var.ae,
                                      burn=burn_HO,eval=EM_eval_it,Zfixed=FALSE,Thetafixed=FALSE,Afixed=FALSE,keep_par=TRUE)
@@ -120,11 +122,19 @@ eBayesNMF<-function(M,W,n,ap,bp,ae,be,lp,le,
         upgrade<-max(abs(c(ap-apold,bp-bpold,ae-aeold,be-beold,lp-lpold,le-leold)))
         it <- it+1
         burn_HO<-200
+        setTxtProgressBar(progbar, it/EM_lim)
       }
+      setTxtProgressBar(progbar, 1)
+      cat("\n")
       #cat("Optimal Parameters are: ",ap,",",bp,",",ae,",",be,",",lp,",",le,".\n")
       #cat("Obtained after ",it," iterations.\n")
     }
-    #Sampler 
+    #Sampler
+    if(n==1){
+      cat("Running  Gibbs sampler for 1 signature...")
+    }else{
+      cat(paste0("Running  Gibbs sampler for ",n," signatures...",collapse=""))
+    }
     Samples <- GibbsSamplerCpp(M,W,Z,P,E,Ap,Bp,Ae,Be,ap,bp,ae,be,lp,le,var.ap,var.ae,
                             burn=burn_it,eval=eval_it,Zfixed=FALSE,Thetafixed=FALSE,Afixed=FALSE,keep_par=keep_param)
                #Samples = list(Zs,Fis,Ps,Es,Aps,Bps,Aes,Bes) #,Zstar,Pstar,Estar,Apstar,Bpstar,Aestar,Bestar)
@@ -172,7 +182,10 @@ eBayesNMF<-function(M,W,n,ap,bp,ae,be,lp,le,
     }
     if(estimate_hyper){
       out_list[[9]]<-data.frame('ap'=apvet,'bp'=bpvet,'ae'=aevet,'be'=bevet,'lp'=lpvet,'le'=levet)
+    }else{
+      out_list[[9]]<-data.frame('ap'=ap,'bp'=bp,'ae'=ae,'be'=be,'lp'=lp,'le'=le)
     }
+    cat("Done.\n")
     return(out_list)
 }
 

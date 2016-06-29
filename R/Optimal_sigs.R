@@ -1,4 +1,4 @@
-Optimal_sigs<-function(testfun,liminf,limsup,step,oldpoints=c(),oldvalues=c(),oldextra=list()){
+Optimal_sigs<-function(testfun,liminf,limsup,step,oldpoints=c(),oldvalues=c(),oldextra=list(),left_eval=NA){
   points<-seq(liminf,limsup,by=step)
   if(step>1){
     if (points[length(points)]<limsup) points<-c(points,limsup)
@@ -7,19 +7,21 @@ Optimal_sigs<-function(testfun,liminf,limsup,step,oldpoints=c(),oldvalues=c(),ol
     extra_out<-list()
     downhill<-FALSE
     k=0
-    cat("Evaluating the number of signatures: ")
-    list_begin <- TRUE
     while(!downhill & k<length(points)){
       k=k+1
       if (points[k] %in% oldpoints){
         thisval<-oldvalues[oldpoints==points[k]]
         thisextra<-oldextra[[which(oldpoints==points[k])]]
       }else{
-        if (list_begin){
-          cat(paste(" ",points[k],sep=""))
-          list_begin <- FALSE
+        if (is.na(left_eval)){
+          cat(paste("Evaluating ",points[k]," signatures. \n",sep=""))
         }else{
-          cat(paste(", ",points[k],sep=""))
+          if ( left_eval > 1 ){
+            cat(paste("Evaluating ",points[k]," signatures (",left_eval," evaluations left). \n",sep=""))
+          }else{
+            cat(paste("Evaluating ",points[k]," signatures (last evaluation). \n",sep=""))
+          }
+          left_eval <- left_eval - 1
         }
         eval<-testfun(points[k])#ebayesNMF(...,n=points[k])
         thisval<-eval[[1]]
@@ -33,7 +35,6 @@ Optimal_sigs<-function(testfun,liminf,limsup,step,oldpoints=c(),oldvalues=c(),ol
         downhill<-TRUE
       }
     }
-    cat(". Done.\n")
     points<-points[1:k]
     values<-values[1:k]
     extra_out<-extra_out[1:k]
@@ -42,7 +43,9 @@ Optimal_sigs<-function(testfun,liminf,limsup,step,oldpoints=c(),oldvalues=c(),ol
     newsup<-points[min(max(maxvals)+1,length(points))]
     newstep<-floor(step/2)
     cat(paste("Refining search for the number of signatures ranging from ",newinf," to ",newsup,", please be patient.\n",sep=""))
-    Os<-Optimal_sigs(testfun,newinf,newsup,newstep,points,values,extra_out)
+    Os<-Optimal_sigs(testfun,liminf=newinf,limsup=newsup,step=newstep,
+                     oldpoints=points,oldvalues=values,oldextra=extra_out,
+                     left_eval=2*floor(log2(newstep)+1))
     n<-Os[[1]]
     old_small<- points < min(Os[[2]])
     old_big  <- points > max(Os[[2]])
@@ -52,18 +55,20 @@ Optimal_sigs<-function(testfun,liminf,limsup,step,oldpoints=c(),oldvalues=c(),ol
   }else{
     values<-rep(0,length(points))
     extra_out<-list()
-    cat("Evaluating the number of signatures: ")
-    list_begin <- TRUE
     for(k in 1:length(points)){
       if (points[k] %in% oldpoints){
         thisval<-oldvalues[oldpoints==points[k]]
         thisextra<-oldextra[[which(oldpoints==points[k])]]
       }else{
-        if (list_begin){
-          cat(paste(" ",points[k],sep=""))
-          list_begin <- FALSE
+        if (is.na(left_eval)){
+          cat(paste("Evaluating ",points[k]," signatures. \n",sep=""))
         }else{
-          cat(paste(", ",points[k],sep=""))
+          if ( left_eval > 1 ){
+            cat(paste("Evaluating ",points[k]," signatures (",left_eval," evaluations left). \n",sep=""))
+          }else{
+            cat(paste("Evaluating ",points[k]," signatures (last evaluation). \n",sep=""))
+          }
+          left_eval <- left_eval - 1
         }
         eval<-testfun(points[k])#ebayesNMF(...,n=points[k])
         thisval<-eval[[1]]
@@ -72,7 +77,6 @@ Optimal_sigs<-function(testfun,liminf,limsup,step,oldpoints=c(),oldvalues=c(),ol
       values[k]<-thisval
       extra_out[[k]]<-thisextra
     }
-    cat(". Done.\n")
     n<-points[which(values==max(values))[1]]
   }
   return(list(n,points,values,extra_out))

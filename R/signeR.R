@@ -105,7 +105,7 @@ signeR<-function(M, Mheader=TRUE, samples = "rows",
       step0 <- 2^max((floor(log2(Nmax-Nmin+1))-2),0)
     }
     cat(paste("Evaluating models with the number of signatures ranging from ",Nmin," to ",Nmax,", please be patient.\n",sep=""))
-    Ops<-Optimal_sigs(function(n){
+    Ops<-Optimal_sigs(testfun=function(n){
         ebNMF<-eBayesNMF(M,W,n,ap,bp,ae,be,lp,le,
                        var.ap,var.ae,
                        burn_it=testing_burn,eval_it=testing_eval,EM_eval_it=EM_eval,
@@ -116,7 +116,7 @@ signeR<-function(M, Mheader=TRUE, samples = "rows",
         rm(ebNMF)
         return(list(median(bics),bics,HH))
       },
-      liminf=Nmin,limsup=Nmax,step=step0)
+      liminf=Nmin,limsup=Nmax,step=step0,oldpoints=c(),oldvalues=c(),oldextra=list(),left_eval=NA)
     nopt<-Ops[[1]]
     Test_BICs<-list()
     HH<-list()
@@ -140,7 +140,7 @@ signeR<-function(M, Mheader=TRUE, samples = "rows",
     Test_BICs<-NA
     HH<-NA
   }
-  cat(paste("Running Gibbs sampler for ",nopt," signatures.\n",sep=""))
+  #cat(paste("Running Gibbs sampler for ",nopt," signatures.\n",sep=""))
   Final_run<-eBayesNMF(M,W,n=nopt,ap,bp,ae,be,lp,le,
                        var.ap,var.ae,
                        burn_it=main_burn,eval_it=main_eval,EM_eval_it=EM_eval,
@@ -158,7 +158,7 @@ signeR<-function(M, Mheader=TRUE, samples = "rows",
                SignExposures=SE,
                BICs=Final_run[[3]],
                Hyper_paths=HH)
-  cat("Done.\n")
+  #cat("Done.\n")
   return(result)
 }
 

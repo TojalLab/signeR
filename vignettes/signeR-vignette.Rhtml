@@ -183,7 +183,7 @@ signatures <- signeR(M=mut, Opport=opp, nlim=c(3,9))
 end.rcode-->
 </li>
 <li>Finally, <b>signeR</b> can also be run by passing the number of signatures as the parameter nsig. In this setting, the algorithm is faster. For example, the following command will make <b>signeR</b> consider only the rank N=5 to estimate the signatures and their exposures:
-<!--begin.rcode
+<!--begin.rcode results='hide', message=FALSE 
 signatures <- signeR(M=mut, Opport=opp, nsig=5)
 end.rcode-->
 </li>
