@@ -1,25 +1,19 @@
 useDynLib(signeR, .registration=TRUE)
 
-S3method(SignPlot, "SignExp")
-S3method(SignHeat, "SignExp")
-S3method(Paths, "SignExp")
-S3method(Classify, "SignExp")
-S3method(DiffExp, "SignExp")
-S3method(ExposureBoxplot, "SignExp")
-export(signeR, SignPlot, SignHeat, Classify, DiffExp, Paths, BICboxplot)
-export(genOpportunityFromGenome, genCountMatrixFromVcf, ExposureBoxplot)
+exportClasses(SignExp)
+exportMethods(SignPlot, SignHeat, Paths, Classify, DiffExp, ExposureBoxplot)
+export(genOpportunityFromGenome, genCountMatrixFromVcf, signeR, BICboxplot)
 
-import(stats, graphics, utils)
+import(stats, graphics, utils, methods)
 
 importFrom("BiocGenerics", "Reduce")
-importFrom("Biostrings","getSeq", "oligonucleotideFrequency", "reverseComplement", "DNAString")
+importFrom("Biostrings","getSeq", "oligonucleotideFrequency",
+    "reverseComplement", "DNAString")
 importFrom("BSgenome", "BSgenomeViews")
 importFrom("class", "knn")
-importFrom("grDevices", "dev.off", "pdf", "png", "rainbow", "terrain.colors")
+importFrom("grDevices", "colorRampPalette", "dev.cur", "dev.new", 
+    "dev.off", "pdf", "png", "rainbow", "terrain.colors")
 importFrom("GenomicRanges", "resize", "granges", "union")
 importFrom("nloptr", "nloptr")
 importFrom("NMF", "nmf", "basis", "coef")
-importFrom("R.methodsS3","setMethodS3")
-importFrom("R.oo", "extend", "Object")
-importFrom("tensorA", "is.tensor", "to.tensor", "mean.tensor")
 importFrom("VariantAnnotation", "readVcf", "isSNV", "alt", "ref", "geno")
