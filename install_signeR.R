@@ -8,8 +8,8 @@ local({
 	targetR <- "3.2"
 	targetBioc <- "3.2"
 	deps <- c(
-		"R.oo", "VariantAnnotation", "RcppArmadillo",
-		"nloptr", "NMF", "class", "tensorA", "devtools"
+		"VariantAnnotation", "RcppArmadillo", "nloptr",
+		"NMF", "class", "PMCMR", "devtools"
 	)
 
 	# check R version
