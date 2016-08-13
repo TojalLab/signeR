@@ -52,6 +52,10 @@ signature.}
 \item{MostExposed}{for each differentially exposed signature, this array
 contains the label of the group where it showed higher levels of exposure.
 Contains NA for signatures not showing differential exposure.}
+\item{Differences}{List of matrices, exported only when there are more than two
+groups in the analysis and any signature is found to be differentially active.
+Each matrix corresponds to one of the highlighted signatures and show the
+results of comparisons among groups, with the significant ones marked as TRUE.}
 }
 
 \examples{

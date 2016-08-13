@@ -1,7 +1,9 @@
 useDynLib(signeR, .registration=TRUE)
 
 exportClasses(SignExp)
-exportMethods(SignPlot, SignHeat, Paths, Classify, DiffExp, ExposureBoxplot)
+exportMethods(SignPlot, SignHeat, Paths, ExposureBoxplot, ExposureHeat,
+    Classify, DiffExp, setSamples, setMutations, Normalize, Reorder,
+    Average_sign, Median_sign, Average_exp, Median_exp)
 export(genOpportunityFromGenome, genCountMatrixFromVcf, signeR, BICboxplot)
 
 import(stats, graphics, utils, methods)
@@ -17,3 +19,4 @@ importFrom("GenomicRanges", "resize", "granges", "union")
 importFrom("nloptr", "nloptr")
 importFrom("NMF", "nmf", "basis", "coef")
 importFrom("VariantAnnotation", "readVcf", "isSNV", "alt", "ref", "geno")
+importFrom("PMCMR","posthoc.kruskal.conover.test")

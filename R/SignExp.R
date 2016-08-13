@@ -6,9 +6,9 @@ setClass("SignExp",
         mutations="character",
         sigSums="matrix",
         normalized="logical"),
-    prototype = list(Ps=array(NA,dim=c('i'=1,'j'=1,'k'=1)), 
+    prototype = list(Ps=array(NA,dim=c('i'=1,'j'=1,'k'=1)),
         Es=array(NA,dim=c('i'=1,'j'=1,'k'=1)),
-        samples=NA_character_, 
+        samples=NA_character_,
         mutations=NA_character_,
         sigSums=matrix(NA_real_,1,1),
         normalized=FALSE)
@@ -16,8 +16,8 @@ setClass("SignExp",
 
 SignExpConstructor<-function(Ps=NA,Es=NA,samplenames=NA,mutnames=NA){
     if(!(is.na(Ps[1]) | is.na(Es[1]))){
-        if(!(is.array(Ps) & is.array(Es))){ 
-            stop("Signatures and exposures must be arrays.") 
+        if(!(is.array(Ps) & is.array(Es))){
+            stop("Signatures and exposures must be arrays.")
         }
         dp<-dim(Ps) #[i,n,r]
         de<-dim(Es) #[n,j,r]
@@ -25,7 +25,7 @@ SignExpConstructor<-function(Ps=NA,Es=NA,samplenames=NA,mutnames=NA){
             stop("Signatures and exposures are not compatible")
         }
         sSums<-apply(Ps,c(2,3),sum)
-        if(all(is.na(samplenames))){ 
+        if(all(is.na(samplenames))){
             samplenames<-paste("sample",1:de[[2]],sep="_")
         }
         if(all(is.na(mutnames))){
@@ -110,7 +110,7 @@ setMethod("Reorder",signature(signexp_obj="SignExp",ord="numeric"),
                 signexp_obj@sigSums<-signexp_obj@sigSums[ord,]
             }
             return(signexp_obj)
-        }else{ 
+        }else{
             stop(paste("'ord' needs to be a vector of length",
                 "equal to the number of signatures.",sep=" "))
         }
@@ -123,7 +123,7 @@ setGeneric("Average_sign",
 )
 setMethod("Average_sign",signature(signexp_obj="SignExp",normalize="ANY"),
     function(signexp_obj,normalize){
-        if(normalize & !signexp_obj@normalized){  
+        if(normalize & !signexp_obj@normalized){
             signexp_obj<-Normalize(signexp_obj)
         }
         Ps<-signexp_obj@Sign #[i,n,r]
@@ -138,7 +138,7 @@ setGeneric("Median_sign",
 )
 setMethod("Median_sign",signature(signexp_obj="SignExp",normalize="ANY"),
     function(signexp_obj,normalize){
-        if(normalize & !signexp_obj@normalized){  
+        if(normalize & !signexp_obj@normalized){
             signexp_obj<-Normalize(signexp_obj)
         }
         Ps<-signexp_obj@Sign #[i,n,r]
@@ -153,13 +153,13 @@ setGeneric("Average_exp",
 )
 setMethod("Average_exp",signature(signexp_obj="SignExp",normalize="ANY"),
     function(signexp_obj,normalize){
-        if(normalize & !signexp_obj@normalized){  
+        if(normalize & !signexp_obj@normalized){
             signexp_obj<-Normalize(signexp_obj)
         }
         Es<-signexp_obj@Exp #[n,j,r]
         Ehat<-apply(Es,c(1,2),mean)
         return(Ehat)
-    })  
+    })
 
 setGeneric("Median_exp",
     def=function(signexp_obj,normalize=TRUE){
@@ -168,13 +168,13 @@ setGeneric("Median_exp",
 )
 setMethod("Median_exp",signature(signexp_obj="SignExp",normalize="ANY"),
     function(signexp_obj,normalize){
-        if(normalize & !signexp_obj@normalized){  
+        if(normalize & !signexp_obj@normalized){
             signexp_obj<-Normalize(signexp_obj)
         }
         Es<-signexp_obj@Exp #[n,j,r]
         Ehat<-apply(Es,c(1,2),median)
         return(Ehat)
-    })  
+    })
 
 setGeneric("Paths",
     def=function(signexp_obj,plot_to_file=FALSE,
@@ -217,7 +217,7 @@ setMethod("Paths",signature(signexp_obj="SignExp",plot_to_file="ANY",
             y.min <- min(signexp_obj@Sign[,k,])
             plot(c(0), c(0), type="l", xlim=c(0,r), ylim=c(y.min,y.max),
                 xlab="Gibbs sampler iterations", ylab="", main=maintitle)
-            for (s in 1:i){ 
+            for (s in 1:i){
                 lines(signexp_obj@Sign[s, k, ], col=cols_p[s], ...)
             }
         }
@@ -241,7 +241,7 @@ setMethod("Paths",signature(signexp_obj="SignExp",plot_to_file="ANY",
             plot(c(0), c(0), type="l", xlim=c(0,r), ylim=c(y.min,y.max),
                 xlab="Gibbs sampler iterations", ylab="",
                 main=maintitle)
-            for (g in 1:j){ 
+            for (g in 1:j){
                 lines(signexp_obj@Exp[k, g, ], col=cols_e[g], ...)
             }
         }
@@ -280,7 +280,7 @@ setMethod("SignPlot",signature(signexp_obj="SignExp",plot_to_file="ANY",
             "#33a02c","#fb9a99","#e31a1c")
         }else if (pal =='lba'){ xcolores <- c("#29b4f4ff","#000000ff",
             "#f41d09ff","#bfc0bfff","#76d248ff","#f9b6b7ff")
-        }else if (pal == 'bw'){ xcolores <- c("#949494FF", "#4D4D4DFF", 
+        }else if (pal == 'bw'){ xcolores <- c("#949494FF", "#4D4D4DFF",
             "#FFFFFFFF","#B7B7B7FF","#DBDBDBFF", "#707070FF")
         }else if (pal == 'bcr1'){ xcolores <- c("#006040FF","#BF7C40FF",
             "#BF0040FF","#406000FF","#4000BFFF","#FF7C00FF")
@@ -294,7 +294,7 @@ setMethod("SignPlot",signature(signexp_obj="SignExp",plot_to_file="ANY",
         }else{
             border <- bar.col
             top_border<-"white"
-        }                  
+        }
         #Plot
         if(plot_to_file){
             if(length(grep("\\.pdf$",file))==0){
@@ -308,7 +308,7 @@ setMethod("SignPlot",signature(signexp_obj="SignExp",plot_to_file="ANY",
                 dev.new(width=7, height=1.75*n)
             }
         }
-        par(cex= 1, cex.axis=1, mfrow=c(plots_per_page,1), 
+        par(cex= 1, cex.axis=1, mfrow=c(plots_per_page,1),
             mar=c(3,2,2,1), mgp=c(4,0.35,0), xpd=NA)
         hg<-rep(1,plots_per_page)
         hg[c(1,plots_per_page)]<-1.15
@@ -343,16 +343,16 @@ setMethod("SignPlot",signature(signexp_obj="SignExp",plot_to_file="ANY",
                 }
             }
             par(mar=c(bottommar,2,topmar,1),cex=0.6,cex.axis=0.6)
-            mp <- barplot(medians, names=NULL, axes=FALSE, cex.names=1, 
-                cex.axis=0.8,las=2, col=bar.col, border=border, 
+            mp <- barplot(medians, names=NULL, axes=FALSE, cex.names=1,
+                cex.axis=0.8,las=2, col=bar.col, border=border,
                 ylim=c(0,y.max), xlim=c(0,100*(1+gap)),
                 space=c(0,rep(gap,95)),tcl=NA,family="mono",
                 font=2)
             MP <- mp + (mp[2,] - mp[1,])/2 #positions
             if(top){ #big text mutations
                 adj<-16*(1+gap)
-                text(c(MP[8]+adj*(0:5)), c(rep(y.max+y.max*0.15, 6)), 
-                    labels=muttypes, 
+                text(c(MP[8]+adj*(0:5)), c(rep(y.max+y.max*0.15, 6)),
+                    labels=muttypes,
                     cex=1, col=c(rep("black",6)),family="mono",font=2)
             }
             axis(side=2,pos=-2,cex.axis=1,font=2)
@@ -375,13 +375,13 @@ setMethod("SignPlot",signature(signexp_obj="SignExp",plot_to_file="ANY",
                 }
             }
             #vertical lines
-            segments(mp[1] - (mp[2,] - mp[1,])/2, 0, 
+            segments(mp[1] - (mp[2,] - mp[1,])/2, 0,
                 mp[1] - (mp[2,] - mp[1,])/2, y.max, lwd=0.4)
             for (j in 2:7) segments(MP[x[j]], 0, MP[x[j]], y.max, lwd=0.4)
             #top bars
-            rect(mp[1] - (mp[2,] - mp[1,])/2, y.max, MP[x[2]], y.width, 
+            rect(mp[1] - (mp[2,] - mp[1,])/2, y.max, MP[x[2]], y.width,
                 col=xcolores[1], border=top_border)
-            for (j in 2:6) rect(MP[x[j]], y.max, MP[x[j+1]], y.width, 
+            for (j in 2:6) rect(MP[x[j]], y.max, MP[x[j+1]], y.width,
                 col=xcolores[j], border=top_border)
             #Error bars
             segments(x0=mp,y0=q05,x1=mp,y1=q95,col="grey50",lwd=0.2)
@@ -408,7 +408,7 @@ setMethod("SignPlot",signature(signexp_obj="SignExp",plot_to_file="ANY",
     })
 
 setGeneric("ExposureBoxplot",
-    def=function(signexp_obj, plot_to_file=FALSE, 
+    def=function(signexp_obj, plot_to_file=FALSE,
         file="Exposure_boxplot.pdf", col='tan2', threshold=0,
         plots_per_page=4,...){
         standardGeneric("ExposureBoxplot")
@@ -417,7 +417,7 @@ setGeneric("ExposureBoxplot",
 setMethod("ExposureBoxplot",signature(signexp_obj="SignExp", plot_to_file="ANY",
     file="ANY", col="ANY", threshold="ANY",
     plots_per_page="ANY"),
-    function(signexp_obj, plot_to_file, file, col, threshold, 
+    function(signexp_obj, plot_to_file, file, col, threshold,
         plots_per_page,...){
         if(!signexp_obj@normalized) signexp_obj<-Normalize(signexp_obj)
         dp <- dim(signexp_obj@Sign) #[i,n,r]
@@ -437,7 +437,7 @@ setMethod("ExposureBoxplot",signature(signexp_obj="SignExp", plot_to_file="ANY",
                 dev.new(width=7, height=1.75*n)
             }
         }
-        par(cex= 1, cex.axis=0.5, mfrow=c(plots_per_page,1),  
+        par(cex= 1, cex.axis=0.5, mfrow=c(plots_per_page,1),
             mar=c(3,2,2,1), mgp=c(4,0.35,0), xpd=NA, las=2)
         hg<-rep(1,plots_per_page)
         hg[plots_per_page]<-1.4
@@ -476,13 +476,13 @@ setMethod("ExposureBoxplot",signature(signexp_obj="SignExp", plot_to_file="ANY",
                 plot(1:j, medians, ylim=c(0,y.max),xlim=c(0.6,j+1.4),
                     type="n", main="", xlab="", ylab="", xaxt="n",font=2)
                 boxplot(E, col=bar.col, border="black", add=TRUE, cex=0.5,
-                    at=1:j, xaxt="n", lwd=0.2, pch=45) 
+                    at=1:j, xaxt="n", lwd=0.2, pch=45)
                 axis(side=1, at=1:j, labels=signexp_obj@samples, font=2)
             }else{
                 plot(1:j, medians, ylim=c(0,y.max),xlim=c(0.6,j+1.4),
                     type="n", main="", xlab="", ylab="", xaxt="n",font=2)
                 boxplot(E, col=bar.col, border="black", add=TRUE, cex=0.5,
-                    at=1:j, xaxt="n", lwd=0.2, pch=45) 
+                    at=1:j, xaxt="n", lwd=0.2, pch=45)
             }
             #Error bars
             mp<-1:j
@@ -510,7 +510,7 @@ setMethod("ExposureBoxplot",signature(signexp_obj="SignExp", plot_to_file="ANY",
     })
 
 setGeneric("SignHeat",
-    def=function(signexp_obj, plot_to_file=FALSE, 
+    def=function(signexp_obj, plot_to_file=FALSE,
         file="Signature_heatmap.pdf", nbins=20, pal="roh",...){
         standardGeneric("SignHeat")
     }
@@ -572,10 +572,10 @@ setMethod("SignHeat",signature(signexp_obj="SignExp", plot_to_file="ANY",
                     text(r-0.5,-1,signat[r],cex=0.6)
                 }
             }
-            text(-0.3,s+0.1,mut.names[i+1-s],cex=0.4) 
+            text(-0.3,s+0.1,mut.names[i+1-s],cex=0.4)
         }
         par(mar=c(5,1,5,1))
-        plot(rep(1,nbins+1), lims, xlim=c(0,2), ylim=c(0,nbins+1), 
+        plot(rep(1,nbins+1), lims, xlim=c(0,2), ylim=c(0,nbins+1),
             type="n", axes=FALSE, xlab="", ylab="")
         for(i in 1:(nbins+1)){
             color<-colors[i]
@@ -590,19 +590,104 @@ setMethod("SignHeat",signature(signexp_obj="SignExp", plot_to_file="ANY",
         }
     })
 
+setGeneric("ExposureHeat",
+    def=function(signexp_obj, plot_to_file=FALSE,
+        file="Exposure_heatmap.pdf",nbins=20,pal="roh",distmethod="euclidean",
+        clustermethod="complete",...){
+        standardGeneric("ExposureHeat")
+    }
+)
+setMethod("ExposureHeat",signature(signexp_obj="SignExp", plot_to_file="ANY",
+    file="ANY", nbins="ANY", pal="ANY",distmethod="ANY",clustermethod="ANY"),
+    function(signexp_obj, plot_to_file, file, nbins, pal, distmethod,
+        clustermethod,...){
+        de <- dim(signexp_obj@Exp) #[n,j,r]
+        n<-de[[1]]; j<-de[[2]]; r<-de[[3]]
+        signat<-paste("S",1:n,sep="")
+        if (pal=="rdh"){
+            colors<-colorRampPalette(c("#fee0d2","#a50f15"))(nbins)
+        }else if (pal=="roh"){
+            colors<-colorRampPalette(c("#fee0d2","#fcbba1","#fc9272","#fb6a4a",
+                "#ef3b2c","#cb181d","#a50f15"))(nbins)
+        }else if (pal=="blh"){
+            colors<-colorRampPalette(c("#ece7f2","#d0d1e6","#a6bddb","#74a9cf",
+                "#3690c0","#0570b0","#045a8d","#023858"))(nbins)
+        }else if (pal=="bph"){
+            colors<-rainbow(nbins,start=0.5,end=0.8)
+        }else if (pal=="bw"){
+            colors<-colorRampPalette(c("#f0f0f0","#000000"))(nbins)
+        }else stop("Unknown pallete.")
+        if(!signexp_obj@normalized) signexp_obj<-Normalize(signexp_obj)
+        Ehat<-Median_exp(signexp_obj)
+        colnames(Ehat)<-signexp_obj@samples
+        Dis<-dist(t(Ehat),method=distmethod)
+        Hc <- hclust(Dis,method=clustermethod)
+        maxh<-max(Hc$height)
+        relh<-maxh/n
+        plotM<-t(Ehat[,Hc$order])
+        ddr <- as.dendrogram(Hc)
+        minval<-log(min(plotM))
+        maxval<-log(max(plotM))
+        lims<-seq(minval,maxval,length=nbins+1)
+        if(plot_to_file){
+            if(length(grep("\\.pdf$",file))==0){
+                file<-paste(file,"pdf",sep=".")
+            }
+            pdf(file,width=7,height=7)
+        }else{
+            if(!grepl("pdf|postscript|cairo_|png|tiff|jpeg|bmp",
+                names(dev.cur()),perl=TRUE)){
+                dev.new(width=7, height=7)
+            }
+        }
+        layout(matrix(1:2,1,2),widths=c(4,1),heights=1)
+        ##Dendrogram##
+        par(mar=c(5, 1, 4, 4),las=2,cex=1,cex.axis=1)
+        plot(ddr, horiz = TRUE, axes = FALSE, yaxs = "i", leaflab = "none",
+            xlim=c(maxh,-1*maxh))
+        ##Heatmap##
+        for(s in 1:j){
+            for(g in 1:n){
+                color<-colors[max(sum(lims<log(plotM[s,g])),1)]
+                rect(-1*g*relh,s-0.5,(1-g)*relh,s+0.5, col=color, border=color)
+            }
+            mtext(rownames(plotM)[s],side=4,at=s,cex=0.7)
+        }
+        for(g in 1:n){
+            mtext(signat[g],side=1,at=(0.5-g)*relh,las=1,cex=0.8)
+        }
+        mtext("Exposure Heatmap",side=3,at=-1*maxh/2,cex=1,las=1,line=2)
+        mtext("Signatures",side=1,at=-1*maxh/2,cex=0.8,las=1,line=2)
+        ##Legend##
+        par(mar=c(3, 0, 3, 2),cex=0.7)#mai=c(1.6, 0.2, 1, 0.2)
+        plot(rep(1,nbins+1), lims, xlim=c(0,2), ylim=c(0,nbins+1),
+            type="n", axes=FALSE, xlab="", ylab="")
+        for(k in 1:(nbins+1)){
+            color<-colors[k]
+            rect(0,k-1,0.8,k,col=color,border=color)
+            text(1.1,k-1,format(lims[k],digits=4,scientific=FALSE),
+                cex=0.9,pos=4)
+        }
+        mtext("log scale",side=1,at=1,las=1,cex=0.8,padj=0,line=-1)
+        if(plot_to_file){
+            dev.off()
+            outmess<-paste("Exposures heatmap was exported to the file",
+                file,"on the current directory.",sep=" ")
+            cat(outmess,"\n")
+        }
+    })
+
 setGeneric("DiffExp",
     def=function(signexp_obj,labels, method=kruskal.test, contrast="all",
-        quant=0.5, cutoff=0.05, plot_to_file=FALSE, 
+        quant=0.5, cutoff=0.05, plot_to_file=FALSE,
         file="Diffexp_boxplot.pdf",colored=TRUE,...){
         standardGeneric("DiffExp")
     }
 )
 setMethod("DiffExp",signature(signexp_obj="SignExp", labels="character",
-    method="ANY", contrast="ANY", quant="ANY",
-    cutoff="ANY", plot_to_file="ANY", file="ANY",
-    colored="ANY"),
-    function(signexp_obj, labels, method, contrast,
-        quant, cutoff, plot_to_file,
+    method="ANY", contrast="ANY", quant="ANY", cutoff="ANY", plot_to_file="ANY",
+    file="ANY", colored="ANY"),
+    function(signexp_obj, labels, method, contrast, quant, cutoff, plot_to_file,
         file, colored,...){
         if(!signexp_obj@normalized) signexp_obj<-Normalize(signexp_obj)
         dp <- dim(signexp_obj@Sign) #[i,n,r]
@@ -616,18 +701,16 @@ setMethod("DiffExp",signature(signexp_obj="SignExp", labels="character",
         }
         used <- labels %in% classes
         used_labels<-as.factor(as.vector(labels[used]))
-        if(colored){
-            col1<-"darkgreen"; col2<-"red"; col3<-"blue"
-        }else{
-            col1<-"black"; col2<-"black"; col3<-"black"
-        }
+        if(colored){ col1<-"darkgreen"; col2<-"red"; col3<-"blue"
+        }else{ col1<-"black"; col2<-"black"; col3<-"black"  }
+        nclasses<-length(classes)
         Pval<-matrix(NA,n,r)
         MoreExp<-data.frame(matrix(NA,r,n))
         for (k in 1:r){
             Exposure <- signexp_obj@Exp[,,'r'=k]
             if(n==1) Exposure <- matrix(as.vector(Exposure),n,j)
-            Pval[,k]<-sapply(1:n,function(m){
-                Test<-method(as.vector(Exposure[m,used]),used_labels,...)
+            Pval[,k]<-sapply(1:n,function(s){
+                Test<-method(as.vector(Exposure[s,used]),used_labels,...)
                 return(Test$p.value)
             })
             MoreExp[k,]<-sapply(1:n,function(m){
@@ -641,29 +724,58 @@ setMethod("DiffExp",signature(signexp_obj="SignExp", labels="character",
         }
         Lpval <- -1*log(Pval) #n x r
         rownames(Lpval)<-paste("S",1:n,sep="")
-        y.min<-min(Lpval)
-        y.max<-max(Lpval)
+        y.min<-min(Lpval); y.max<-max(Lpval)
         lcut <- -1*log(cutoff)
         invquant<-1-quant
-        Lpmed<-apply(Lpval,1,quantile,invquant)
+        Lpmed<-apply(Lpval,1,quantile,invquant,na.rm=TRUE)
         cor<-rep("black",n)
         cor[Lpmed>=lcut]<-col1
         bigexp<-rep(NA,n)
         boxnames<-paste("S",1:n,sep="")
         boxlines<-rep(0.5,n)
-        for(k in which(Lpmed>=lcut)){
+        signif<-which(Lpmed>=lcut)
+        for(k in signif){
             morevet<-MoreExp[,k]
-            freqcl<-sapply(classes,function(cl){
-                sum(morevet==cl)
-            })
+            freqcl<-sapply(classes, function(cl){ sum(morevet==cl) })
             maxfreq <- max(freqcl)
             bigexp[k]<-classes[which(freqcl==maxfreq)[1]]
             boxnames[k]<-paste(boxnames[k],bigexp[k],sep="\n")
             boxlines[k]<-1.5
         }
+        multicompare <- length(signif)>0 & nclasses>2
+        if(multicompare){ #Multiple comparisons
+            MCpv<-array(NA,dim=c(nclasses-1,nclasses-1,length(signif),r))
+            for (k in 1:r){
+                Exposure <- signexp_obj@Exp[,,'r'=k]
+                if(n==1) Exposure <- matrix(as.vector(Exposure),n,j)
+                for (i in 1:length(signif)){
+                    s<-signif[i]
+                    pkct<-posthoc.kruskal.conover.test(
+                        x=as.vector(Exposure[s,used]), g=used_labels,
+                        p.adjust.method="BH")
+                    MCpv[,,i,k] <- -1*log(pkct$p.value)
+                }
+            }
+            MCpvm <- apply(MCpv,c(1,2,3),quantile,invquant,na.rm=TRUE)
+            Mcsig <- MCpvm > lcut
+            Allcomp<-Comp_labels(Mcsig)
+            names(Allcomp)<-rownames(Lpval)[signif]
+            for(k in 1:length(Allcomp)){
+                names(Allcomp[[k]])<-classes
+            }
+            List_sig<-list()
+            for (s in 1:length(signif)){
+                Dif<-Mcsig[,,s]
+                colnames(Dif)<-classes[-nclasses]
+                rownames(Dif)<-classes[-1]
+                List_sig<-c(List_sig,list(Dif))
+            }
+            names(List_sig)<-paste("Signature",signif,sep="_")
+        }
+        new_plot <-FALSE
         if(plot_to_file){
             if(length(grep("\\.pdf$",file))==0){
-                tfile<-paste(file,"pdf",sep=".")
+                file<-paste(file,"pdf",sep=".")
             }
             pdf(file,width=7,height=7)
             par(mfrow=c(1,1),mar=c(3.1,4.2,2,2))
@@ -671,6 +783,7 @@ setMethod("DiffExp",signature(signexp_obj="SignExp", labels="character",
             if(!grepl("pdf|postscript|cairo_|png|tiff|jpeg|bmp",
                 names(dev.cur()),perl=TRUE)){
                 dev.new(width=7, height=7)
+                new_plot <- TRUE
             }
             par(mfrow=c(1,1),mar=c(4.2,5.2,2,2))
         }
@@ -680,8 +793,26 @@ setMethod("DiffExp",signature(signexp_obj="SignExp", labels="character",
             names=rep("",n),pch=45)
         mtext(boxnames,side=1,line=boxlines,at=1:n,cex=1,las=1)
         lines(x=c(0,n+1),y=rep(lcut,2),col=col2)
-        for (k in 1:n){
-            segments(k-0.39,Lpmed[k],k+0.39,Lpmed[k],col=col3,lwd=2)
+        for (k in 1:n){segments(k-0.39,Lpmed[k],k+0.39,Lpmed[k],col=col3,lwd=2)}
+        if(multicompare){
+            if(new_plot) dev.new(width=7, height=7)
+            par(mfrow=c(length(signif),1),mar=c(3.1,4.2,3,2))
+            for (i in 1:length(signif)){
+                multicomp<-Allcomp[[i]]
+                s<-signif[i]
+                boxdata<-list()
+                for(cl in classes){
+                    boxdata<-c(boxdata,
+                        list(as.vector(signexp_obj@Exp[s,labels==cl,])))
+                }
+                names(boxdata)=classes
+                boxplot(boxdata,main=paste("Signature",s,sep=" "),xaxt="n")
+                for(c in 1:nclasses){
+                    mtext(classes[c],side=3,at=c,cex=0.7)
+                    mtext(paste(multicomp[[c]],collapse=","),side=1,at=c,padj=1,
+                        cex=0.8)
+                }
+            }
         }
         if(plot_to_file){
             dev.off()
@@ -694,19 +825,21 @@ setMethod("DiffExp",signature(signexp_obj="SignExp", labels="character",
         signif <- Pmed<=cutoff
         mainresult<-data.frame(matrix(signif,1,n))
         colnames(mainresult)<-paste("S",1:n,sep="")
-        return(list(result=mainresult,Pvquant=Pmed,
-            Pvalues=Pval,MostExposed=bigexp))
+        result_list<-list(result=mainresult, Pvquant=Pmed, Pvalues=Pval,
+            MostExposed=bigexp)
+        if(multicompare) result_list<-c(result_list,list(Differences=List_sig))
+        return(result_list)
     })
 
 setGeneric("Classify",
-    def=function(signexp_obj, labels, method=knn, k=3,
-        plot_to_file=FALSE, file="Classification_barplot.pdf", 
+    def=function(signexp_obj, labels, method=knn, k=3, weights=NA,
+        plot_to_file=FALSE, file="Classification_barplot.pdf",
         colors=NA_character_, min_agree=0.75,...){
         standardGeneric("Classify")
     }
 )
 setMethod("Classify",signature(signexp_obj="SignExp",labels="character",
-    method="ANY", k="ANY", plot_to_file="ANY", 
+    method="ANY", k="ANY", weights="ANY", plot_to_file="ANY",
     file="ANY", colors="ANY", min_agree="ANY"),
     function(signexp_obj, labels, method, k, plot_to_file, file, colors,
         min_agree,...){
@@ -716,7 +849,7 @@ setMethod("Classify",signature(signexp_obj="SignExp",labels="character",
         i<-dp[[1]]; n<-dp[[2]]; j<-de[[2]]; r<-de[[3]]
         knearest<-k
         if(!length(labels)==j){
-            stop(paste("Labels should be provided for each sample.", 
+            stop(paste("Labels should be provided for each sample.",
                 "Samples that will be classified should be",
                 "labeled with 'NA'.",sep=" "))
         }
@@ -733,10 +866,22 @@ setMethod("Classify",signature(signexp_obj="SignExp",labels="character",
         cl<-labels[totrain]
         classes<-as.vector(levels(as.factor(cl)))
         nclass<-length(classes)
+        if(all(is.na(weights))){
+            weights<-rep(1,n)
+        }
+        if (length(weights)<n){
+            weights<-rep(weights,n)[1:n]
+        }
         Freqs<-matrix(0,nclass,ntest)
         rownames(Freqs)<-classes
         for (smp in 1:r){ # generates classifications
             D<-matrix(as.vector(signexp_obj@Exp[,,'r'=smp,drop=FALSE]),n,j)
+            if (any(weights == "standardize")){
+                cond <- which(weights == "standardize")
+                weights[cond]<-1/apply(D[cond,],1,sd)
+                weights<-as.numeric(weights)
+            }
+            D<-D*weights
             Train<-t(D[,!is.na(labels),drop=FALSE])
             Test<-t(D[,is.na(labels),drop=FALSE])
             if(identical(method,knn)){ # kNN classification
@@ -764,8 +909,8 @@ setMethod("Classify",signature(signexp_obj="SignExp",labels="character",
         names(result)<-testsamples
         names(prob)<-testsamples
         if(is.na(colors[1])){
-            cols<-rainbow(nclass,start=0.5,end=0.8)
-            #cols<-terrain.colors(nclass+1,0.6)[1:nclass]
+            #cols<-rainbow(nclass,start=0.5,end=0.8)
+            cols<-terrain.colors(nclass+1,0.6)[1:nclass]
         }else{
             if(length(colors)==nclass){
                 cols<-colors
@@ -785,7 +930,7 @@ setMethod("Classify",signature(signexp_obj="SignExp",labels="character",
             }
         }
         layout(matrix(1:2,1,2),widths=c(4,1),heights=1)
-        bpl<-barplot(Freqs,main="Sample Classification", 
+        bpl<-barplot(Freqs,main="Sample Classification",
             ylab="Frequencies",col=cols, las=1)
         for(k in 1:ntest){
             j<-which(classes==result[k])
@@ -797,7 +942,7 @@ setMethod("Classify",signature(signexp_obj="SignExp",labels="character",
             text(bpl[k],hei,paste(round(100*prob[k],1),"%",sep=""))
         }
         par(mar=c(5,1,5,1))
-        plot(1:4, 1:4, xlim=c(0,4), ylim=c(0,2*nclass), axes=FALSE, 
+        plot(1:4, 1:4, xlim=c(0,4), ylim=c(0,2*nclass), axes=FALSE,
             type="n", main="", xlab="", ylab="")
         for (k in 1:nclass){
             rect(0,nclass+k-2,1,nclass+k-1,col=cols[k])

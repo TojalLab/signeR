@@ -1,7 +1,7 @@
 Package: signeR
 Type: Package
 Title: signeR 
-Version: 0.99.10
+Version: 0.99.11
 Author: Rafael Rosales, Rodrigo Drummond, Renan Valieris, Israel Tojal da Silva
 Maintainer: Renan Valieris <renan.valieris@cipe.accamargo.org.br>
 Description: The signeR package provides an empirical Bayesian approach to
@@ -12,7 +12,7 @@ Description: The signeR package provides an empirical Bayesian approach to
 License: GPL-3
 Imports: BiocGenerics, Biostrings, BSgenome (>= 1.36.3), class, graphics,
     grDevices, GenomicRanges, nloptr, methods, NMF, stats, utils,
-    VariantAnnotation
+    VariantAnnotation, PMCMR
 LinkingTo: Rcpp, RcppArmadillo
 SystemRequirements: C++11
 NeedsCompilation: yes
