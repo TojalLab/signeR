@@ -255,7 +255,7 @@ end.rcode-->
 <li>The user can give a interval of the possible numbers of signatures as the
 parameter nlim. <b>signeR</b> will calculate the optimal number of signatures
 within this range, for example:
-<!--begin.rcode results='hide', message=FALSE
+<!--begin.rcode eval=FALSE
 signatures <- signeR(M=mut, Opport=opp, nlim=c(2,11))
 end.rcode-->
 </li>
@@ -263,8 +263,8 @@ end.rcode-->
 as the parameter nsig. In this setting, the algorithm is faster. For example,
 the following command will make <b>signeR</b> consider only the rank N=5 to
 estimate the signatures and their exposures:
-<!--begin.rcode eval=FALSE
-signatures <- signeR(M=mut, Opport=opp, nsig=5)
+<!--begin.rcode results='hide', message=FALSE
+signatures <- signeR(M=mut, Opport=opp, nsig=5, main_eval=500, EM_eval=50, EMit_lim=50)
 end.rcode-->
 </li>
 </ol>
@@ -276,8 +276,12 @@ decide which number of signatures is optimal, it will search for the rank Nsig
 that maximizes the median BIC. After the processing is done, this information
 can be plotted by the following command:</p>
 
-<!--begin.rcode
+<!--begin.rcode eval=FALSE
 BICboxplot(signatures)
+end.rcode-->
+
+<!--begin.rcode echo=FALSE, results='asis'
+cat(sprintf("<img src=\"%s\" />\n",image_uri("Model_selection_BICs.png")))
 end.rcode-->
 
 <p>Boxplot of BIC values, showing that the optimal number of signatures for this
