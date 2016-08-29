@@ -62,8 +62,8 @@ each group.}
 # assuming signatures is the return value of signeR()
 \dontshow{
     # mock data
-    mut <- rmultinom(96, 100, 1:6)
-    signatures <- signeR(M=mut, Mheader=FALSE, EMit_lim=10, nsig=1)
+    mut <- rmultinom(96, 50, 1:6)
+    signatures <- signeR(M=mut, Mheader=FALSE, nsig=1, EMit_lim=10, EM_eval=10, main_eval=10, main_burn=10)
 }
 
 my_labels <- c("a","a",NA,"b","b",NA)

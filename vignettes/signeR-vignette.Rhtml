@@ -264,7 +264,7 @@ as the parameter nsig. In this setting, the algorithm is faster. For example,
 the following command will make <b>signeR</b> consider only the rank N=5 to
 estimate the signatures and their exposures:
 <!--begin.rcode results='hide', message=FALSE
-signatures <- signeR(M=mut, Opport=opp, nsig=5, main_eval=500, EM_eval=50, EMit_lim=50)
+signatures <- signeR(M=mut, Opport=opp, nsig=5, main_eval=100, EM_eval=50, EMit_lim=20)
 end.rcode-->
 </li>
 </ol>
@@ -379,7 +379,6 @@ differentially exposed.</p>
 # pvalues
 diff_exposure$Pvquant
 end.rcode-->
-<!-- ## [1] 0.8869743120 0.2269944187 0.0001242361 0.0003803649 0.0156802231 -->
 
 <p>The <code>MostExposed</code> vector contains the name of the group where each
 differentially exposed signature showed the highest levels of activity.</p>
@@ -388,7 +387,6 @@ differentially exposed signature showed the highest levels of activity.</p>
 # most exposed group
 diff_exposure$MostExposed
 end.rcode-->
-<!-- ## [1] NA      NA      "BRCA+" "BRCA+" "BRCA+" -->
 
 <h3 id="toc5.4">5.4: Sample Classification</h3>
 

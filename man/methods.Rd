@@ -75,8 +75,8 @@ matrix with the corresponding approximation.
 \examples{
 \dontshow{
     # mock data
-    mut <- rmultinom(96, 100, 1:4)
-    signatures <- signeR(M=mut, Mheader=FALSE, EMit_lim=10, nsig=2)
+    mut <- rmultinom(96, 50, 1:4)
+    signatures <- signeR(M=mut, Mheader=FALSE, nsig=2, EMit_lim=10, EM_eval=10, main_eval=10, main_burn=10)
 }
 
 # each function needs the SignExposures object

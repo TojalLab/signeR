@@ -85,8 +85,8 @@ plot_to_file=TRUE, the plot is saved in the file defined by the file argument.
 \examples{
 \dontshow{
     # mock data
-    mut <- rmultinom(96, 100, 1:4)
-    signatures <- signeR(M=mut, Mheader=FALSE, EMit_lim=10, nsig=1)
+    mut <- rmultinom(96, 50, 1:4)
+    signatures <- signeR(M=mut, Mheader=FALSE, nsig=1, EMit_lim=10, EM_eval=10, main_eval=10, main_burn=10)
 }
 
 # each plot function need the SignExposures object

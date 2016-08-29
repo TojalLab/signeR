@@ -62,8 +62,8 @@ results of comparisons among groups, with the significant ones marked as TRUE.}
 # assuming signatures is the return value of signeR()
 \dontshow{
     # mock data
-    mut <- rmultinom(96, 100, 1:4)
-    signatures <- signeR(M=mut, Mheader=FALSE, EMit_lim=10, nsig=1)
+    mut <- rmultinom(96, 50, 1:4)
+    signatures <- signeR(M=mut, Mheader=FALSE, nsig=1, EMit_lim=10, EM_eval=10, main_eval=10, main_burn=10)
 }
 # labels vector, one for each sample
 my_labels <- c("a","a","b","b")
