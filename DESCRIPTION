@@ -1,0 +1,25 @@
+Package: signeR
+Type: Package
+Title: signeR
+Version: 0.99.13
+Author: Rafael Rosales, Rodrigo Drummond, Renan Valieris, Israel Tojal
+        da Silva
+Maintainer: Renan Valieris <renan.valieris@cipe.accamargo.org.br>
+Description: The signeR package provides an empirical Bayesian approach
+        to mutational signature discovery. It is designed to analyze
+        single nucleotide variaton (SNV) counts in cancer genomes, but
+        can also be applied to other features as well. Functionalities
+        to characterize signatures or genome samples according to
+        exposure patterns are also provided.
+License: GPL-3
+Imports: BiocGenerics, Biostrings, BSgenome (>= 1.36.3), class,
+        graphics, grDevices, GenomicRanges, nloptr, methods, NMF,
+        stats, utils, VariantAnnotation, PMCMR
+LinkingTo: Rcpp, RcppArmadillo
+SystemRequirements: C++11
+NeedsCompilation: yes
+ByteCompile: TRUE
+biocViews: GenomicVariation, SomaticMutation, StatisticalMethod,
+        Visualization
+Suggests: knitr, rtracklayer, BSgenome.Hsapiens.UCSC.hg19
+VignetteBuilder: knitr

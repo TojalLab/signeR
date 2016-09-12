@@ -1,0 +1,22 @@
+useDynLib(signeR, .registration=TRUE)
+
+exportClasses(SignExp)
+exportMethods(SignPlot, SignHeat, Paths, ExposureBoxplot, ExposureHeat,
+    Classify, DiffExp, setSamples, setMutations, Normalize, Reorder,
+    Average_sign, Median_sign, Average_exp, Median_exp)
+export(genOpportunityFromGenome, genCountMatrixFromVcf, signeR, BICboxplot)
+
+import(stats, graphics, utils, methods)
+
+importFrom("BiocGenerics", "Reduce")
+importFrom("Biostrings","getSeq", "oligonucleotideFrequency",
+    "reverseComplement", "DNAString")
+importFrom("BSgenome", "BSgenomeViews")
+importFrom("class", "knn")
+importFrom("grDevices", "colorRampPalette", "dev.cur", "dev.new", 
+    "dev.off", "pdf", "png", "rainbow", "terrain.colors")
+importFrom("GenomicRanges", "resize", "granges", "union")
+importFrom("nloptr", "nloptr")
+importFrom("NMF", "nmf", "basis", "coef")
+importFrom("VariantAnnotation", "readVcf", "isSNV", "alt", "ref", "geno")
+importFrom("PMCMR","posthoc.kruskal.conover.test")
