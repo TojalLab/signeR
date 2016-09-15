@@ -1,0 +1,20 @@
+citEntry(
+    entry = "article",
+    title = "signeR: An empirical Bayesian approach to mutational signature discovery.",
+    author = personList(
+        as.person("Rafael A. Rosales"),
+        as.person("Rodrigo D. Drummond"),
+        as.person("Renan Valieris"),
+        as.person("Emmanuel Dias-Neto"),
+        as.person("Israel T. da Silva")
+    ),
+    year = 2016,
+    journal = "Bioinformatics",
+    doi = "10.1093/bioinformatics/btw572",
+    textVersion =
+        paste("Rafael A. Rosales, Rodrigo D. Drummond, Renan Valieris,",
+            "Emmanuel Dias-Neto, and Israel T. da Silva (2016):",
+            "signeR: An empirical Bayesian approach to mutational",
+            "signature discovery. Bioinformatics",
+            "September 1, 2016 doi:10.1093/bioinformatics/btw572")
+)

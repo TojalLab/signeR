@@ -108,9 +108,10 @@ end.rcode-->
     <li><a href="#toc5.7">5.7: Sample Classification</a></li>
     </ul>
 </li>
-<li><a href="#toc6">6. Troubleshooting</a>
+<li><a href="#toc6">6. Frequently Asked Questions</a>
     <ul>
-    <li><a href="#toc6.1">6.1: Installing on OS X</a></li>
+    <li><a href="#toc6.1">6.1: Citing signeR</a></li>
+    <li><a href="#toc6.2">6.2: Compilation errors on OS X</a></li>
     </ul>
 </li>
 <li><a href="#toc7">7. References</a></li>
@@ -145,19 +146,16 @@ clinical applications.</p>
 
 <h2 id="toc2">2: Installation</h2>
 
-<p>Before installing, please make sure your R version is <b>3.2.2</b> or
-superior.</p>
+<p>Before installing, please make sure you have the latest version of R and
+<a href="http://bioconductor.org/">Bioconductor</a> installed.</p>
 
-<p><b>signeR</b> will soon be available on <a href="http://bioconductor.org/">
-Bioconductor</a> but in the meantime it must be installed manually. A <a
-target="_blank"
-href="https://github.com/rvalieris/signeR/blob/gh-pages/install_signeR.R">
-installer script</a> is available to make the installation process easier:
-
+<p>To install <b>signeR</b>, start R and enter:</p>
 <!--begin.rcode eval=FALSE
-# this will install all dependencies and signeR
-source("http://rvalieris.github.io/signeR/install_signeR.R")
+source("https://bioconductor.org/biocLite.R")
+biocLite("signeR")
 end.rcode-->
+
+<p>For more information, see <a href="http://bioconductor.org/packages/signeR">this page</a>.</p>
 
 <p>Once installed the library can be loaded:</p>
 
@@ -166,8 +164,8 @@ library(signeR)
 end.rcode-->
 
 <p class='message'>OS X users might experience compilation errors due to
-missing gfortran libraries. Please read the
-<a href="#toc6">troubleshooting section</a> for a solution.</p>
+missing gfortran libraries. Please read <a href="#toc6.2">this section</a>
+ for a solution.</p>
 
 <h2 id="toc3">3: Preparing the input</h2>
 
@@ -418,9 +416,15 @@ Class$allfreqs
 end.rcode-->
 
 
-<h2 id="toc6">6: Troubleshooting</h2>
+<h2 id="toc6">6: Frequently Asked Questions</h2>
 
-<h3 id="toc6.1">6.1: Installing on OS X</h3>
+<h3 id="toc6.1">6.1: Citing signeR</h3>
+If you use the <b>signeR</b> package in your work, please cite it:
+<!--begin.rcode
+citation("signeR")
+end.rcode-->
+
+<h3 id="toc6.2">6.2: Compilation errors on OS X</h3>
 
 <p>OS X users might get compilation errors similar to these:</p>
 <pre>
@@ -443,9 +447,6 @@ Rcpp FAQ, section 2.16</a>.</p>
 
 
 <h2 id="toc7">7: References</h2>
-
-<p>This work has been submitted to Bioinformatics under the title "signeR: An
-empirical Bayesian approach to mutational signature discovery".</p>
 
 <p>L. B. Alexandrov, S. Nik-Zainal, D. C. Wedge, P. J. Campbell, and M. R.
 Stratton. Deciphering Signatures of Mutational Processes Operative in Human
