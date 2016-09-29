@@ -53,8 +53,7 @@ arma::Col<int> one_multinom(int size, arma::rowvec prob) {
 inline double one_gamma_dist(double shape, double rate) {
     shape = std::max(pow(10,-160),shape);
     double scale = std::max(pow(10,-160),1/rate);
-    arma::vec v = arma::randg<arma::vec>(1, arma::distr_param(shape, scale));
-    return v[0];
+    return R::rgamma(shape, scale);
 }
 
 // turns 3D/4D index into 1D
