@@ -6,11 +6,13 @@
 \alias{ExposureBoxplot}
 \alias{BICboxplot}
 \alias{ExposureHeat}
+\alias{ExposureBarplot}
 \alias{Paths,SignExp-method}
 \alias{SignPlot,SignExp-method}
 \alias{SignHeat,SignExp-method}
 \alias{ExposureBoxplot,SignExp-method}
 \alias{ExposureHeat,SignExp-method}
+\alias{ExposureBarplot,SignExp-method}
 
 \title{signeR plot functions}
 
@@ -26,6 +28,10 @@
         Gibbs samples.\cr
 
     SignHeat: Plot the mutations signatures in a heatmap.\cr
+
+    ExposureBarplot: Barplot of estimated exposure values, showing the
+        contribution of the signatures to the mutation counts of each genome
+        sample.\cr
 
     ExposureBoxplot: Boxplot of exposure values, showing their variation
         along generated Gibbs samples.\cr
@@ -43,6 +49,8 @@ BICboxplot(signeRout, plot_to_file=FALSE, file="Model_selection_BICs.pdf")
     gap=1, reord=NA, ...)
 \S4method{SignHeat}{SignExp}(signexp_obj, plot_to_file=FALSE,
     file="Signature_heatmap.pdf", nbins=20, pal="roh", ...)
+\S4method{ExposureBarplot}{SignExp}(signexp_obj, plot_to_file=FALSE,
+    file="Exposure_barplot.pdf", col='tan2', threshold=0, relative=TRUE, ...)
 \S4method{ExposureBoxplot}{SignExp}(signexp_obj, plot_to_file=FALSE, 
     file="Exposure_boxplot.pdf", col='tan2', threshold=0,
     plots_per_page=4, ...)
@@ -53,28 +61,33 @@ BICboxplot(signeRout, plot_to_file=FALSE, file="Model_selection_BICs.pdf")
 
 \arguments{
     \item{signexp_obj}{A SignExp object returned by signeR function.
-e.g.: sig$SignExposures}
+    e.g.: sig$SignExposures}
     \item{signeRout}{The list returned by the signeR function.}
     \item{plot_to_file}{Whether to save the plot to the file parameter.
-Default is FALSE.}
+    Default is FALSE.}
     \item{file}{Output pdf file of the plots.}
     \item{pal}{Color palette used. Options are: "brew","lba","bcr1",
-"bcr2","bw","roh".}
+    "bcr2","bw","roh".}
     \item{threshold}{Entries below this value will be rounded to 0. Default
-is 0 (all entries are kept).}
+    is 0 (all entries are kept).}
     \item{plots_per_page}{How many plots in a single page, default is 4.}
     \item{gap}{Distance between consecutive bars on the plot.}
     \item{reord}{Order of signatures for plotting. Should be a permutation of
-1:nsig, where nsig is the number of signatures. By default, signatures are
-ordered by the total exposure, in decreasing order.}
+    1:nsig, where nsig is the number of signatures. By default, signatures are
+    ordered by the total exposure, in decreasing order.}
     \item{nbins}{The range of signature entries is divided in this number of
-bins for plotting, each bin corresponding to a different color.}
+    bins for plotting, each bin corresponding to a different color.}
     \item{file_suffix}{The suffix of the output file.}
     \item{col}{Single color name for boxplots.}
     \item{distmethod}{Distance measure used for grouping samples. Default is 
     "euclidean", see the documentation of the dist function for other options.}
     \item{clustermethod}{Agglomeration method used for grouping samples. Default
-is "complete", see the documentation of the hclust function for other options.}
+    is "complete", see the documentation of the hclust function for other
+    options.}
+    \item{relative}{Whether to normalize exposures of each sample so that they
+    sum up to one. Default is TRUE, thus generating a barplot of relative
+    contributions of the signatures to mutation counts. Otherwise, absolute
+    contributions to mutation counts will be displayed.}
     \item{...}{.}
 }
 

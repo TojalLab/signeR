@@ -199,13 +199,13 @@ setMethod("Paths",signature(signexp_obj="SignExp",plot_to_file="ANY",
             E_file <- paste("Exposure_paths",file_suffix,sep="_")
             #P matrix plot
             pdf(file=P_file,width=7,height=1.75*plots_per_page)
-            par(mfcol=c(plots_per_page,1))
+            par(mfcol=c(plots_per_page,1),mar=c(3.8, 3, 1.9, 2) )
         }else{
             if(!grepl("pdf|postscript|cairo_|png|tiff|jpeg|bmp",
                 names(dev.cur()),perl=TRUE)){
                 dev.new(width=8, height=1.75*n)
             }
-            par(mfcol=c(n,2))
+            par(mfcol=c(n,2),mar=c(3.8, 3, 1.9, 2) )
         }
         for (k in 1:n){
             if( k==1 | (k %% plots_per_page == 1 & plot_to_file)){
@@ -228,7 +228,7 @@ setMethod("Paths",signature(signexp_obj="SignExp",plot_to_file="ANY",
             cat(outmessage,"\n")
             #E matrix plot
             pdf(file=E_file,width=7,height=1.75*plots_per_page)
-            par(mfcol=c(plots_per_page,1))
+            par(mfcol=c(plots_per_page,1),mar=c(3.8, 3, 1.9, 2) )
         }
         for (k in 1:n){
             if( k==1 | (k %% plots_per_page == 1 & plot_to_file)){
@@ -504,6 +504,63 @@ setMethod("ExposureBoxplot",signature(signexp_obj="SignExp", plot_to_file="ANY",
         if(plot_to_file){
             dev.off()
             outmess<-paste("Exposure boxplots were exported to the file",
+                file, "on the current directory.",sep=" ")
+            cat(outmess,"\n")
+        }
+    })
+
+setGeneric("ExposureBarplot",
+    def=function(signexp_obj, plot_to_file=FALSE,
+        file="Exposure_barplot.pdf",col='tan2',threshold=0,relative=TRUE,...){
+        standardGeneric("ExposureBarplot")
+    }
+)
+setMethod("ExposureBarplot",signature(signexp_obj="SignExp", plot_to_file="ANY",
+    file="ANY", col="ANY", threshold="ANY",relative="ANY"),
+    function(signexp_obj, plot_to_file, file, col, threshold,...){
+        if(!signexp_obj@normalized) signexp_obj<-Normalize(signexp_obj)
+        dp <- dim(signexp_obj@Sign) #[i,n,r]
+        de <- dim(signexp_obj@Exp) #[n,j,r]
+        i<-dp[[1]]; n<-dp[[2]]; j<-de[[2]]; r<-de[[3]]
+        bar.col <- col
+        if(!signexp_obj@normalized) signexp_obj<-Normalize(signexp_obj)
+        Ehat<-Median_exp(signexp_obj)
+        colnames(Ehat)<-signexp_obj@samples
+        Ehat[Ehat<threshold]<-0
+        if(relative){
+            Ehat<-t(t(Ehat)/colSums(Ehat))
+            ylabel<-"Relative Signature contribution to mutations"
+        }else{
+            ylabel<-"Signature contribution to mutation counts"
+        }
+        mycolors<-terrain.colors(n)[n:1]
+        #Plot
+        if(plot_to_file){
+            if(length(grep("\\.pdf$",file,perl=TRUE))==0){
+                file<-paste(file,"pdf",sep=".")
+            }
+            pdf(file,width=7,height=7)
+        }else{
+            if(!grepl("pdf|postscript|cairo_|png|tiff|jpeg|bmp",
+                names(dev.cur()),perl=TRUE)){
+                dev.new(width=7, height=7)
+            }
+        }
+        layout(mat=matrix(1:2,1,2),widths=c(5,1))
+        par(cex= 1, cex.axis=0.9, mar=c(4,5,2,1), mgp=c(4,0.35,0), xpd=NA,las=2)
+        barplot(Ehat[n:1,],col=mycolors,las=3,xlab="Samples",ylab="")
+        mtext(ylabel,side=2,at=0.5*max(colSums(Ehat)),
+            cex=1,las=3,padj=-3)
+        par(mar=c(15,1,3,0))
+        plot(rep(1,n),1:n,type="n",xlim=c(-2,4),ylim=c(-5,n),main="Signatures",
+            xlab="",ylab="",cex.main=0.8,xaxt="n",yaxt="n",bty="n")
+        for(k in 1:n){
+            rect(0,k-1,1,k,col=mycolors[k],border="black")
+            text(2,k-0.5,paste("S",n-k+1,sep=""),cex=0.6)
+        }
+        if(plot_to_file){
+            dev.off()
+            outmess<-paste("Exposure barplots were exported to the file",
                 file, "on the current directory.",sep=" ")
             cat(outmess,"\n")
         }

@@ -96,16 +96,18 @@ end.rcode-->
     <li><a href="#toc3.2">3.2: Input from tab-delimited file</a></li>
     </ul>
 </li>
-<li><a href="#toc4">4: Generating the signatures</a></li>
+<li><a href="#toc4">4: Estimating the number of mutational processes and their
+                       signatures</a></li>
 <li><a href="#toc5">5: Results and further analyses</a>
     <ul>
-    <li><a href="#toc5.1">5.1: Plot the paths</a></li>
+    <li><a href="#toc5.1">5.1: Plot the MCMC paths for the NMF parameters</a></li>
     <li><a href="#toc5.2">5.2: Plot the signatures</a></li>
     <li><a href="#toc5.3">5.3: Plot the exposures</a></li>
-    <li><a href="#toc5.4">5.4: Signature heatmap</a></li>
-    <li><a href="#toc5.5">5.5: Exposure heatmap</a></li>
-    <li><a href="#toc5.6">5.6: Differential Exposure Analysis</a></li>
-    <li><a href="#toc5.7">5.7: Sample Classification</a></li>
+    <li><a href="#toc5.4">5.4: Exposure barplot</a></li>
+    <li><a href="#toc5.5">5.5: Signature heatmap</a></li>
+    <li><a href="#toc5.6">5.6: Exposure heatmap</a></li>
+    <li><a href="#toc5.7">5.7: Differential Exposure Analysis</a></li>
+    <li><a href="#toc5.8">5.8: Sample Classification</a></li>
     </ul>
 </li>
 <li><a href="#toc6">6. Frequently Asked Questions</a>
@@ -132,17 +134,23 @@ orchestrated by DNA damage agents and repair processes, including exogenous or
 endogenous mutagen exposures, defects in DNA mismatch repair and enzymatic
 modification of DNA. The identification of the underlying mutational processes
 is central to understanding of cancer origin and evolution.</p>
-<p>The <b>signeR</b> package focus on the characterization and analysis of
-mutational processes. Its functionalities can be divided in three steps.
-Firstly, it provides tools to process VCF files and generate matrices of SNV
-mutation counts and mutational opportunities, both divided according to a 3bp
-context (mutation site and its neighboring bases). Secondly, the main part of
-the package takes those matrices as input and applies a Bayesian approach to
-estimate the number of underlying signatures and their mutational profiles.
-Thirdly, the package provides tools to correlate the activities of those
-signatures with other relevant information, e.g. clinical data, in order to
-infer conclusions about the analyzed genome samples, which can be useful for
-clinical applications.</p>
+<p>The <b>signeR</b> package focuses on the estimation and further analysis of
+mutational signatures. The functionalities of this package can be divided into
+three categories. First, it provides tools to process VCF files and generate
+matrices of SNV mutation counts and mutational opportunities, both defined
+according to a 3bp context (mutation site and its neighbouring 3' and 5' bases).
+ Second, these count matrices are considered as input for the estimation of the
+underlying mutational signatures and the number of active mutational processes.
+Third, the package provides tools to correlate the activities of those
+signatures with other relevant information such as clinical data, in order to
+draw conclusions about the analysed genome samples, which can be useful for
+clinical applications. These include the Differential Exposure Score and the a
+posteriori sample classification.</p>
+<p>Although signeR is intended for the estimation of mutational signatures, it
+actually provides a full Bayesian treatment to the non-negative matrix
+factorisation (NMF) model.</p>
+<p>This vignette briefly explains the use of signeR through examples.</p>
+
 
 <h2 id="toc2">2: Installation</h2>
 
@@ -155,9 +163,10 @@ source("https://bioconductor.org/biocLite.R")
 biocLite("signeR")
 end.rcode-->
 
-<p>For more information, see <a href="http://bioconductor.org/packages/signeR">this page</a>.</p>
+<p>For more information, see
+<a href="http://bioconductor.org/packages/signeR">this page</a>.</p>
 
-<p>Once installed the library can be loaded:</p>
+<p>Once installed the library can be loaded as</p>
 
 <!--begin.rcode results='hide', message=FALSE
 library(signeR)
@@ -170,11 +179,13 @@ missing gfortran libraries. Please read <a href="#toc6.2">this section</a>
 <h2 id="toc3">3: Preparing the input</h2>
 
 <p><b>signeR</b> takes as input a count matrix of samples x features.
-Each feature is usually a SNV mutation within a 3bp context (96 features).
-Optionally, an opportunity matrix can also be provided containing the count
-frequency of the features in the whole analyzed region for each sample.
-Although not required, this argument is highly recommended because it allows
-<b>signeR</b> to normalize the features frequency over the analyzed region.</p>
+Each feature is usually a SNV mutation within a 3bp context (96 features, 6
+types of SNV mutations and 4 possibilities for the bases at each side of the
+SNV change). Optionally, an opportunity matrix can also be provided containing
+the count frequency of the features in the whole analyzed region for each
+sample. Although not required, this argument is highly recommended because it
+allows <b>signeR</b> to normalize the features frequency over the analyzed
+region.</p>
 
 <p>Input matrices can be read both from a VCF or a tab-delimited files, as
 described next.</p>
@@ -225,9 +236,9 @@ required matrix format can be seen
 href="https://github.com/rvalieris/signeR/blob/master/inst/extdata/21_breast_cancers.mutations.txt">
 here</a>.</p>
 
-<p>This tutorial uses as input the 21 breast cancer dataset from
+<p>This tutorial uses as input the 21 breast cancer dataset described in
 <a target="_blank" href="http://dx.doi.org/10.1016/j.cell.2012.04.023">
-Nik-Zainal et al 2012</a> paper. For the sake of convenience this dataset is
+Nik-Zainal et al 2012</a>. For the sake of convenience this dataset is
 included with the package and can be accessed by using the
 <code>system.file</code> function:</p>
 
@@ -238,14 +249,17 @@ opp <- read.table(system.file("extdata","21_breast_cancers.opportunity.txt",
     package="signeR"))
 end.rcode-->
 
-<h2 id="toc4">4: Generating the signatures</h2>
+<h2 id="toc4">4: Estimating the number of mutational processes and their
+signatures</h2>
 
 <p><b>signeR</b> takes a count matrix as its only required parameter, but the
 user can provide an opportunity matrix as well. The algorithm allows the
-assessment of the number of signatures by three options, as following.</p>
+assessment of the number of signatures by three options, as follows.</p>
 
 <ol type="i">
-<li>signeR detects the number of signatures at run time:
+<li>signeR detects the number of signatures at run time by considering the best
+NMF factorisation rank between 1 and min(G, K)-1, with G = number of genomes and
+K = number of features (i.e. 96):
 <!--begin.rcode eval=FALSE
 signatures <- signeR(M=mut, Opport=opp)
 end.rcode-->
@@ -269,10 +283,13 @@ end.rcode-->
 
 <p>The parameters <code>testing_burn</code> and <code>testing_eval</code>
 control the number of iterations used to estimate the number of signatures
-(default value is 1000 for both parameters). Whenever <b>signeR</b> is left to
-decide which number of signatures is optimal, it will search for the rank Nsig
-that maximizes the median BIC. After the processing is done, this information
-can be plotted by the following command:</p>
+(default value is 1000 for both parameters). There are other
+arguments that may be passed on to signeR. Please have a look at signeR's
+manual, issued by typing <code>help(signeR)</code>.</p>
+<p>Whenever <b>signeR</b> is left to decide which number of signatures is
+optimal, it will search for the rank Nsig that maximizes the median Bayesian
+Information Criterion (BIC). After the processing is done, this information can
+be plotted by the following command:</p>
 
 <!--begin.rcode eval=FALSE
 BICboxplot(signatures)
@@ -287,11 +304,13 @@ dataset is 5.</p>
 
 <h2 id="toc5">5: Results and further analyses</h2>
 
-<h3 id="toc5.1">5.1: Plot the paths</h3>
+<h3 id="toc5.1">5.1: Plot the MCMC paths for the NMF parameters (P and E
+matrices)</h3>
 
-<p>Plots of signatures and exposures individual entries along successive
-iterations of the Gibbs sampler. Useful to check if entries have leveled off,
-what reflects the sampler convergence.</p>
+<p>The following instruction plots the MCMC sampled paths for each entry of the
+signature matrix P and their exposures, i.e. the E matrix. Only post-burnin
+paths are available for plotting. Those plots are useful for checking if
+entries have leveled off, reflecting the sampler convergence.</p>
 
 <!--begin.rcode
 Paths(signatures$SignExposures)
@@ -301,7 +320,7 @@ iterations.</p>
 
 <h3 id="toc5.2">5.2: Plot the signatures</h3>
 
-<p>Once the processing is done, estimated signatures can be visualized by
+<p>Once the processing is done, the estimated signatures can be visualized by
 issuing the following command:</p>
 
 <!--begin.rcode
@@ -320,7 +339,18 @@ plotted:</p>
 ExposureBoxplot(signatures$SignExposures)
 end.rcode-->
 
-<h3 id="toc5.4">5.4: Signature heatmap</h3>
+<h3 id="toc5.4">5.4: Exposure barplot</h3>
+
+<p>The relative contribution of the signatures to the mutations found on each
+genome sample can also be visualized by the following command:</p>
+
+<!--begin.rcode
+ExposureBarplot(signatures$SignExposures)
+end.rcode-->
+<p>Barplot showing the contributions of the signatures to genome samples
+mutation counts.</p>
+
+<h3 id="toc5.5">5.5: Signature heatmap</h3>
 
 <p>Estimated signatures can also be visualized in a heatmap, generated by the
 following command:</p>
@@ -330,7 +360,7 @@ SignHeat(signatures$SignExposures)
 end.rcode-->
 <p>Heat map showing the entries of each signature.</p>
 
-<h3 id="toc5.5">5.5: Exposure heatmap</h3>
+<h3 id="toc5.6">5.6: Exposure heatmap</h3>
 
 <p>The levels of exposure to each signature can also be plotted in
 a heatmap:</p>
@@ -342,7 +372,7 @@ end.rcode-->
 Samples are grouped according to their levels of exposure to the signatures,
 as can be seen in the dendrogram on the left.</p>
 
-<h3 id="toc5.6">5.6: Differential Exposure Analysis</h3>
+<h3 id="toc5.7">5.7: Differential Exposure Analysis</h3>
 
 <p><b>signeR</b> can highlight signatures that are differentially active among
 previously defined groups of samples. To perform this task <b>signeR</b> needs
@@ -386,7 +416,7 @@ differentially exposed signature showed the highest levels of activity.</p>
 diff_exposure$MostExposed
 end.rcode-->
 
-<h3 id="toc5.4">5.4: Sample Classification</h3>
+<h3 id="toc5.8">5.8: Sample Classification</h3>
 
 <p><b>signeR</b> can also classify unlabeled samples based on the given labels.
 In order to do this, those samples must correspond to <code>NA</code> values in

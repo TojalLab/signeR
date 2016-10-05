@@ -1,13 +1,13 @@
 useDynLib(signeR, .registration=TRUE)
 
 exportClasses(SignExp)
-exportMethods(SignPlot, SignHeat, Paths, ExposureBoxplot, ExposureHeat,
-    Classify, DiffExp, setSamples, setMutations, Normalize, Reorder,
-    Average_sign, Median_sign, Average_exp, Median_exp)
+exportMethods(setSamples, setMutations, Normalize, Reorder,
+    Average_sign, Median_sign, Average_exp, Median_exp,
+    Paths, SignPlot, SignHeat, ExposureBoxplot,
+    ExposureBarplot, ExposureHeat, Classify, DiffExp)
 export(genOpportunityFromGenome, genCountMatrixFromVcf, signeR, BICboxplot)
 
 import(stats, graphics, utils, methods)
-
 importFrom("BiocGenerics", "Reduce")
 importFrom("Biostrings","getSeq", "oligonucleotideFrequency",
     "reverseComplement", "DNAString")
