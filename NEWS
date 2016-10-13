@@ -1,0 +1,8 @@
+
+Changes in signeR 1.0.0:
+
+    * First Bioconductor release.
+
+Changes in signeR 0.99.17:
+
+    * Reduced memory usage.

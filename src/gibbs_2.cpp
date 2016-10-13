@@ -22,9 +22,9 @@ inline arma::cube cube_lgamma(arma::cube c) {
 // cube sum along rows
 arma::mat cube_sum_i(const arma::cube &c) {
     arma::mat ss(c.n_cols, c.n_slices, arma::fill::zeros);
-    for(int i = 0; i < c.n_rows; i++) {
-    for(int j = 0; j < c.n_cols; j++) {
-    for(int k = 0; k < c.n_slices; k++) {
+    for(size_t i = 0; i < c.n_rows; i++) {
+    for(size_t j = 0; j < c.n_cols; j++) {
+    for(size_t k = 0; k < c.n_slices; k++) {
         ss(j,k) += c(i,j,k);
     }}}
     return ss;
@@ -33,9 +33,9 @@ arma::mat cube_sum_i(const arma::cube &c) {
 // cube sum along columns
 arma::mat cube_sum_j(const arma::cube &c) {
     arma::mat ss(c.n_rows, c.n_slices, arma::fill::zeros);
-    for(int i = 0; i < c.n_rows; i++) {
-    for(int j = 0; j < c.n_cols; j++) {
-    for(int k = 0; k < c.n_slices; k++) {
+    for(size_t i = 0; i < c.n_rows; i++) {
+    for(size_t j = 0; j < c.n_cols; j++) {
+    for(size_t k = 0; k < c.n_slices; k++) {
         ss(i,k) += c(i,j,k);
     }}}
     return ss;
@@ -57,13 +57,13 @@ inline double one_gamma_dist(double shape, double rate) {
 }
 
 // turns 3D/4D index into 1D
-inline int adr(const arma::uword * dim, int i=0, int j=0, int k=0, int l=0) {
+inline size_t adr(const size_t * dim, size_t i=0, size_t j=0, size_t k=0, size_t l=0) {
     return i + dim[0]*(j + dim[1]*(k + l*dim[2]));
 }
 
 // creates a array with given dims, use adr() function for element access
 Rcpp::NumericVector create_array(Rcpp::IntegerVector dims) {
-    int k = 1;
+    size_t k = 1;
     for(int i = 0; i < dims.size(); i++) k *= dims[i];
     Rcpp::NumericVector array(k);
     array.attr("dim") = dims;
@@ -71,13 +71,13 @@ Rcpp::NumericVector create_array(Rcpp::IntegerVector dims) {
 }
 
 // copy the cube values to a 4D array cube-slice, like: dest[,,,l] <- src
-inline void copy_cube_to_4Darray(const arma::cube &src, const int l,
+inline void copy_cube_to_4Darray(const arma::cube &src, const size_t l,
     Rcpp::NumericVector &dest
     ) {
-    const arma::uword dim[3] = {src.n_rows, src.n_cols, src.n_slices};
-    for(int i = 0; i < src.n_rows; i++) {
-    for(int j = 0; j < src.n_cols; j++) {
-    for(int k = 0; k < src.n_slices; k++) {
+    const size_t dim[3] = {src.n_rows, src.n_cols, src.n_slices};
+    for(size_t i = 0; i < src.n_rows; i++) {
+    for(size_t j = 0; j < src.n_cols; j++) {
+    for(size_t k = 0; k < src.n_slices; k++) {
         dest[adr(dim, i,j,k,l)] = src(i,j,k);
     }}}
 }
@@ -101,15 +101,15 @@ void gibbs_step1(
     arma::cube &Z, arma::cube &Fi
     ) {
     arma::mat PE = P * E;
-    for(int m = 0; m < Z.n_slices; m++) {
+    for(size_t m = 0; m < Z.n_slices; m++) {
         Fi.slice(m) = (P.col(m) * E.row(m)) / PE;
     }
     arma::rowvec v(Z.n_slices, arma::fill::zeros);
-    for(int s = 0; s < Z.n_rows; s++) {
-        for(int g = 0; g < Z.n_cols; g++) {
-            for(int m = 0; m < Z.n_slices; m++) { v[m] = Fi(s,g,m); }
+    for(size_t s = 0; s < Z.n_rows; s++) {
+        for(size_t g = 0; g < Z.n_cols; g++) {
+            for(size_t m = 0; m < Z.n_slices; m++) { v[m] = Fi(s,g,m); }
             arma::Col<int> u = one_multinom(M(s,g), v);
-            for(int m = 0; m < Z.n_slices; m++) {
+            for(size_t m = 0; m < Z.n_slices; m++) {
                 Z(s,g,m) = u[m];
             }
         }
@@ -124,8 +124,8 @@ void gibbs_step2(
     ) {
     arma::mat corrE = W * E.t();
     arma::mat Zin = cube_sum_j(Z);
-    for(int s = 0; s < Z.n_rows; s++) {
-        for(int m = 0; m < Z.n_slices; m++) {
+    for(size_t s = 0; s < Z.n_rows; s++) {
+        for(size_t m = 0; m < Z.n_slices; m++) {
             double shape = Ap(s,m) + 1 + Zin(s,m);
             double rate = Bp(s,m) + corrE(s,m);
             P(s,m) = one_gamma_dist(shape, rate);
@@ -141,8 +141,8 @@ void gibbs_step3(
     ) {
     arma::mat corrP = P.t() * W;
     arma::mat Znj = cube_sum_i(Z).t();
-    for(int m = 0; m < Z.n_slices; m++) {
-        for(int g = 0; g < Z.n_cols; g++) {
+    for(size_t m = 0; m < Z.n_slices; m++) {
+        for(size_t g = 0; g < Z.n_cols; g++) {
             double shape = Ae(m,g) + 1 + Znj(m,g);
             double rate = Be(m,g) + corrP(m,g);
             E(m,g) = one_gamma_dist(shape, rate);
@@ -157,8 +157,8 @@ void gibbs_step4(
     const double var_ap,
     arma::mat &Bp
     ) {
-    for(int s = 0; s < Z.n_rows; s++) {
-        for(int m = 0; m < Z.n_slices; m++) {
+    for(size_t s = 0; s < Z.n_rows; s++) {
+        for(size_t m = 0; m < Z.n_slices; m++) {
             double shape = Ap(s,m) + ap + 1;
             double rate = P(s,m) + bp;
             Bp(s,m) = std::max(pow(10,-160), one_gamma_dist(shape,rate));
@@ -173,8 +173,8 @@ void gibbs_step5(
     const double var_ae,
     arma::mat &Be
     ) {
-    for(int m = 0; m < Z.n_slices; m++) {
-        for(int g = 0; g < Z.n_cols; g++) {
+    for(size_t m = 0; m < Z.n_slices; m++) {
+        for(size_t g = 0; g < Z.n_cols; g++) {
             double shape = Ae(m,g) + ae + 1;
             double rate = E(m,g) + be;
             Be(m,g) = std::max(pow(10,-160), one_gamma_dist(shape,rate));
@@ -189,8 +189,8 @@ void gibbs_step6(
     arma::mat &Ap
     ) {
     arma::mat Y(Z.n_rows, Z.n_slices, arma::fill::zeros);
-    for(int s = 0; s < Z.n_rows; s++) {
-        for(int m = 0; m < Z.n_slices; m++) {
+    for(size_t s = 0; s < Z.n_rows; s++) {
+        for(size_t m = 0; m < Z.n_slices; m++) {
             double shape = pow(Ap(s,m), 2) / var_ap;
             double rate = Ap(s,m) / var_ap;
             Y(s,m) = std::max(pow(10,-160), one_gamma_dist(shape,rate));
@@ -206,16 +206,16 @@ void gibbs_step6(
     arma::mat ProbCh = exp(LnProb);
     arma::mat U = arma::randu(Z.n_rows, Z.n_slices);
 
-    for(int i = 0; i < ProbCh.n_rows; i++) {
-        for(int j = 0; j < ProbCh.n_cols; j++) {
+    for(size_t i = 0; i < ProbCh.n_rows; i++) {
+        for(size_t j = 0; j < ProbCh.n_cols; j++) {
             if(P(i,j) == 0) {
                 ProbCh(i,j) = Y(i,j) < Ap(i,j);
             }
         }
     }
 
-    for(int i = 0; i < Ap.n_rows; i++) {
-        for(int j = 0; j < Ap.n_cols; j++) {
+    for(size_t i = 0; i < Ap.n_rows; i++) {
+        for(size_t j = 0; j < Ap.n_cols; j++) {
             if(U(i,j) <= ProbCh(i,j)) {
                 Ap(i,j) = Y(i,j);
             }
@@ -230,8 +230,8 @@ void gibbs_step7(
     arma::mat &Ae
     ) {
     arma::mat Y(Z.n_slices, Z.n_cols, arma::fill::zeros);
-    for(int m = 0; m < Z.n_slices; m++) {
-        for(int g = 0; g < Z.n_cols; g++) {
+    for(size_t m = 0; m < Z.n_slices; m++) {
+        for(size_t g = 0; g < Z.n_cols; g++) {
             double shape = pow(Ae(m,g), 2) / var_ae;
             double rate = Ae(m,g) / var_ae;
             Y(m,g) = std::max(pow(10,-160), one_gamma_dist(shape,rate));
@@ -247,16 +247,16 @@ void gibbs_step7(
     arma::mat ProbCh = exp(LnProb);
     arma::mat U = arma::randu(Z.n_slices, Z.n_cols);
 
-    for(int i = 0; i < ProbCh.n_rows; i++) {
-        for(int j = 0; j < ProbCh.n_cols; j++) {
+    for(size_t i = 0; i < ProbCh.n_rows; i++) {
+        for(size_t j = 0; j < ProbCh.n_cols; j++) {
             if(E(i,j) == 0) {
                 ProbCh(i,j) = Y(i,j) < Ae(i,j);
             }
         }
     }
 
-    for(int i = 0; i < Ae.n_rows; i++) {
-        for(int j = 0; j < Ae.n_cols; j++) {
+    for(size_t i = 0; i < Ae.n_rows; i++) {
+        for(size_t j = 0; j < Ae.n_cols; j++) {
             if(U(i,j) <= ProbCh(i,j)) {
                 Ae(i,j) = Y(i,j);
             }
@@ -280,9 +280,9 @@ Rcpp::List GibbsSamplerCpp(
     if(Thetafixed) Afixed = Bfixed = true;
 
     //Initialize variables:
-    int i = Z.n_rows;
-    int j = Z.n_cols;
-    int n = Z.n_slices;
+    size_t i = Z.n_rows;
+    size_t j = Z.n_cols;
+    size_t n = Z.n_slices;
     arma::cube Fi(i, j, n, arma::fill::zeros);
 
     //Initialize max_mlhood_num as -Infinity:
@@ -291,7 +291,7 @@ Rcpp::List GibbsSamplerCpp(
     Rcpp::NumericVector Zs;
     if(!Zfixed && keep_par) Zs = create_array(Rcpp::IntegerVector::create(
         Rcpp::_["i"] = i, Rcpp::_["j"] = j,
-        Rcpp::_["n"] = n, Rcpp::_["r"] = eval
+        Rcpp::_["n"] = n, Rcpp::_["r"] = 1
     ));
 
     Rcpp::NumericVector Fis;
@@ -317,7 +317,7 @@ Rcpp::List GibbsSamplerCpp(
 
     for(int k = 0; k < burn+eval; k++) {
         flist = arma::shuffle(flist);
-        for(int f = 0; f < flist.size(); f++) {
+        for(size_t f = 0; f < flist.size(); f++) {
             int step = flist[f];
             switch(step) {
                 case 1: if(!Zfixed) gibbs_step1(M,P,E, Z,Fi); break;
@@ -333,7 +333,7 @@ Rcpp::List GibbsSamplerCpp(
         if(k >= burn) {
             // save samples
             int k2 = k - burn;
-            if(!Zfixed && keep_par) copy_cube_to_4Darray(Z, k2, Zs);
+            if(!Zfixed && keep_par) copy_cube_to_4Darray(Z, 0, Zs);
             if(!Zfixed && Thetafixed) copy_cube_to_4Darray(Fi, k2, Fis);
             Ps.slice(k2) = P;
             Es.slice(k2) = E;
@@ -349,7 +349,7 @@ Rcpp::List GibbsSamplerCpp(
             //Compute mlhood_numerator
             //LogPosteriorZ=log(P(Z,M|E,P,Theta,Omega))
             arma::cube EPz(Z.n_rows, Z.n_cols, Z.n_slices, arma::fill::zeros);
-            for (int kk=0; kk<n; kk++){
+            for (size_t kk=0; kk<n; kk++){
                 EPz.slice(kk) = (P.col(kk) * E.row(kk)) % W;
                 //EPz keeps expected values for Z, given P and E
             }
@@ -394,13 +394,12 @@ Rcpp::List GibbsSamplerCpp(
     else if (Thetafixed) {
         arma::cube meanlogFis(i, j, n, arma::fill::zeros);
         double logsum=0;
-        const arma::uword dimsl[3] = 
-            {(arma::uword)i, (arma::uword)j, (arma::uword)n};
+        const size_t dimsl[3] = {i, j, n};
 
         //meanlogFis = mean.tensor(log(Fis),along='r'):
-        for(int s=0; s<i ; s++) {
-            for(int g=0; g<j ; g++) {
-                for(int m=0; m<n ; m++) {
+        for(size_t s=0; s<i ; s++) {
+            for(size_t g=0; g<j ; g++) {
+                for(size_t m=0; m<n ; m++) {
                     logsum = 0;
                     for(int r = 0; r < eval; r++) {
                         logsum += log(Fis[adr(dimsl, s,g,m,r)]);
