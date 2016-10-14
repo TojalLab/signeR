@@ -198,12 +198,12 @@ setMethod("Paths",signature(signexp_obj="SignExp",plot_to_file="ANY",
             P_file <- paste("Signature_paths",file_suffix,sep="_")
             E_file <- paste("Exposure_paths",file_suffix,sep="_")
             #P matrix plot
-            pdf(file=P_file,width=7,height=1.75*plots_per_page)
+            pdf(file=P_file,width=7,height=2*plots_per_page)
             par(mfcol=c(plots_per_page,1),mar=c(3.8, 3, 1.9, 2) )
         }else{
             if(!grepl("pdf|postscript|cairo_|png|tiff|jpeg|bmp",
                 names(dev.cur()),perl=TRUE)){
-                dev.new(width=8, height=1.75*n)
+                dev.new(width=8, height=2*n)
             }
             par(mfcol=c(n,2),mar=c(3.8, 3, 1.9, 2) )
         }
