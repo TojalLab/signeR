@@ -5,13 +5,19 @@ setClass("SignExp",
         samples="character",
         mutations="character",
         sigSums="matrix",
-        normalized="logical"),
-    prototype = list(Ps=array(NA,dim=c('i'=1,'j'=1,'k'=1)),
-        Es=array(NA,dim=c('i'=1,'j'=1,'k'=1)),
+        normalized="logical",
+        Psummary="array",
+        Esummary="array",
+        Eoutliers="list"),
+    prototype = list(Ps=array(NA,dim=c('i'=1,'n'=1,'k'=1)),
+        Es=array(NA,dim=c('n'=1,'j'=1,'k'=1)),
         samples=NA_character_,
         mutations=NA_character_,
         sigSums=matrix(NA_real_,1,1),
-        normalized=FALSE)
+        normalized=FALSE,
+        Psummary=array(NA,dim=c('i'=1,'n'=1,'q'=6)),
+        Esummary=array(NA,dim=c('n'=1,'j'=1,'q'=6)),
+        Eoutliers=list())
 )
 
 SignExpConstructor<-function(Ps=NA,Es=NA,samplenames=NA,mutnames=NA){
@@ -24,6 +30,7 @@ SignExpConstructor<-function(Ps=NA,Es=NA,samplenames=NA,mutnames=NA){
         if(!(dp[[3]]==de[[3]] & dp[[2]]==de[[1]])){
             stop("Signatures and exposures are not compatible")
         }
+        n<-dp[[2]]
         sSums<-apply(Ps,c(2,3),sum)
         if(all(is.na(samplenames))){
             samplenames<-paste("sample",1:de[[2]],sep="_")
@@ -36,7 +43,11 @@ SignExpConstructor<-function(Ps=NA,Es=NA,samplenames=NA,mutnames=NA){
                 sep="")
         }
         SE<-new("SignExp",Sign=Ps,Exp=Es,samples=samplenames,mutations=mutnames,
-            sigSums=sSums,normalized=FALSE)
+            sigSums=sSums,normalized=FALSE,
+            Psummary=array(NA,dim=c('i'=1,'n'=1,'q'=6)),
+            Esummary=array(NA,dim=c('n'=1,'j'=1,'q'=6)),
+            Eoutliers=list())
+        SE<-Normalize(SE)
     }else{
         SE<-new("SignExp")
     }
@@ -91,6 +102,24 @@ setMethod("Normalize",signature("SignExp"), function(signexp_obj){
             signexp_obj@Exp[,,k] <- matrix(as.vector(E),n,j)*vm
         }
         signexp_obj@normalized=TRUE
+        Psum<-array(NA,dim=c('i'=i,'n'=n,'q'=6))
+        Esum<-array(NA,dim=c('n'=n,'j'=j,'q'=5))
+        Eout<-list()
+        for(k in 1:n){
+            P<-signexp_obj@Sign[,k,,drop=TRUE]
+            Psum[,k,]<-t(apply(P,1,quantile,c(0.05,0.25,0.50,0.75,0.95,1)))
+            E<- signexp_obj@Exp[k,,,drop=TRUE]
+            bpstats<-apply(E,1,function(v){
+                bp<-boxplot(v)
+                return(list(bp$stats,bp$out))
+            })
+            Esum[k,,]<-t(matrix(unlist(lapply(bpstats,function(l){
+                l[[1]]})),5,j))
+            Eout[[k]]<-lapply(bpstats,function(l){l[[2]]})
+        }
+        signexp_obj@Psummary <- Psum
+        signexp_obj@Esummary <- Esum
+        signexp_obj@Eoutliers <- Eout
     }
     return(signexp_obj)
 })
@@ -141,8 +170,10 @@ setMethod("Median_sign",signature(signexp_obj="SignExp",normalize="ANY"),
         if(normalize & !signexp_obj@normalized){
             signexp_obj<-Normalize(signexp_obj)
         }
-        Ps<-signexp_obj@Sign #[i,n,r]
-        Phat<-apply(Ps,c(1,2),median)
+        dp <- dim(signexp_obj@Sign) #[i,n,r]
+        i<-dp[[1]]; n<-dp[[2]]; r<-dp[[3]]
+        Phat<-signexp_obj@Psummary[,,3,drop=TRUE]
+        if(n==1) Phat<-matrix(as.vector(Phat),i,n)
         return(Phat)
     })
 
@@ -171,8 +202,10 @@ setMethod("Median_exp",signature(signexp_obj="SignExp",normalize="ANY"),
         if(normalize & !signexp_obj@normalized){
             signexp_obj<-Normalize(signexp_obj)
         }
-        Es<-signexp_obj@Exp #[n,j,r]
-        Ehat<-apply(Es,c(1,2),median)
+        de <- dim(signexp_obj@Exp) #[n,j,r]
+        n<-de[[1]]; j<-de[[2]]; r<-de[[3]]
+        Ehat<-signexp_obj@Esummary[,,3,drop=TRUE]
+        if(n==1) Ehat<-matrix(as.vector(Ehat),n,j)
         return(Ehat)
     })
 
@@ -314,19 +347,15 @@ setMethod("SignPlot",signature(signexp_obj="SignExp",plot_to_file="ANY",
         hg[c(1,plots_per_page)]<-1.15
         layout(mat=matrix(1:plots_per_page,plots_per_page,1),heights=hg)
         for(k in 1:n){
-            P<-signexp_obj@Sign[mutord,reord[k],]
-            y.max <- max(P)
-            y.width <- y.max+y.max*.05
-            medians<-apply(P,1,median)
-            q05<-apply(P,1,quantile,0.05)
-            q25<-apply(P,1,quantile,0.25)
-            q75<-apply(P,1,quantile,0.75)
-            q95<-apply(P,1,quantile,0.95)
-            medians[medians<threshold]<-0
-            q05[q05<threshold]<-0
-            q25[q25<threshold]<-0
-            q75[q75<threshold]<-0
-            q95[q95<threshold]<-0
+            Pdata<-signexp_obj@Psummary[mutord,reord[k],1:6,drop=TRUE]
+            Pdata[Pdata<threshold]<-0
+            q05<-Pdata[,1]
+            q25<-Pdata[,2]
+            medians<-Pdata[,3]
+            q75<-Pdata[,4]
+            q95<-Pdata[,5]
+            y.max <- max(Pdata[,6])
+            y.width <- y.max*1.05
             bottom <- k==n | (k %% plots_per_page==0 & plot_to_file)
             top <- k==1 | (k %% plots_per_page==1 & plot_to_file)
             topmar<-1
@@ -410,13 +439,13 @@ setMethod("SignPlot",signature(signexp_obj="SignExp",plot_to_file="ANY",
 setGeneric("ExposureBoxplot",
     def=function(signexp_obj, plot_to_file=FALSE,
         file="Exposure_boxplot.pdf", col='tan2', threshold=0,
-        plots_per_page=4,...){
+        plots_per_page=4,reord=NA_real_,...){
         standardGeneric("ExposureBoxplot")
     }
 )
 setMethod("ExposureBoxplot",signature(signexp_obj="SignExp", plot_to_file="ANY",
     file="ANY", col="ANY", threshold="ANY",
-    plots_per_page="ANY"),
+    plots_per_page="ANY",reord="ANY"),
     function(signexp_obj, plot_to_file, file, col, threshold,
         plots_per_page,...){
         if(!signexp_obj@normalized) signexp_obj<-Normalize(signexp_obj)
@@ -437,26 +466,23 @@ setMethod("ExposureBoxplot",signature(signexp_obj="SignExp", plot_to_file="ANY",
                 dev.new(width=7, height=1.75*n)
             }
         }
+        if(is.na(reord[1])) reord<-1:n
         par(cex= 1, cex.axis=0.5, mfrow=c(plots_per_page,1),
             mar=c(3,2,2,1), mgp=c(4,0.35,0), xpd=NA, las=2)
         hg<-rep(1,plots_per_page)
         hg[plots_per_page]<-1.4
         layout(mat=matrix(1:plots_per_page,plots_per_page,1),heights=hg)
         for(k in 1:n){
-            E<- data.frame(t(signexp_obj@Exp[k,,]))
-            y.max <- max(E)
+            bp<-t(signexp_obj@Esummary[reord[k],,1:5,drop=TRUE])
+            outliers<-signexp_obj@Eoutliers[[reord[k]]]
+            y.max <- max(c(as.vector(bp),unlist(outliers)))
             y.width <- y.max+y.max*.05
-            colnames(E)<-signexp_obj@samples
-            medians<-apply(E,2,median)
-            q05<-apply(E,2,quantile,0.05)
-            q25<-apply(E,2,quantile,0.25)
-            q75<-apply(E,2,quantile,0.75)
-            q95<-apply(E,2,quantile,0.95)
-            medians[medians<threshold]<-0
-            q05[q05<threshold]<-0
-            q25[q25<threshold]<-0
-            q75[q75<threshold]<-0
-            q95[q95<threshold]<-0
+            bp[bp<threshold]<-0
+            q05<-bp[1,]
+            q25<-bp[2,]
+            medians<-bp[3,]
+            q75<-bp[4,]
+            q95<-bp[5,]
             bottom <- k==n | (k %% plots_per_page==0 & plot_to_file)
             top <- k==1 | (k %% plots_per_page==1 & plot_to_file)
             topmar<-1
@@ -472,17 +498,16 @@ setMethod("ExposureBoxplot",signature(signexp_obj="SignExp", plot_to_file="ANY",
                 }
             }
             par(mar=c(bottommar,3.5,topmar,1),cex=0.7,cex.axis=1)
+            plot(1:j, medians, ylim=c(0,y.max),xlim=c(0.6,j+1.4),
+                type="n", main="", xlab="", ylab="", xaxt="n",font=2)
+            boxplot(bp, col=bar.col, border="black", add=TRUE, cex=0.5,
+                at=1:j, xaxt="n", lwd=0.2, pch=45)
+            for (g in 1:j){
+                points(rep(g,length(outliers[[g]])),outliers[[g]],
+                    col="grey40", lwd=0.2, pch=45)
+            }
             if (bottom){
-                plot(1:j, medians, ylim=c(0,y.max),xlim=c(0.6,j+1.4),
-                    type="n", main="", xlab="", ylab="", xaxt="n",font=2)
-                boxplot(E, col=bar.col, border="black", add=TRUE, cex=0.5,
-                    at=1:j, xaxt="n", lwd=0.2, pch=45)
                 axis(side=1, at=1:j, labels=signexp_obj@samples, font=2)
-            }else{
-                plot(1:j, medians, ylim=c(0,y.max),xlim=c(0.6,j+1.4),
-                    type="n", main="", xlab="", ylab="", xaxt="n",font=2)
-                boxplot(E, col=bar.col, border="black", add=TRUE, cex=0.5,
-                    at=1:j, xaxt="n", lwd=0.2, pch=45)
             }
             #Error bars
             mp<-1:j
@@ -681,7 +706,7 @@ setMethod("ExposureHeat",signature(signexp_obj="SignExp", plot_to_file="ANY",
         Hc <- hclust(Dis,method=clustermethod)
         maxh<-max(Hc$height)
         relh<-maxh/n
-        plotM<-t(Ehat[,Hc$order])
+        plotM<-t(Ehat[,Hc$order,drop=FALSE])
         ddr <- as.dendrogram(Hc)
         minval<-log(min(plotM))
         maxval<-log(max(plotM))

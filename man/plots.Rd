@@ -53,7 +53,7 @@ BICboxplot(signeRout, plot_to_file=FALSE, file="Model_selection_BICs.pdf")
     file="Exposure_barplot.pdf", col='tan2', threshold=0, relative=TRUE, ...)
 \S4method{ExposureBoxplot}{SignExp}(signexp_obj, plot_to_file=FALSE, 
     file="Exposure_boxplot.pdf", col='tan2', threshold=0,
-    plots_per_page=4, ...)
+    plots_per_page=4, reord=NA, ...)
 \S4method{ExposureHeat}{SignExp}(signexp_obj, plot_to_file=FALSE,
     file="Exposure_heatmap.pdf", nbins=20, pal="roh", distmethod="euclidean",
         clustermethod="complete", ...)
