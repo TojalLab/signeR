@@ -110,7 +110,7 @@ setMethod("Normalize",signature("SignExp"), function(signexp_obj){
             Psum[,k,]<-t(apply(P,1,quantile,c(0.05,0.25,0.50,0.75,0.95,1)))
             E<- signexp_obj@Exp[k,,,drop=TRUE]
             bpstats<-apply(E,1,function(v){
-                bp<-boxplot(v)
+                bp<-boxplot(v,plot=FALSE)
                 return(list(bp$stats,bp$out))
             })
             Esum[k,,]<-t(matrix(unlist(lapply(bpstats,function(l){
