@@ -1,4 +1,8 @@
 
+Changes in signeR 1.1.2:
+
+    * Pre-calculate plot data during object construction
+
 Changes in signeR 1.0.0:
 
     * First Bioconductor release.

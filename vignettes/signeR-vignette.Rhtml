@@ -125,6 +125,7 @@ end.rcode-->
     <ul>
     <li><a href="#toc6.1">6.1: Citing signeR</a></li>
     <li><a href="#toc6.2">6.2: Compilation errors on OS X</a></li>
+    <li><a href="#toc6.3">6.3: Missing library headers</a></li>
     </ul>
 </li>
 <li><a href="#toc7">7. References</a></li>
@@ -498,6 +499,14 @@ see this post</a> and the
 <a href="http://dirk.eddelbuettel.com/code/rcpp/Rcpp-FAQ.pdf">
 Rcpp FAQ, section 2.16</a>.</p>
 
+<h3 id="toc6.3">6.3: Missing library headers</h3>
+
+<p>Some packages that signeR depends on requires that 3rd party library headers be installed. If you see errors like:</p>
+<pre><code>Error: checking for curl-config... no
+         Cannot find curl-config</code></pre>
+
+<p>It means you need to install these headers with your package manager. For example on ubuntu:</p>
+<pre><code>$ sudo apt-get install libcurl4-openssl-dev</code></pre>
 
 <h2 id="toc7">7: References</h2>
 

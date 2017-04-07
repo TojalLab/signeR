@@ -5,20 +5,6 @@
 #include <RcppArmadillo.h>
 #include <limits>
 
-// lgamma function for matrices
-inline arma::mat mat_lgamma(arma::mat m) {
-    // the argument must be passed by value
-    // because transform is executed in-place
-    return m.transform(lgamma);
-}
-
-// lgamma function for cubes
-inline arma::cube cube_lgamma(arma::cube c) {
-    // the argument must be passed by value
-    // because transform is executed in-place
-    return c.transform(lgamma);
-}
-
 // cube sum along rows
 arma::mat cube_sum_i(const arma::cube &c) {
     arma::mat ss(c.n_cols, c.n_slices, arma::fill::zeros);
@@ -198,8 +184,8 @@ void gibbs_step6(
     }
 
     arma::mat LnProb = (Y-Ap) % (log(Bp)+log(P)-lp) +
-        mat_lgamma(Ap+1) - mat_lgamma(Y+1) +
-        mat_lgamma(pow(Ap,2)/var_ap) - mat_lgamma(pow(Y,2)/var_ap) +
+        arma::lgamma(Ap+1) - arma::lgamma(Y+1) +
+        arma::lgamma(pow(Ap,2)/var_ap) - arma::lgamma(pow(Y,2)/var_ap) +
         ((pow(Y,2) - pow(Ap,2)) / var_ap) % log((Ap % Y)/var_ap) +
         log(Y) - log(Ap);
 
@@ -239,8 +225,8 @@ void gibbs_step7(
     }
 
     arma::mat LnProb = (Y - Ae) % (log(Be) + log(E) - le) +
-        mat_lgamma(Ae + 1) - mat_lgamma(Y + 1) +
-        mat_lgamma(pow(Ae,2)/var_ae) - mat_lgamma(pow(Y,2)/var_ae) +
+        arma::lgamma(Ae + 1) - arma::lgamma(Y + 1) +
+        arma::lgamma(pow(Ae,2)/var_ae) - arma::lgamma(pow(Y,2)/var_ae) +
         ((pow(Y,2) - pow(Ae,2))/var_ae) % log((Ae % Y)/var_ae) +
         log(Y) - log(Ae);
 
@@ -353,14 +339,14 @@ Rcpp::List GibbsSamplerCpp(
                 EPz.slice(kk) = (P.col(kk) * E.row(kk)) % W;
                 //EPz keeps expected values for Z, given P and E
             }
-            double logPosteriorZ = arma::accu(Z%log(EPz)-EPz -cube_lgamma(Z+1));
+            double logPosteriorZ = arma::accu(Z%log(EPz)-EPz -arma::lgamma(Z+1));
             EPz.clear();
             //LogPriorP=log(P(Phat|Thetahat))
-            double logPriorP = arma::accu( (Ap+1)%log(Bp) - mat_lgamma(Ap+1) +
+            double logPriorP = arma::accu( (Ap+1)%log(Bp) - arma::lgamma(Ap+1) +
                 Ap%log(P) -(Bp)%P );
 
             //LogPriorE=log(P(Ehat|Thetahat))
-            double logPriorE = arma::accu( (Ae+1)%log(Be) - mat_lgamma(Ae+1) +
+            double logPriorE = arma::accu( (Ae+1)%log(Be) - arma::lgamma(Ae+1) +
                 Ae%log(E) -(Be)%E );
 
             //LogPriorAp=log(P(Aphat|Omega))
