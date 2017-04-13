@@ -50,8 +50,9 @@ BICboxplot(signeRout, plot_to_file=FALSE, file="Model_selection_BICs.pdf")
 \S4method{SignHeat}{SignExp}(signexp_obj, plot_to_file=FALSE,
     file="Signature_heatmap.pdf", nbins=20, pal="roh", ...)
 \S4method{ExposureBarplot}{SignExp}(signexp_obj, plot_to_file=FALSE,
-    file="Exposure_barplot.pdf", col='tan2', threshold=0, relative=TRUE, ...)
-\S4method{ExposureBoxplot}{SignExp}(signexp_obj, plot_to_file=FALSE, 
+    file="Exposure_barplot.pdf", col='tan2', threshold=0, relative=FALSE,
+    title="", samplenames=TRUE, ...)
+\S4method{ExposureBoxplot}{SignExp}(signexp_obj, plot_to_file=FALSE,
     file="Exposure_boxplot.pdf", col='tan2', threshold=0,
     plots_per_page=4, reord=NA, ...)
 \S4method{ExposureHeat}{SignExp}(signexp_obj, plot_to_file=FALSE,
@@ -88,6 +89,10 @@ BICboxplot(signeRout, plot_to_file=FALSE, file="Model_selection_BICs.pdf")
     sum up to one. Default is TRUE, thus generating a barplot of relative
     contributions of the signatures to mutation counts. Otherwise, absolute
     contributions to mutation counts will be displayed.}
+    \item{title}{Main title added to the plot. Default is no title.}
+    \item{samplenames}{Whether sample names will be shown in the plot.
+    Default is TRUE, however sample names are not shown if there are more
+    then 50 samples.}
     \item{...}{.}
 }
 

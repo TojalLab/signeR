@@ -13,7 +13,8 @@ among sample groups.
 \usage{
 \S4method{DiffExp}{SignExp,character}(signexp_obj, labels,
     method=kruskal.test, contrast="all", quant=0.5, cutoff=0.05,
-    plot_to_file=FALSE, file="Diffexp_boxplot.pdf", colored=TRUE, ...)
+    p.adj= "BH",plot_to_file=FALSE, file="Diffexp_boxplot.pdf",
+    colored=TRUE, relative = FALSE, ...)
 }
 
 \arguments{
@@ -30,6 +31,9 @@ null hypothesis of exposure levels beeing constant among those groups.}
     \item{quant}{the p-values quantile which, after log-transform, will be
 used as DES (Differental Exposure Score). Deafult is 0.5, which means the
 median log-transformed p-value will be considered as DES.}
+    \item{p.adj}{correction method for p-values adjust at the post-hoc tests
+    performed when there are more then two group labels. See p.adjust for
+    options.}
     \item{cutoff}{threshold for p-values quantile for signatures to be
 considered as showing differential exposure.}
     \item{plot_to_file}{Whether to save the plot to the file parameter.
@@ -39,6 +43,9 @@ Default is FALSE.}
 exposed signatures will be colored in green, cutoff line will be colored in
 red and line segments showing the transformed p-value quantile used for DE
 evaluation will be colored in blue. Otherwise the plot will be black & white.}
+    \item{relative}{Whether tests should be performed on absolute or relative
+    signature contributions to each sample mutations.
+    Default is FALSE (absolute contributions will be tested).}
     \item{...}{additional parameters for test algorithm defined by the method
 parameter.}
 }

@@ -1,7 +1,8 @@
 useDynLib(signeR, .registration=TRUE)
 
 exportClasses(SignExp)
-exportMethods(setSamples, setMutations, Normalize, Reorder,
+exportMethods(setSamples, setMutations, Normalize,
+    Reorder_signatures, Reorder_samples, Reorder_mutations,
     Average_sign, Median_sign, Average_exp, Median_exp,
     Paths, SignPlot, SignHeat, ExposureBoxplot,
     ExposureBarplot, ExposureHeat, Classify, DiffExp)

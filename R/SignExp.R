@@ -124,12 +124,12 @@ setMethod("Normalize",signature("SignExp"), function(signexp_obj){
     return(signexp_obj)
 })
 
-setGeneric("Reorder",
+setGeneric("Reorder_signatures",
     def=function(signexp_obj,ord){
-        standardGeneric("Reorder")
+        standardGeneric("Reorder_signatures")
     }
 )
-setMethod("Reorder",signature(signexp_obj="SignExp",ord="numeric"),
+setMethod("Reorder_signatures",signature(signexp_obj="SignExp",ord="numeric"),
     function(signexp_obj,ord){
         #Change signatures order.
         if(length(ord)==dim(signexp_obj@Sign)[[2]]){
@@ -138,12 +138,68 @@ setMethod("Reorder",signature(signexp_obj="SignExp",ord="numeric"),
             if(!all(is.na(signexp_obj@sigSums))){
                 signexp_obj@sigSums<-signexp_obj@sigSums[ord,]
             }
+            if(signexp_obj@normalized){
+                signexp_obj@Psummary <- signexp_obj@Psummary[,ord,]
+                signexp_obj@Esummary <- signexp_obj@Esummary[ord,,]
+                signexp_obj@Eoutliers <- signexp_obj@Eoutliers[ord]
+            }
             return(signexp_obj)
         }else{
             stop(paste("'ord' needs to be a vector of length",
                 "equal to the number of signatures.",sep=" "))
         }
-    })
+    }
+)
+
+setGeneric("Reorder_samples",
+    def=function(signexp_obj,ord){
+        standardGeneric("Reorder_samples")
+    }
+)
+setMethod("Reorder_samples",signature(signexp_obj="SignExp",ord="numeric"),
+    function(signexp_obj,ord){
+        #Change sample order or take subsets.
+        if(!length(ord)==dim(signexp_obj@Sign)[[1]]){
+            warning("Reorder_samples will generate a new SignExp object",
+                " with the sample subset enumerated in 'ord'.\n")
+        }
+        signexp_obj@Exp<-signexp_obj@Exp[,ord,,drop=FALSE]
+        if(!all(is.na(signexp_obj@samples))){
+            signexp_obj@samples<-signexp_obj@samples[ord]
+        }
+        if(signexp_obj@normalized){
+            signexp_obj@Esummary <- signexp_obj@Esummary[,ord,,drop=FALSE]
+            for(k in 1:length(signexp_obj@Eoutliers)){
+                signexp_obj@Eoutliers[[k]] <- signexp_obj@Eoutliers[[k]][ord]
+            }
+        }
+        return(signexp_obj)
+    }
+)
+
+setGeneric("Reorder_mutations",
+    def=function(signexp_obj,ord){
+        standardGeneric("Reorder_mutations")
+    }
+)
+setMethod("Reorder_mutations",signature(signexp_obj="SignExp",ord="numeric"),
+    function(signexp_obj,ord){
+        #Change mutation order.
+        if(length(ord)==dim(signexp_obj@Sign)[[1]]){
+            signexp_obj@Sign<-signexp_obj@Sign[ord,,]
+            if(!all(is.na(signexp_obj@mutations))){
+                signexp_obj@mutations<-signexp_obj@mutations[ord]
+            }
+            if(signexp_obj@normalized){
+                signexp_obj@Psummary <- signexp_obj@Psummary[ord,,]
+            }
+            return(signexp_obj)
+        }else{
+            stop(paste("'ord' needs to be a vector of length",
+                "equal to the number of mutations.",sep=" "))
+        }
+    }
+)
 
 setGeneric("Average_sign",
     def=function(signexp_obj,normalize=TRUE){
@@ -158,7 +214,8 @@ setMethod("Average_sign",signature(signexp_obj="SignExp",normalize="ANY"),
         Ps<-signexp_obj@Sign #[i,n,r]
         Phat<-apply(Ps,c(1,2),mean)
         return(Phat)
-    })
+    }
+)
 
 setGeneric("Median_sign",
     def=function(signexp_obj,normalize=TRUE){
@@ -175,7 +232,8 @@ setMethod("Median_sign",signature(signexp_obj="SignExp",normalize="ANY"),
         Phat<-signexp_obj@Psummary[,,3,drop=TRUE]
         if(n==1) Phat<-matrix(as.vector(Phat),i,n)
         return(Phat)
-    })
+    }
+)
 
 setGeneric("Average_exp",
     def=function(signexp_obj,normalize=TRUE){
@@ -190,7 +248,8 @@ setMethod("Average_exp",signature(signexp_obj="SignExp",normalize="ANY"),
         Es<-signexp_obj@Exp #[n,j,r]
         Ehat<-apply(Es,c(1,2),mean)
         return(Ehat)
-    })
+    }
+)
 
 setGeneric("Median_exp",
     def=function(signexp_obj,normalize=TRUE){
@@ -207,7 +266,8 @@ setMethod("Median_exp",signature(signexp_obj="SignExp",normalize="ANY"),
         Ehat<-signexp_obj@Esummary[,,3,drop=TRUE]
         if(n==1) Ehat<-matrix(as.vector(Ehat),n,j)
         return(Ehat)
-    })
+    }
+)
 
 setGeneric("Paths",
     def=function(signexp_obj,plot_to_file=FALSE,
@@ -284,7 +344,8 @@ setMethod("Paths",signature(signexp_obj="SignExp",plot_to_file="ANY",
                 E_file,"on the current directory.",sep=" ")
             cat(outmessage2,"\n")
         }
-    })
+    }
+)
 
 setGeneric("SignPlot",
     def=function(signexp_obj, plot_to_file=FALSE,
@@ -434,7 +495,8 @@ setMethod("SignPlot",signature(signexp_obj="SignExp",plot_to_file="ANY",
                 file,"on the current directory.",sep=" ")
             cat(outmess,"\n")
         }
-    })
+    }
+)
 
 setGeneric("ExposureBoxplot",
     def=function(signexp_obj, plot_to_file=FALSE,
@@ -532,16 +594,19 @@ setMethod("ExposureBoxplot",signature(signexp_obj="SignExp", plot_to_file="ANY",
                 file, "on the current directory.",sep=" ")
             cat(outmess,"\n")
         }
-    })
+    }
+)
 
 setGeneric("ExposureBarplot",
     def=function(signexp_obj, plot_to_file=FALSE,
-        file="Exposure_barplot.pdf",col='tan2',threshold=0,relative=TRUE,...){
+        file="Exposure_barplot.pdf",col='tan2',threshold=0,relative=FALSE,
+        title="", samplenames=TRUE, ...){
         standardGeneric("ExposureBarplot")
     }
 )
 setMethod("ExposureBarplot",signature(signexp_obj="SignExp", plot_to_file="ANY",
-    file="ANY", col="ANY", threshold="ANY",relative="ANY"),
+    file="ANY", col="ANY", threshold="ANY",relative="ANY",title="ANY",
+    samplenames="ANY"),
     function(signexp_obj, plot_to_file, file, col, threshold,...){
         if(!signexp_obj@normalized) signexp_obj<-Normalize(signexp_obj)
         dp <- dim(signexp_obj@Sign) #[i,n,r]
@@ -558,6 +623,8 @@ setMethod("ExposureBarplot",signature(signexp_obj="SignExp", plot_to_file="ANY",
         }else{
             ylabel<-"Signature contribution to mutation counts"
         }
+        if(j>50){ samplenames<-FALSE }
+        if(!samplenames){ colnames(Ehat)<-NULL }
         mycolors<-terrain.colors(n)[n:1]
         #Plot
         if(plot_to_file){
@@ -573,7 +640,7 @@ setMethod("ExposureBarplot",signature(signexp_obj="SignExp", plot_to_file="ANY",
         }
         layout(mat=matrix(1:2,1,2),widths=c(5,1))
         par(cex= 1, cex.axis=0.9, mar=c(4,5,2,1), mgp=c(4,0.35,0), xpd=NA,las=2)
-        barplot(Ehat[n:1,],col=mycolors,las=3,xlab="Samples",ylab="")
+        barplot(Ehat[n:1,],col=mycolors,las=3,xlab="Samples",ylab="",main=title)
         mtext(ylabel,side=2,at=0.5*max(colSums(Ehat)),
             cex=1,las=3,padj=-3)
         par(mar=c(15,1,3,0))
@@ -582,6 +649,7 @@ setMethod("ExposureBarplot",signature(signexp_obj="SignExp", plot_to_file="ANY",
         for(k in 1:n){
             rect(0,k-1,1,k,col=mycolors[k],border="black")
             text(2,k-0.5,paste("S",n-k+1,sep=""),cex=0.6)
+
         }
         if(plot_to_file){
             dev.off()
@@ -589,7 +657,8 @@ setMethod("ExposureBarplot",signature(signexp_obj="SignExp", plot_to_file="ANY",
                 file, "on the current directory.",sep=" ")
             cat(outmess,"\n")
         }
-    })
+    }
+)
 
 setGeneric("SignHeat",
     def=function(signexp_obj, plot_to_file=FALSE,
@@ -670,7 +739,8 @@ setMethod("SignHeat",signature(signexp_obj="SignExp", plot_to_file="ANY",
                 file,"on the current directory.",sep=" ")
             cat(outmess,"\n")
         }
-    })
+    }
+)
 
 setGeneric("ExposureHeat",
     def=function(signexp_obj, plot_to_file=FALSE,
@@ -757,18 +827,19 @@ setMethod("ExposureHeat",signature(signexp_obj="SignExp", plot_to_file="ANY",
                 file,"on the current directory.",sep=" ")
             cat(outmess,"\n")
         }
-    })
+    }
+)
 
 setGeneric("DiffExp",
     def=function(signexp_obj,labels, method=kruskal.test, contrast="all",
-        quant=0.5, cutoff=0.05, plot_to_file=FALSE,
-        file="Diffexp_boxplot.pdf",colored=TRUE,...){
+        quant=0.5, cutoff=0.05, p.adj="BH", plot_to_file=FALSE,
+        file="Diffexp_boxplot.pdf",colored=TRUE,relative=FALSE,...){
         standardGeneric("DiffExp")
     }
 )
 setMethod("DiffExp",signature(signexp_obj="SignExp", labels="character",
-    method="ANY", contrast="ANY", quant="ANY", cutoff="ANY", plot_to_file="ANY",
-    file="ANY", colored="ANY"),
+    method="ANY", contrast="ANY", quant="ANY", cutoff="ANY", p.adj="ANY",
+    plot_to_file="ANY", file="ANY", colored="ANY",relative="ANY"),
     function(signexp_obj, labels, method, contrast, quant, cutoff, plot_to_file,
         file, colored,...){
         if(!signexp_obj@normalized) signexp_obj<-Normalize(signexp_obj)
@@ -776,21 +847,26 @@ setMethod("DiffExp",signature(signexp_obj="SignExp", labels="character",
         de <- dim(signexp_obj@Exp) #[n,j,r]
         i<-dp[[1]]; n<-dp[[2]]; j<-de[[2]]; r<-de[[3]]
         cl<-labels[!is.na(labels)]
-        if(all(contrast=="all")){
-            classes <- as.vector(levels(as.factor(cl)))
-        }else{
-            classes <- contrast
-        }
+        if(all(contrast=="all")){ classes <- as.vector(levels(as.factor(cl)))
+        }else{ classes <- contrast  }
         used <- labels %in% classes
         used_labels<-as.factor(as.vector(labels[used]))
         if(colored){ col1<-"darkgreen"; col2<-"red"; col3<-"blue"
         }else{ col1<-"black"; col2<-"black"; col3<-"black"  }
         nclasses<-length(classes)
+        classes<-classes[classes %in% labels]
+        if(length(classes)<nclasses){
+            warning("There are labels in 'contrast' not found among samples.\n",
+                "Comparison will be peformed between the following groups: ",
+                paste(classes,collapse=", "),".\n")
+            nclasses<-length(classes)
+        }
         Pval<-matrix(NA,n,r)
         MoreExp<-data.frame(matrix(NA,r,n))
         for (k in 1:r){
             Exposure <- signexp_obj@Exp[,,'r'=k]
             if(n==1) Exposure <- matrix(as.vector(Exposure),n,j)
+            if(relative){ Exposure<-t(t(Exposure)/colSums(Exposure)) }
             Pval[,k]<-sapply(1:n,function(s){
                 Test<-method(as.vector(Exposure[s,used]),used_labels,...)
                 return(Test$p.value)
@@ -834,7 +910,7 @@ setMethod("DiffExp",signature(signexp_obj="SignExp", labels="character",
                     s<-signif[i]
                     pkct<-posthoc.kruskal.conover.test(
                         x=as.vector(Exposure[s,used]), g=used_labels,
-                        p.adjust.method="BH")
+                        p.adjust.method=p.adj)
                     MCpv[,,i,k] <- -1*log(pkct$p.value)
                 }
             }
@@ -842,23 +918,25 @@ setMethod("DiffExp",signature(signexp_obj="SignExp", labels="character",
             Mcsig <- MCpvm > lcut
             Allcomp<-Comp_labels(Mcsig)
             names(Allcomp)<-rownames(Lpval)[signif]
-            for(k in 1:length(Allcomp)){
-                names(Allcomp[[k]])<-classes
-            }
+            for(k in 1:length(Allcomp)){ names(Allcomp[[k]])<-classes }
             List_sig<-list()
+            List_pval<-list()
             for (s in 1:length(signif)){
                 Dif<-Mcsig[,,s]
                 colnames(Dif)<-classes[-nclasses]
                 rownames(Dif)<-classes[-1]
                 List_sig<-c(List_sig,list(Dif))
+                Pv<-exp(-1*MCpvm[,,s])
+                colnames(Pv)<-classes[-nclasses]
+                rownames(Pv)<-classes[-1]
+                List_pval<-c(List_pval,list(Pv))
             }
             names(List_sig)<-paste("Signature",signif,sep="_")
+            names(List_pval)<-paste("Signature",signif,sep="_")
         }
         new_plot <-FALSE
         if(plot_to_file){
-            if(length(grep("\\.pdf$",file))==0){
-                file<-paste(file,"pdf",sep=".")
-            }
+            if(length(grep("\\.pdf$",file))==0){file<-paste(file,"pdf",sep=".")}
             pdf(file,width=7,height=7)
             par(mfrow=c(1,1),mar=c(3.1,4.2,2,2))
         }else{
@@ -883,12 +961,10 @@ setMethod("DiffExp",signature(signexp_obj="SignExp", labels="character",
                 multicomp<-Allcomp[[i]]
                 s<-signif[i]
                 boxdata<-list()
-                for(cl in classes){
-                    boxdata<-c(boxdata,
-                        list(as.vector(signexp_obj@Exp[s,labels==cl,])))
-                }
+                for(cl in classes){  boxdata<-c(boxdata,
+                    list(as.vector(signexp_obj@Exp[s,labels==cl,]))) }
                 names(boxdata)=classes
-                boxplot(boxdata,main=paste("Signature",s,sep=" "),xaxt="n")
+                boxplot(boxdata,main=paste("Signature",s),xaxt="n",pch=45)
                 for(c in 1:nclasses){
                     mtext(classes[c],side=3,at=c,cex=0.7)
                     mtext(paste(multicomp[[c]],collapse=","),side=1,at=c,padj=1,
@@ -898,10 +974,9 @@ setMethod("DiffExp",signature(signexp_obj="SignExp", labels="character",
         }
         if(plot_to_file){
             dev.off()
-            outmessage<-paste("Differential exposure analysis results",
+            cat(paste("Differential exposure analysis results",
                 "were plotted to the file",file,
-                "on the current directory.",sep=" ")
-            cat(outmessage,"\n")
+                "on the current directory.",sep=" "),"\n")
         }
         Pmed<-apply(Pval,1,quantile,quant)
         signif <- Pmed<=cutoff
@@ -909,9 +984,11 @@ setMethod("DiffExp",signature(signexp_obj="SignExp", labels="character",
         colnames(mainresult)<-paste("S",1:n,sep="")
         result_list<-list(result=mainresult, Pvquant=Pmed, Pvalues=Pval,
             MostExposed=bigexp)
-        if(multicompare) result_list<-c(result_list,list(Differences=List_sig))
+        if(multicompare){ result_list<-c(result_list,list(Differences=List_sig,
+            MCPvalues=List_pval)) }
         return(result_list)
-    })
+    }
+)
 
 setGeneric("Classify",
     def=function(signexp_obj, labels, method=knn, k=3, weights=NA,
@@ -1039,4 +1116,5 @@ setMethod("Classify",signature(signexp_obj="SignExp",labels="character",
         }
         colnames(Freqs)<-paste(testsamples,result_final,sep="-")
         return(list(class=result_final,freq=prob,allfreqs=Freqs))
-    })
+    }
+)

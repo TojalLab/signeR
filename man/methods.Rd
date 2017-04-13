@@ -3,7 +3,9 @@
 \alias{setSamples}
 \alias{setMutations}
 \alias{Normalize}
-\alias{Reorder}
+\alias{Reorder_signatures}
+\alias{Reorder_samples}
+\alias{Reorder_mutations}
 \alias{Average_sign}
 \alias{Median_sign}
 \alias{Average_exp}
@@ -11,7 +13,9 @@
 \alias{setSamples,SignExp-method}
 \alias{setMutations,SignExp-method}
 \alias{Normalize,SignExp-method}
-\alias{Reorder,SignExp,numeric-method}
+\alias{Reorder_signatures,SignExp,numeric-method}
+\alias{Reorder_samples,SignExp,numeric-method}
+\alias{Reorder_mutations,SignExp,numeric-method}
 \alias{Average_sign,SignExp-method}
 \alias{Median_sign,SignExp-method}
 \alias{Average_exp,SignExp-method}
@@ -29,9 +33,13 @@
     Normalize: Normalize a SignExp object so that the entries of each 
         signature sum up to one.\cr
         
-    Reorder: Change the order of the signatures in a SignExp object. New 
-    signature order wil be defined by the "ord" argument.\cr
-    
+    Reorder_signatures: Change the order of the signatures in a SignExp object.
+        New signature order wil be defined by the "ord" argument.\cr
+
+    Reorder_samples: Change samples order, according to ord parameter.\cr
+
+    Reorder_mutations: Change mutations order, according to ord parameter.\cr
+
     Average_sign: Exports an aproximation of the signatures obtained by the 
         averages of the samples for the signature matrix P.\cr
         
@@ -49,7 +57,9 @@
 \S4method{setSamples}{SignExp}(signexp_obj, names)
 \S4method{setMutations}{SignExp}(signexp_obj, mutations)
 \S4method{Normalize}{SignExp}(signexp_obj)
-\S4method{Reorder}{SignExp,numeric}(signexp_obj, ord)
+\S4method{Reorder_signatures}{SignExp,numeric}(signexp_obj, ord)
+\S4method{Reorder_samples}{SignExp,numeric}(signexp_obj, ord)
+\S4method{Reorder_mutations}{SignExp,numeric}(signexp_obj, ord)
 \S4method{Average_sign}{SignExp}(signexp_obj, normalize=TRUE)
 \S4method{Median_sign}{SignExp}(signexp_obj, normalize=TRUE)
 \S4method{Average_exp}{SignExp}(signexp_obj, normalize=TRUE)
@@ -66,8 +76,8 @@ e.g.: sig$SignExposures}
     \item{ord}{Vector with the new signature order.}
 }
 
-\value{ setSamples, setMutations, Normalize and Reorder return a modified 
-SignExp object.\cr 
+\value{ setSamples, setMutations, Normalize and Reorder_* 
+returns a modified SignExp object.\cr
 Average_sign, Median_sign, Average_exp and Median_exp return a
 matrix with the corresponding approximation.
 }
@@ -82,7 +92,7 @@ matrix with the corresponding approximation.
 # each function needs the SignExposures object
 # which is part of the result of the signeR() call
 signexp  <- Normalize(signatures$SignExposures)
-signexp  <- Reorder(signatures$SignExposures,ord=c(2,1))
+signexp  <- Reorder_signatures(signatures$SignExposures,ord=c(2,1))
 matrix_p <- Median_sign(signatures$SignExposures)
 # etc ...
 
