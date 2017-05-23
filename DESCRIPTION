@@ -1,7 +1,7 @@
 Package: signeR
 Type: Package
 Title: Empirical Bayesian approach to mutational signature discovery
-Version: 1.3.0
+Version: 1.3.1
 Author: Rafael Rosales, Rodrigo Drummond, Renan Valieris, Israel Tojal
         da Silva
 Maintainer: Renan Valieris <renan.valieris@cipe.accamargo.org.br>
@@ -15,6 +15,7 @@ License: GPL-3
 Imports: BiocGenerics, Biostrings, BSgenome (>= 1.36.3), class,
         graphics, grDevices, GenomicRanges, nloptr, methods, NMF,
         stats, utils, VariantAnnotation, PMCMR
+Depends: NMF
 LinkingTo: Rcpp, RcppArmadillo (>= 0.7.100)
 SystemRequirements: C++11
 NeedsCompilation: yes
