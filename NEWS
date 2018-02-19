@@ -1,4 +1,9 @@
 
+Changes in signeR 1.5.1:
+
+    * fix GRanges list usage
+    * fix conflicts of NMF:seed, by adding VariantAnnotation to Depends before NMF
+
 Changes in signeR 1.1.7:
 
     * Reorder method was renamed to Reorder_signatures.

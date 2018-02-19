@@ -44,7 +44,7 @@ getFirstGenoAltIndex <- function(genoIndex) {
 genOpportunityFromGenome <- function(bsgenome, target_regions, nsamples=1) {
 
     # make sure there are no overlaps
-    target_regions <- Reduce(union, target_regions)
+    target_regions <- Reduce(union, as(target_regions, "GRangesList"))
 
     # count the kmers in the region
     kmers <- colSums(oligonucleotideFrequency(
