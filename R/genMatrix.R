@@ -44,11 +44,11 @@ getFirstGenoAltIndex <- function(genoIndex) {
 genOpportunityFromGenome <- function(bsgenome, target_regions, nsamples=1) {
 
     # make sure there are no overlaps
-    target_regions <- Reduce(union, as(target_regions, "GRangesList"))
+    target_regions <- reduce(target_regions, drop.empty.ranges=TRUE)
 
     # count the kmers in the region
     kmers <- colSums(oligonucleotideFrequency(
-        BSgenomeViews(bsgenome, target_regions),3))
+        getSeq(bsgenome, target_regions),3))
 
     # turn back into matrix
     c0 <- names(kmers)

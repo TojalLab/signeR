@@ -237,6 +237,17 @@ end.rcode-->
 href="https://genome.ucsc.edu/FAQ/FAQformat.html#format1">bed file</a>
 containing the genomic regions analyzed by the variant caller.</p>
 
+<p>If a BSgenome is not available for your genome, you can use a fasta file:</p>
+<!--begin.rcode eval=FALSE
+library(Biostrings)
+
+mygenome <- readDNAStringSet("/path/to/genome.fasta")
+
+mut <- genCountMatrixFromVcf(mygenome, vcfobj)
+opp <- genOpportunityFromGenome(mygenome, target_regions)
+
+end.rcode-->
+
 <h3 id="toc3.2">3.2: Input from tab-delimited file</h3>
 
 <p>By convention, the input file should be tab-delimited with sample names as

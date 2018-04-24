@@ -1,4 +1,8 @@
 
+Changes in signeR 1.5.2:
+
+    * support for generating matrices with a DNAStringSet
+
 Changes in signeR 1.5.1:
 
     * fix GRanges list usage

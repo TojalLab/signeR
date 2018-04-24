@@ -12,11 +12,10 @@ import(stats, graphics, utils, methods)
 importFrom("BiocGenerics", "Reduce")
 importFrom("Biostrings","getSeq", "oligonucleotideFrequency",
     "reverseComplement", "DNAString")
-importFrom("BSgenome", "BSgenomeViews")
 importFrom("class", "knn")
 importFrom("grDevices", "colorRampPalette", "dev.cur", "dev.new", 
     "dev.off", "pdf", "png", "rainbow", "terrain.colors")
-importFrom("GenomicRanges", "resize", "granges", "union")
+importFrom("GenomicRanges", "resize", "granges", "union", "reduce")
 importFrom("nloptr", "nloptr")
 importFrom("NMF", "nmf", "basis", "coef")
 importFrom("VariantAnnotation", "readVcf", "isSNV", "alt", "ref", "geno")
