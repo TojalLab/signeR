@@ -1,4 +1,8 @@
 
+Changes in signeR 1.7.1:
+
+    * optimization of genCountMatrixFromVcf function
+
 Changes in signeR 1.5.2:
 
     * support for generating matrices with a DNAStringSet

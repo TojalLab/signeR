@@ -20,10 +20,6 @@ revcomp <- function(s) {
     return(as.character(reverseComplement(DNAString(s))))
 }
 
-genotypeIndexes <- function(geno) {
-    return(sapply(strsplit(geno, "/", fixed=TRUE), unique))
-}
-
 isBadGeno <- function(genoIndex) {
     if(isGenoIndexRef(genoIndex)){return(FALSE)}
     if("." %in% genoIndex){return(TRUE)}
@@ -81,8 +77,9 @@ genCountMatrixFromVcf <- function(bsgenome, vcfobj) {
     alts <- alt(vcfobj)
     refs <- ref(vcfobj)
 
-    gts <- geno(vcfobj)[[1]]
-    sample_names <- colnames(gts)
+    gtsMat <- geno(vcfobj)$GT
+    gtsMat <- structure(sapply(strsplit(gtsMat,"/",fixed=TRUE), unique), dim=dim(gtsMat))
+    sample_names <- colnames(vcfobj)
 
     count_matrix <- matrix(0,
         nrow=length(sample_names), ncol=length(change_triplet))
@@ -90,9 +87,19 @@ genCountMatrixFromVcf <- function(bsgenome, vcfobj) {
     rownames(count_matrix) <- sample_names
     colnames(count_matrix) <- change_triplet
 
-    for(i in 1:nrow(gts)) {
+    for(i in 1:nrow(gtsMat)) {
+        rb <- refs[[i]]
+        cc <- contexts[i]
+        if(rb == DNAString("C") || rb == DNAString("T")) {
+            cts <- sapply(alts[i], function(ab){paste0(rb,">",ab,":",cc)})
+        } else {
+            cts <- sapply(alts[i], function(ab){
+                paste0(reverseComplement(rb),">",
+                    reverseComplement(ab),":",
+                    reverseComplement(cc))})
+        }
         for(j in 1:length(sample_names)) {
-            gi <- genotypeIndexes(gts[i,j])
+            gi <- gtsMat[[i,j]]
             if(isGenoIndexRef(gi)) {next}
             if(isBadGeno(gi)){
                 warning(paste0("Genotype of Line ",i," sample ",
@@ -100,16 +107,7 @@ genCountMatrixFromVcf <- function(bsgenome, vcfobj) {
                 next
             }
             ai <- as.integer(getFirstGenoAltIndex(gi))
-
-            rb <- as.character(refs[[i]])
-            ab <- as.character(alts[i][[ai]])
-            cc <- as.character(contexts[i])
-            if(rb == "C" || rb == "T") {
-                ct <- paste0(rb,">",ab,":", cc)
-            } else {
-                ct <- paste0(revcomp(rb),">",revcomp(ab),":", revcomp(cc))
-            }
-
+            ct <- cts[[ai]]
             cx <- match(ct, change_triplet)
             if(is.na(cx)) {
                 warning(paste0("ct = ",ct))
