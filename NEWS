@@ -1,4 +1,9 @@
 
+Changes in signeR 1.9.1:
+
+    * fix prototype mismatch issue
+    * fix plot error: non-finite ylim when pvalue=0
+
 Changes in signeR 1.7.1:
 
     * optimization of genCountMatrixFromVcf function

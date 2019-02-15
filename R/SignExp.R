@@ -9,8 +9,8 @@ setClass("SignExp",
         Psummary="array",
         Esummary="array",
         Eoutliers="list"),
-    prototype = list(Ps=array(NA,dim=c('i'=1,'n'=1,'k'=1)),
-        Es=array(NA,dim=c('n'=1,'j'=1,'k'=1)),
+    prototype = list(Sign=array(NA,dim=c('i'=1,'n'=1,'k'=1)),
+        Exp=array(NA,dim=c('n'=1,'j'=1,'k'=1)),
         samples=NA_character_,
         mutations=NA_character_,
         sigSums=matrix(NA_real_,1,1),
@@ -882,7 +882,7 @@ setMethod("DiffExp",signature(signexp_obj="SignExp", labels="character",
         }
         Lpval <- -1*log(Pval) #n x r
         rownames(Lpval)<-paste("S",1:n,sep="")
-        y.min<-min(Lpval); y.max<-max(Lpval)
+        y.min<-min(Lpval); y.max<-max(Lpval[Lpval<Inf])
         lcut <- -1*log(cutoff)
         invquant<-1-quant
         Lpmed<-apply(Lpval,1,quantile,invquant,na.rm=TRUE)
@@ -949,6 +949,7 @@ setMethod("DiffExp",signature(signexp_obj="SignExp", labels="character",
         }
         plot(1:n,rep(lcut,n),type="n",main="",xlab="",ylab="-log(pvalue)",
             xlim=c(0.5,n+0.5),ylim=c(y.min,y.max),xaxt="n",cex.lab=1.2)
+        Lpval[Lpval==Inf]<-NA
         boxplot(data.frame(t(Lpval)),at=1:n,add=TRUE,border=cor,
             names=rep("",n),pch=45)
         mtext(boxnames,side=1,line=boxlines,at=1:n,cex=1,las=1)
