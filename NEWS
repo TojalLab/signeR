@@ -1,4 +1,9 @@
 
+Changes in signeR 1.9.2:
+
+    * fix for genCountMatrixFromVcf fails with phased genotypes
+    * added one-vcf-per-sample example to vignette
+
 Changes in signeR 1.9.1:
 
     * fix prototype mismatch issue

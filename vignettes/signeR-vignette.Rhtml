@@ -222,7 +222,22 @@ mut <- genCountMatrixFromVcf(BSgenome.Hsapiens.UCSC.hg19, vcfobj)
 end.rcode-->
 
 <p>This function will generate a matrix of mutation counts for each sample in
-the provided VCF. The opportunity matrix can also be generated from the
+the provided VCF.</p>
+<p>If you have one vcf per sample you can combine the results into a single
+matrix like this:</p>
+<!--begin.rcode eval=FALSE
+mut = matrix(ncol=96,nrow=0)
+for(i in vcf_files) {
+    vo = readVcf(i, "hg19")
+    # sample name (should pick up from the vcf automatically if available)
+    # colnames(vo) = i
+    m0 = genCountMatrixFromVcf(mygenome, vo)
+    mut = rbind(mut, m0)
+}
+dim(mut) # matrix with all samples
+end.rcode-->
+
+<p>The opportunity matrix can also be generated from the
 reference genome (hg19 in the following case):</p>
 
 <!--begin.rcode eval=FALSE
