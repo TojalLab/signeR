@@ -1,4 +1,7 @@
 
+Changes in signeR 1.9.3:
+    * fix parsing issue in genCountMatrixFromVcf for some vcfs
+
 Changes in signeR 1.9.2:
 
     * fix for genCountMatrixFromVcf fails with phased genotypes

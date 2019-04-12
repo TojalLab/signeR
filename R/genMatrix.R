@@ -78,7 +78,7 @@ genCountMatrixFromVcf <- function(bsgenome, vcfobj) {
     refs <- ref(vcfobj)
 
     gtsMat <- geno(vcfobj)$GT
-    gtsMat <- structure(sapply(strsplit(gtsMat,"[/|]",fixed=FALSE), unique), dim=dim(gtsMat))
+    gtsMat <- structure(lapply(strsplit(gtsMat,"[/|]",fixed=FALSE), unique), dim=dim(gtsMat))
     sample_names <- colnames(vcfobj)
 
     count_matrix <- matrix(0,
