@@ -1,7 +1,7 @@
 Package: signeR
 Type: Package
 Title: Empirical Bayesian approach to mutational signature discovery
-Version: 1.9.3
+Version: 1.10.0
 Author: Rafael Rosales, Rodrigo Drummond, Renan Valieris, Israel Tojal
         da Silva
 Maintainer: Renan Valieris <renan.valieris@accamargo.org.br>
