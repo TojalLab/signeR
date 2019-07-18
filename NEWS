@@ -1,5 +1,10 @@
 
+Changes in signeR 1.11.1:
+
+    * ignore mutations on edges of chromosomes
+
 Changes in signeR 1.9.3:
+
     * fix parsing issue in genCountMatrixFromVcf for some vcfs
 
 Changes in signeR 1.9.2:

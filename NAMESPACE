@@ -15,8 +15,10 @@ importFrom("Biostrings","getSeq", "oligonucleotideFrequency",
 importFrom("class", "knn")
 importFrom("grDevices", "colorRampPalette", "dev.cur", "dev.new", 
     "dev.off", "pdf", "png", "rainbow", "terrain.colors")
-importFrom("GenomicRanges", "resize", "granges", "union", "reduce")
+importFrom("GenomicRanges", "resize", "granges", "union", "reduce","GRanges")
+importFrom("IRanges","subsetByOverlaps")
 importFrom("nloptr", "nloptr")
 importFrom("NMF", "nmf", "basis", "coef")
 importFrom("VariantAnnotation", "readVcf", "isSNV", "alt", "ref", "geno")
 importFrom("PMCMR","posthoc.kruskal.conover.test")
+importFrom("GenomeInfoDb","seqinfo")
