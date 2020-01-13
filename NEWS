@@ -1,4 +1,8 @@
 
+Changes in signeR 1.13.1:
+
+    * fix issue with pseudo-variants on vcf
+
 Changes in signeR 1.11.1:
 
     * ignore mutations on edges of chromosomes
