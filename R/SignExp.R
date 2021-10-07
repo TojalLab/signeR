@@ -908,7 +908,7 @@ setMethod("DiffExp",signature(signexp_obj="SignExp", labels="character",
                 if(n==1) Exposure <- matrix(as.vector(Exposure),n,j)
                 for (i in 1:length(signif)){
                     s<-signif[i]
-                    pkct<-posthoc.kruskal.conover.test(
+                    pkct<-kwAllPairsConoverTest(
                         x=as.vector(Exposure[s,used]), g=used_labels,
                         p.adjust.method=p.adj)
                     MCpv[,,i,k] <- -1*log(pkct$p.value)
