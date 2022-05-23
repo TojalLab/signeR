@@ -1,4 +1,12 @@
 
+Changes in signeR 2.0.0:
+
+    * Option to work with previously defined signatures, just estimating exposures.  
+    * Parallel processing,
+    * New method to find the number of signatures (or groups) present in data, based on statistical testes of BIC values,
+    * Tests of signature association with survival data or continuous variables,
+    * Exposure-based clustering methods
+
 Changes in signeR 1.19.1:
 
     * migrate to PMCMRplus package

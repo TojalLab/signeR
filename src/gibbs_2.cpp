@@ -258,6 +258,7 @@ Rcpp::List GibbsSamplerCpp(
     double var_ap,
     double var_ae,
     int burn, int eval,
+    bool Pfixed,
     bool Zfixed, bool Thetafixed, bool Afixed, bool keep_par
     ) {
 
@@ -307,11 +308,11 @@ Rcpp::List GibbsSamplerCpp(
             int step = flist[f];
             switch(step) {
                 case 1: if(!Zfixed) gibbs_step1(M,P,E, Z,Fi); break;
-                case 2: gibbs_step2(W,Z,E,Ap,Bp, P); break;
+                case 2: if(!Pfixed) gibbs_step2(W,Z,E,Ap,Bp, P); break;
                 case 3: gibbs_step3(W,Z,P,Ae,Be, E); break;
-                case 4: if(!Bfixed) gibbs_step4(Z,P,Ap,ap,bp,var_ap, Bp); break;
+                case 4: if(!Pfixed && !Bfixed) gibbs_step4(Z,P,Ap,ap,bp,var_ap, Bp); break;
                 case 5: if(!Bfixed) gibbs_step5(Z,E,Ae,ae,be,var_ae, Be); break;
-                case 6: if(!Afixed) gibbs_step6(Z,P,Bp,lp,var_ap, Ap); break;
+                case 6: if(!Pfixed && !Afixed) gibbs_step6(Z,P,Bp,lp,var_ap, Ap); break;
                 case 7: if(!Afixed) gibbs_step7(Z,E,Be,le,var_ae, Ae); break;
             }
         }

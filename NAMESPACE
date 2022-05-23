@@ -5,14 +5,22 @@ exportMethods(setSamples, setMutations, Normalize,
     Reorder_signatures, Reorder_samples, Reorder_mutations,
     Average_sign, Median_sign, Average_exp, Median_exp,
     Paths, SignPlot, SignHeat, ExposureBoxplot,
-    ExposureBarplot, ExposureHeat, Classify, DiffExp)
-export(genOpportunityFromGenome, genCountMatrixFromVcf, signeR, BICboxplot)
+    ExposureBarplot, ExposureHeat, 
+    DiffExp, SignLRT, ExposureSurvival, ExposureSurvModel, 
+    ExposureCorrelation, ExposureGLM,
+    ExposureClassify, FuzzyClustExp, HClustExp)
+export(genOpportunityFromGenome, genCountMatrixFromVcf, signeR, 
+       BICboxplot, eBayesNMF, GibbsSamplerCpp)
 
-import(stats, graphics, utils, methods)
+import(stats, graphics, utils, methods, future, future.apply,
+       class, VGAM, MASS, glmnet, e1071, randomForest, ada,
+       kknn, forestplot, grid, pROC, ggplot2, pheatmap,
+       scales, reshape2, RColorBrewer, dplyr)
+importFrom("parallel", "detectCores")
+importFrom("listenv", "listenv")
 importFrom("BiocGenerics", "Reduce")
 importFrom("Biostrings","getSeq", "oligonucleotideFrequency",
-    "reverseComplement", "DNAString")
-importFrom("class", "knn")
+    "reverseComplement", "DNAString", "DNAStringSetList")
 importFrom("grDevices", "colorRampPalette", "dev.cur", "dev.new", 
     "dev.off", "pdf", "png", "rainbow", "terrain.colors")
 importFrom("GenomicRanges", "resize", "granges", "union", "reduce","GRanges")
@@ -22,3 +30,12 @@ importFrom("NMF", "nmf", "basis", "coef")
 importFrom("VariantAnnotation", "readVcf", "isSNV", "alt", "ref", "geno")
 importFrom("PMCMRplus","kwAllPairsConoverTest")
 importFrom("GenomeInfoDb","seqinfo")
+importFrom("survival", "Surv","is.Surv","survdiff", "survfit", "coxph", "cox.zph")
+importFrom("survivalAnalysis", "cox_as_data_frame")
+importFrom("survminer", "ggsurvplot")
+importFrom("maxstat", "maxstat.test")
+importFrom("pvclust", "msfit")
+importFrom("ppclust", "fcm", "pcm", "fpcm")
+importFrom("clue", "solve_LSAP")
+importFrom("grid", "unit")
+importFrom("ggpubr","ggarrange")

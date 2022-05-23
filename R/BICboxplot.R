@@ -25,16 +25,24 @@ BICboxplot<-function(signeRout, plot_to_file=FALSE,
         pdf(file,width=7,height=7)
     }
     par(mar=c(5,6,3,2))
-    plot(tested_n, seq(ymin,ymax,length=length(tested_n)), xlim=c(xmin,xmax),
-        ylim=c(ymin,ymax),type='n', main="Bayesian Information Criterion", 
-        xlab="Number of processes",ylab="",xaxt="n",yaxt="n")
-    axis(side=2,at=ticks,labels=parse(text=labels),tick=TRUE,las=1,cex=0.5)
-    boxplot(Test_BICs, add=TRUE, at=tested_n, names=tested_n, 
-        xaxt="s", yaxt="n",cex=0.7)
-    if(length(tested_n)==1){
-        axis(side=1,at=tested_n,labels=tested_n,las=1,cex=0.5)
+    #ggplot2
+    reps<-unlist(lapply(Test_BICs,length))
+    tested_n_rep<-c()
+    for(k in 1:length(tested_n)){
+        tested_n_rep<-c(tested_n_rep,rep(tested_n[k],reps[k]))
     }
-    abline(v=nopt,lty=3)
+    Boxdata<-data.frame(BIC=unlist(Test_BICs),n=tested_n_rep)
+    p <- ggplot(Boxdata, aes(x=n, y=BIC, group=n)) + 
+        scale_x_continuous(breaks=tested_n, labels=as.character(tested_n))+
+        scale_y_continuous(breaks=ticks, labels=parse(text=labels))+
+        geom_boxplot(outlier.shape = 19,notch=F)+
+        labs(title="Bayesian Information Criterion",
+            subtitle = "", 
+            x="Number of processes", 
+            y = "")+
+        geom_vline(xintercept=nopt,lty=3)+
+        theme_classic(base_size = 15)
+    plot(p)
     if(plot_to_file){
         dev.off()
         outmessage<-paste("BIC boxplots were exported to the file",file,
