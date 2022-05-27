@@ -142,15 +142,15 @@ setMethod("DiffExp",signature(signexp_obj="SignExp", labels="character",
         }
         ####### Plotting
         ####################### ggplot2
-        md<-data.frame(Sig=rep(paste("S",1:n,sep=""),each=r),
-                       Pvalues=as.vector(t(Lpval)))
-        ms = group_by(md, Sig) %>% summarize(q1=min(Pvalues),
+        md<-data.frame("Sig"=rep(paste("S",1:n,sep=""),each=r),
+                       "Pvalues"=as.vector(t(Lpval)))
+        ms = group_by(md, Sig) %>% summarise(q1=min(Pvalues),
                                              q2=quantile(Pvalues,p=0.25),
                                              q3=median(Pvalues),
                                              q4=quantile(Pvalues,p=0.75),
                                              q5=max(Pvalues))
-        segments<-data.frame(Sig=paste("S",1:n,sep=""),x_bgn=c(1:n)-0.4,x_end=c(1:n)+0.4,
-                             y_bgn=Lpmed,y_end=Lpmed,q1=0,q2=0,q3=0,q4=0,q5=0)
+        segments<-data.frame("Sig"=paste("S",1:n,sep=""),"x_bgn"=c(1:n)-0.4,"x_end"=c(1:n)+0.4,
+                             "y_bgn"=Lpmed,"y_end"=Lpmed,"q1"=0,"q2"=0,"q3"=0,"q4"=0,"q5"=0)
         g1<-ggplot(ms, aes(x=Sig,ymin=q1,lower=q2,middle=q3,upper=q4,ymax=q5)) + 
             geom_boxplot(stat='identity',show.legend = FALSE) +
             geom_hline(yintercept=lcut,col=col2) +
@@ -185,7 +185,7 @@ setMethod("DiffExp",signature(signexp_obj="SignExp", labels="character",
                                                  q3=median(exp),
                                                  q4=quantile(exp,p=0.75),
                                                  q5=max(exp),
-                                                 fc=classdiffs[1])
+                                                 "fc"=classdiffs[1])
             
             g2<-ggplot(ms, aes(x=class,lower=q2, upper=q4, middle=q3, 
                               ymin=q1, ymax=q5)) + 
@@ -401,7 +401,7 @@ setMethod("ExposureCorrelation",signature(Exposures="matrix",feature="numeric",
               boxnames<-paste("S",1:n,sep="")
               boxlines<-rep(0.5,n)
               ####################### ggplot2
-              md<-data.frame(Sig=rep(paste("S",1:n,sep=""),each=r),
+              md<-data.frame(Sig=paste("S",1:n,sep=""),
                              Pvalues=as.vector(t(Lpval)))
               ms = group_by(md, Sig) %>% summarize(q1=min(Pvalues),
                                                    q2=quantile(Pvalues,p=0.25),
@@ -671,7 +671,7 @@ setMethod("ExposureSurvival",signature(Exposures="matrix",surv="ANY",
               boxlines<-rep(0.5,n)
               ####### Plotting
               ####################### ggplot2
-              md<-data.frame(Sig=rep(paste("S",1:n,sep=""),each=r),
+              md<-data.frame(Sig=paste("S",1:n,sep=""),
                              Pvalues=as.vector(t(Lpval)))
               ms = group_by(md, Sig) %>% summarize(q1=min(Pvalues),
                                                    q2=quantile(Pvalues,p=0.25),
@@ -679,7 +679,7 @@ setMethod("ExposureSurvival",signature(Exposures="matrix",surv="ANY",
                                                    q4=quantile(Pvalues,p=0.75),
                                                    q5=max(Pvalues))
               segments<-data.frame(Sig=paste("S",1:n,sep=""),x_bgn=c(1:n)-0.4,x_end=c(1:n)+0.4,
-                                   y_bgn=Lpmed,y_end=Lpmed,q1=0,q2=0,q3=0,q4=0,q5=0)
+                                   y_bgn=Lpval,y_end=Lpval,q1=0,q2=0,q3=0,q4=0,q5=0)
               g1<-ggplot(ms, aes(x=Sig,ymin=q1,lower=q2,middle=q3,upper=q4,ymax=q5)) + 
                   geom_boxplot(stat='identity',show.legend = FALSE,col=cor) +
                   geom_hline(yintercept=lcut,col=col2) +
@@ -802,7 +802,7 @@ setMethod("ExposureSurvival",signature(Exposures="SignExp",surv="ANY",
               Pvalues_diff<-Res.univ[j+1,,]
               cutvalues<-Res.univ[j+2,,]
               Pvalues_prop<-Res.univ[j+3,,]
-              Pvalues_cox<-round(Res.univ[j+10,,],5)
+              Pvalues_cox<-Res.univ[j+10,,]
               univ.tests.ar<-Res.univ[(j+4):(j+10),,]
               if(method=="logrank") {
                   Pvalues <- Pvalues_diff
@@ -810,7 +810,11 @@ setMethod("ExposureSurvival",signature(Exposures="SignExp",surv="ANY",
                   Pvalues <- Pvalues_cox
               }
               invquant<-1-quant
-              Pvalues_quant<-apply(Pvalues,1,function(v){quantile(v,probs=quant)})
+              if(n==1){
+                  Pvalues_quant<-quantile(Pvalues,probs=quant)
+              }else{
+                  Pvalues_quant<-apply(Pvalues,1,function(v){quantile(v,probs=quant)})
+              }
               HR_quantiles=apply(univ.tests.ar[1,,],1,function(v){quantile(v,probs=c(invquant,0.5,quant))})
               cond<-HR_quantiles[2,]>=1
               HR_quant<-ifelse(cond,HR_quantiles[1,],HR_quantiles[3,])#if HR>1, takes inferior quantile.

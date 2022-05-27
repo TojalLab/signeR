@@ -12,18 +12,22 @@ exportMethods(setSamples, setMutations, Normalize,
 export(genOpportunityFromGenome, genCountMatrixFromVcf, signeR, 
        BICboxplot, eBayesNMF, GibbsSamplerCpp)
 
-import(stats, graphics, utils, methods, future, future.apply,
-       class, VGAM, MASS, glmnet, e1071, randomForest, ada,
-       kknn, forestplot, grid, pROC, ggplot2, pheatmap,
+import(graphics, utils, methods, future, future.apply,
+       class, VGAM, glmnet, e1071, ada,
+       kknn, forestplot, grid, ggplot2, pheatmap,
        scales, reshape2, RColorBrewer, dplyr)
-importFrom("parallel", "detectCores")
+importFrom("parallel", "detectCores", "makeCluster", "clusterExport", "parLapply", "stopCluster")
+importFrom("stats", "kruskal.test", "cor.test", 'quantile', 'median', 'sd')
+importFrom("MASS", "lda")
+importFrom("randomForest","randomForest")
+importFrom("pROC","roc")
 importFrom("listenv", "listenv")
 importFrom("BiocGenerics", "Reduce")
 importFrom("Biostrings","getSeq", "oligonucleotideFrequency",
     "reverseComplement", "DNAString", "DNAStringSetList")
 importFrom("grDevices", "colorRampPalette", "dev.cur", "dev.new", 
     "dev.off", "pdf", "png", "rainbow", "terrain.colors")
-importFrom("GenomicRanges", "resize", "granges", "union", "reduce","GRanges")
+importFrom("GenomicRanges", "resize", "granges", "reduce","GRanges")
 importFrom("IRanges","subsetByOverlaps")
 importFrom("nloptr", "nloptr")
 importFrom("NMF", "nmf", "basis", "coef")
@@ -32,7 +36,7 @@ importFrom("PMCMRplus","kwAllPairsConoverTest")
 importFrom("GenomeInfoDb","seqinfo")
 importFrom("survival", "Surv","is.Surv","survdiff", "survfit", "coxph", "cox.zph")
 importFrom("survivalAnalysis", "cox_as_data_frame")
-importFrom("survminer", "ggsurvplot")
+importFrom("survminer", "ggsurvplot", "ggforest")
 importFrom("maxstat", "maxstat.test")
 importFrom("pvclust", "msfit")
 importFrom("ppclust", "fcm", "pcm", "fpcm")

@@ -6,12 +6,15 @@
 }
 \usage{
     signeR(M, Mheader = TRUE, samples = "rows", Opport = NA,
-        Oppheader = FALSE, nsig = NA, nlim = c(NA, NA),
-        try_all = FALSE, ap = NA, bp = NA, ae = NA, be = NA,
+        Oppheader = FALSE,  P = NA, fixedP = FALSE,
+        nsig = NA, nlim = c(NA, NA),
+        try_all = FALSE, BICsignificance = FALSE, critical_p = 0.05,
+        ap = NA, bp = NA, ae = NA, be = NA,
         lp = NA, le = NA, var.ap = 10, var.ae = 10,
-        testing_burn = 1000, testing_eval = 1000, EM_eval = 100,
-        main_burn = 10000, main_eval = 2000, start = "lee",
-        estimate_hyper = FALSE, EMit_lim=100)
+        start = "lee", testing_burn = 1000, testing_eval = 1000,
+        main_burn = 10000, main_eval = 2000,
+        estimate_hyper = FALSE, EMit_lim=100, EM_eval = 100,
+        parallelization = "multisession")
 }
 \arguments{
     \item{M}{mutation counts matrix of samples x features.}
@@ -22,11 +25,19 @@ is "row".}
     \item{Opport}{context count matrix of samples x features in the target
 genome or region.}
     \item{Oppheader}{if Opport have header defined.}
+    \item{P}{Previously known matrix of signatures. If provided, can be fixed 
+    along algorithm iterations or just used as a initial value (see next parameter)}
+    \item{fixedP}{If TRUE, provided P matrix will be fixed along iterations.}
     \item{nsig}{number of signatures, which can be provided or estimated by
 the algorithm.}
     \item{nlim}{define a interval to search for the optimal number of
 signatures.}
-    \item{try_all}{if true, all possible values for nsig will be tested}
+    \item{try_all}{if TRUE, all possible values for nsig will be tested}
+    \item{BICsignificance}{if TRUE, BICs will be considered different 
+    only if their distribution is significantly different. In case of ties in 
+    BICs comparison, signer will adopt the model with less signatures.}
+    \item{critical_p}{level of significance for BICs distribution to be 
+    considered different}
     \item{ap}{shape parameter of the gamma distribution used to generate the
 entries of a matrix of rate parameters of the gamma distributions which
 generate signatures.}
@@ -49,6 +60,9 @@ generate exposures.}
 proposals for shape parameters of signatures}
     \item{var.ae}{variance of the gamma distribution used to generate
 proposals for shape parameters of exposures}
+    \item{start}{NMF algorithm used to generate initial values for signatures
+and exposures,options: "brunet","KL","lee","Frobenius","offset","nsNMF",
+"ls-nmf","pe-nmf","siNMF","snmf/r" or "snmf/l".}
     \item{testing_burn}{number of burning iterations of the Gibbs sampler used
 to estimate the number of signatures in data. Corresponds to R0 at Algorithm 1
 on signeR paper.}
@@ -59,14 +73,13 @@ on signeR paper.}
 algorithm. Corresponds to R1 at Algorithm 1 on signeR paper.}
     \item{main_burn}{number of burning iterations of the final Gibbs sampler.}
     \item{main_eval}{number of iterations of the final Gibbs sampler.}
-    \item{start}{NMF algorithm used to generate initial values for signatures
-and exposures,options: "brunet","KL","lee","Frobenius","offset","nsNMF",
-"ls-nmf","pe-nmf","siNMF","snmf/r" or "snmf/l".}
     \item{estimate_hyper}{if TRUE, algorithm estimates optimal values of
 ap,bp,ae,be,lp,le. Start values can still be provided.}
     \item{EMit_lim}{limit of EM iterations for the estimation of
 hyper-hyperparameters ap,bp,ae,be,lp,le. Default is 100. Corresponds to U at
 Algorithm 1 on signeR paper.}
+    \item{parallelization}{strategy of computation parallelization, see 
+    future::plan help}
 }
 \value{
     signeR output is a list with the following items:\cr

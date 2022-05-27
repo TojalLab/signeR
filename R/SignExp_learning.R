@@ -247,7 +247,7 @@ setMethod("ExposureClassify",signature(signexp_obj="ANY",labels="character",
                       }
                   }
                   ####### Plotting - ggplot2
-                  g<-ggplot(Mymelt(Freqs), aes(x=Var2,y=value,fill=Var1)) + 
+                  g<-ggplot(Mymelt(Freqs), aes(x=Col,y=value,fill=Row)) + 
                       geom_col(position='stack') +  
                       theme(axis.text.x=element_text(angle=0,vjust=.5)) + 
                       coord_cartesian(expand=0) + 
@@ -273,7 +273,7 @@ Mymelt<-function(M){
     Di<-NROW(D)
     Dj<-NCOL(D)
     N<-data.frame(matrix(0.1,Di*Dj,3))
-    colnames(N)<-c("Var1","Var2","value")
+    colnames(N)<-c("Row","Col","value")
     for(i in 1:Di){
         for(j in 1:Dj){
             N[(j-1)*Di+i,1:2]<-c(rownames(D)[i],colnames(D)[j])
@@ -300,7 +300,7 @@ setMethod("ExposureGLM",signature(Exposures="matrix",feature="numeric",
                                   cutoff_pvalue="ANY",plot_to_file="ANY", 
                                   file="ANY",colors="ANY"),
           function(Exposures,feature,cutoff_pvalue=0.05, plot_to_file=FALSE,
-                   file="ExposureGLM_plot.pdf",colors=TRUE){
+                   file="ExposureGLM_plot.pdf",colors=TRUE,...){
               de <- dim(Exposures) #[n,j]
               n<-de[[1]]; j<-de[[2]]
               Es <- data.frame(t(Exposures),target=feature)
@@ -491,12 +491,19 @@ setMethod("ExposureSurvModel",signature(Exposures="matrix",surv="ANY",
                   }
                   par(mfrow=c(2,1),mar=c(4.2,5.2,2,2))
               }
-              if(is.na(addata[[1]][1])) addata<-matrix(0,j,0)
-              cph0<-coxph(Surv(dtime,os)~., data=data.frame(dtime,os,addata))
               const<-min(Ehat[Ehat>0])*1e-3
-              thisdata<-data.frame(dtime,os,log2(Ehat+const),addata)
-              colnames(thisdata)<-c("time","os",signature_names,
-                                    colnames(as.dataframe(addata)))
+              model0<-!is.na(addata[[1]][1])
+              if(model0){ 
+                  cph0<-coxph(Surv(dtime,os)~., data=data.frame(dtime,os,addata))
+                  #addata<-matrix(1,j,1)
+                  #colnames(addata)<-"Intercept0"
+                  thisdata<-data.frame(dtime,os,log2(Ehat+const),addata)
+                  colnames(thisdata)<-c("time","os",signature_names,
+                                        colnames(as.data.frame(addata)))
+              }else{
+                  thisdata<-data.frame(dtime,os,log2(Ehat+const))
+                  colnames(thisdata)<-c("time","os",signature_names)
+              }
               cph<-coxph(Surv(dtime,os)~., data=thisdata)
               coxz<-cox.zph(cph)
               Pvalues_prop<-round(coxz$table[,3],5)
@@ -505,8 +512,10 @@ setMethod("ExposureSurvModel",signature(Exposures="matrix",surv="ANY",
               HR<-round(thisTable$coefficients[,2],5)
               multiv.tests<-cox_as_data_frame(thisTable)[,4:10]
               colnames(multiv.tests)[7]<-"P.value"
-              thisAnova<-anova(cph0,cph)
-              pvalAnova<-thisAnova[[4]][2]
+              if(model0){
+                  thisAnova<-anova(cph0,cph)
+                  pvalAnova<-thisAnova[[4]][2]
+              }
               signif_signatures <- rep(TRUE,n)
               if(!is.na(cutoff_pvalue)){
                   signif_signatures <- signif_signatures & 
@@ -622,7 +631,13 @@ setMethod("ExposureSurvModel",signature(Exposures="SignExp",surv="ANY",
               }else{
                   signature_names<-rownames(Ehat)
               }
-              cph0<-coxph(Surv(dtime,os)~., data=data.frame(dtime,os,addata))
+              model0<-!is.na(addata[[1]][1])
+              if(model0){ 
+                  cph0<-coxph(Surv(dtime,os)~., data=data.frame(dtime,os,addata))
+              }else{
+                  addata<-matrix(0,j,0)
+                  # empty matrix
+              }
               Allstats<-future_apply(Es,3,function(D){
                   E<-t(D)
                   const<-min(E[E>0])*1e-3
@@ -634,8 +649,12 @@ setMethod("ExposureSurvModel",signature(Exposures="SignExp",surv="ANY",
                   pval.df<-round(thisTable$coefficients[,5],5)[1:n] #<-output n real
                   hr.df<-round(thisTable$coefficients[,2],5)[1:n] #<-output n real
                   mult.tests.ar<-as.vector(as.matrix(cox_as_data_frame(thisTable)[1:n,4:10])) #<-output nx7 real
-                  thisAnova<-anova(cph0,cph)
-                  pval.anova<-thisAnova[[4]][2] #<-output 1 real
+                  if(model0){
+                      thisAnova<-anova(cph0,cph)
+                      pval.anova<-thisAnova[[4]][2] #<-output 1 real
+                  }else{
+                      pval.anova<-NA
+                  }
                   return(c(pval.anova,pval_prop.df,pval.df,hr.df,mult.tests.ar))
               })
               pvalAnova<-as.vector(Allstats[1,])
@@ -643,12 +662,12 @@ setMethod("ExposureSurvModel",signature(Exposures="SignExp",surv="ANY",
               Pvalues.df<-data.frame(Allstats[(n+3):(2*n+2),])
               HR.df<-data.frame(Allstats[(2*n+3):(3*n+2),])
               multiv.tests.ar<-array(as.vector(Allstats[(3*n+3):(10*n+2),]),dim=c(n,7,r))
-              #####temp#######
-              LpvalAnova <- -1*log(pvalAnova)
-              dev.new(width=7, height=7)
-              par(mfrow=c(1,1))
-              boxplot(LpvalAnova,ylab="-log(p-value)",main="Anova.coxph comparison of surv models")
-              ################
+              if(model0){
+                  LpvalAnova <- -1*log(pvalAnova)
+                  dev.new(width=7, height=7)
+                  par(mfrow=c(1,1))
+                  boxplot(LpvalAnova,ylab="-log(p-value)",main="Anova.coxph comparison of surv models")
+              }
               if(colors){ col1<-"darkgreen"; col2<-"red"; col3<-"blue"
               }else{ col1<-"black"; col2<-"black"; col3<-"black"  }
               if(plot_to_file){
@@ -1112,6 +1131,7 @@ Exp.hclust <- function(signexp_obj, object.hclust, method.dist, use.cor,
     }
     Es<-signexp_obj@Exp
     n<-dim(Es)[[1]]
+    j<-dim(Es)[[2]]
     r<-dim(Es)[[3]]
     
     pattern   <- hc2split(object.hclust)$pattern
@@ -1135,7 +1155,7 @@ Exp.hclust <- function(signexp_obj, object.hclust, method.dist, use.cor,
         } else {
             x.hclust <- NULL
             warning(paste("inappropriate distance matrices",
-                " are omitted in computation: r = ", i), call.=FALSE)
+                " are omitted in computation: r = ", k), call.=FALSE)
         }
     }
     boot <- list(edges.cnt=edges.cnt, method.dist=method.dist, use.cor=use.cor,
@@ -1143,6 +1163,7 @@ Exp.hclust <- function(signexp_obj, object.hclust, method.dist, use.cor,
     class(boot) <- "boot.hclust"
     return(boot)
 }
+
 Expclust.merge <- function(data, object.hclust, mboot){
     pattern <- hc2split(object.hclust)$pattern
     r     <- unlist(lapply(mboot,"[[","r"))

@@ -2,6 +2,7 @@
 \docType{methods}
 \alias{ExposureSurvival}
 \alias{ExposureSurvival,SignExp,character-method}
+\alias{ExposureSurvival,SignExp,Surv-method}
 
 \title{Exposure survival analysis}
 
@@ -35,7 +36,7 @@
     \item{plot_to_file}{Whether to save the plot to the file parameter.
     Default is FALSE.}
     \item{file}{Output file to export p-values boxplots and Kaplan-Meier curves.}
-    \item{colored}{Boolean variable, if TRUE p-values boxplots of 
+    \item{colors}{Boolean variable, if TRUE p-values boxplots of 
     significant signatures will be colored in green, 
     cutoff line will be colored in red and line segments showing the 
     transformed p-value quantile used for significance evaluation will be 
@@ -64,11 +65,12 @@ differences between the groups are maximal.}
 \dontshow{
     # mock data
     muts <- t(rmultinom(30, 500, rep(1:6,each=16))) #30 samples
-    signatures <- signeR(M=muts, Mheader=FALSE, nsig=1, EMit_lim=10, EM_eval=10, 
+    signatures <- signeR(M=muts, Mheader=FALSE, nsig=2, EMit_lim=10, EM_eval=10, 
     main_eval=10, main_burn=10)
 }
 # feature vector, with one value for each sample
-my_surv <- Surv(rnorm(30,730,100),sample(c(0:1),30,replace=T))
+library(survival)
+my_surv <- Surv(rnorm(30,730,100),sample(c(0:1),30,replace=TRUE))
 
 Exp_corr <- ExposureSurvival(signatures$SignExposures, surv = my_surv)
 

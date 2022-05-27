@@ -10,7 +10,7 @@
 }
 
 \usage{
-\S4method{ExposureClassify}{SignExp,character,character}(signexp_obj, labels, method="knn",
+\S4method{ExposureClassify}{SignExp,character}(signexp_obj, labels, method="knn",
     k=3, weights=NA, plot_to_file=FALSE, file="Classification_barplot.pdf",
     colors=NA_character_, min_agree=0.75, ...)
 }

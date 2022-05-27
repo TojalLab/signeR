@@ -24,7 +24,7 @@
 #                 ap,bp,ae,be,lp,le. Start values are still required.
 # EM_lim: limit of EM iterations for the estimation of ap,bp,ae,be,lp,le.
 # EM_eval_it: number of samples generated at each EM iteration.
-# keep_param: if TRUE, algorithm export hyperparameters
+# keep_param: if TRUE, the algorithm export hyperparameters
 ############################################################################
 
 eBayesNMF<-function(M,W,n,ap,bp,ae,be,lp,le,var.ap=10,var.ae=10,

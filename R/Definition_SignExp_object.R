@@ -337,17 +337,18 @@ setMethod("AddSamples",signature(Signatures="ANY", originalCounts="ANY",
         dn<-dim(NewCounts)
         newsamp<-dn[[2]]
         fixP<-!updateSigs
+        keep_param<-TRUE ############# FALSE would make no difference
         #Estimate new expositions based on P
         NewExp<-matrix(0,n,newsamp)
         for(k in 1:newsamp){
             found<-NewCounts[,k]
             opp<-NewOpp[,k]
             RSS0<-function(vet){
-                expected<-Ps%*%matrix(vet,nsig,1) * opp
+                expected<-Ps%*%matrix(vet,n,1) * opp
                 return( sum( expected+lgamma(found+1)-found*log(expected) ) )
                 
             }
-            Fit0 <- nloptr(x0=rep(1,nsig), eval_f = RSS0, lb=rep(0,nsig), 
+            Fit0 <- nloptr(x0=rep(1,n), eval_f = RSS0, lb=rep(0,n), 
                 opts = list(algorithm = "NLOPT_LN_SBPLX", xtol_rel=1e-200, 
                     xtol_abs=1e-200, maxeval = 1e10))
             NewExp[,k]<-as.vector(Fit0$solution)
@@ -398,13 +399,13 @@ setMethod("AddSamples",signature(Signatures="ANY", originalCounts="ANY",
             cat("EM algorithm:\n")
             progbar <- txtProgressBar(style=3)
             while(upgrade>0.05 & it < EMit_lim){
-                if(prlel){
+                if(parallel){
                     SamplesHO <-GibbsSamplerParallel(M,W,Z,P,E,Ap,Bp,Ae,Be,
                         ap,bp,ae,be,lp,le,
                         var.ap,var.ae,burn=burn_HO,eval=EM_eval,
                         Pfixed=fixP,Zfixed=FALSE,Thetafixed=FALSE,
-                        Afixed=FALSE,keep_par=TRUE,n_cor=n_cores,
-                        sGap=sampGap, min_samples_c=min_samples_core)
+                        Afixed=FALSE,keep_par=TRUE,n_cor=ncore,
+                        sGap=samplerGap, min_samples_c=min_samples_per_core)
                 }else{
                     SamplesHO <-GibbsSamplerCpp(M,W,Z,P,E,Ap,Bp,Ae,Be,
                         ap,bp,ae,be,lp,le,
@@ -457,7 +458,7 @@ setMethod("AddSamples",signature(Signatures="ANY", originalCounts="ANY",
                 }                
                 it <- it+1
                 burn_HO<-200
-                setTxtProgressBar(progbar, it/EM_lim)
+                setTxtProgressBar(progbar, it/EMit_lim)
             }
             setTxtProgressBar(progbar, 1)
             cat("\n")
@@ -474,13 +475,13 @@ setMethod("AddSamples",signature(Signatures="ANY", originalCounts="ANY",
                 cat(paste0("Running  Gibbs sampler for ",n," signatures...",
                     collapse=""))
             }
-            if(prlel){
+            if(parallel){
                 Samples <- GibbsSamplerParallel(M,W,Z,P,E,Ap,Bp,Ae,Be,
                     ap,bp,ae,be,lp,le,
                     var.ap,var.ae,burn=burn_it,eval=eval_it,
                     Pfixed=fixP,Zfixed=FALSE,Thetafixed=FALSE,Afixed=FALSE,
-                    keep_par=keep_param, n_cor=n_cores, sGap=sampGap, 
-                    min_samples_c=min_samples_core)
+                    keep_par=keep_param, n_cor=ncore, sGap=samplerGap, 
+                    min_samples_c=min_samples_per_core)
             }else{
                 Samples <- GibbsSamplerCpp(M,W,Z,P,E,Ap,Bp,Ae,Be,
                     ap,bp,ae,be,lp,le,
@@ -547,13 +548,13 @@ setMethod("AddSamples",signature(Signatures="ANY", originalCounts="ANY",
                     cat("EM algorithm:\n")
                     progbar <- txtProgressBar(style=3)
                     while(upgrade>0.05 & it < EMit_lim){
-                        if(prlel){
+                        if(parallel){
                             SamplesHO <-GibbsSamplerParallel(M,W,Z,P,E,Ap,Bp,Ae,Be,
                                 ap,bp,ae,be,lp,le,
                                 var.ap,var.ae,burn=burn_HO,eval=EM_eval,
                                 Pfixed=fixP,Zfixed=FALSE,Thetafixed=FALSE,
-                                Afixed=FALSE,keep_par=TRUE,n_cor=n_cores,
-                                sGap=sampGap, min_samples_c=min_samples_core)
+                                Afixed=FALSE,keep_par=TRUE,n_cor=ncore,
+                                sGap=samplerGap, min_samples_c=min_samples_per_core)
                         }else{
                             SamplesHO <-GibbsSamplerCpp(M,W,Z,P,E,Ap,Bp,Ae,Be,
                                 ap,bp,ae,be,lp,le,
@@ -606,7 +607,7 @@ setMethod("AddSamples",signature(Signatures="ANY", originalCounts="ANY",
                         }                
                         it <- it+1
                         burn_HO<-200
-                        setTxtProgressBar(progbar, it/EM_lim)
+                        setTxtProgressBar(progbar, it/EMit_lim)
                     }
                     setTxtProgressBar(progbar, 1)
                     cat("\n")
@@ -617,13 +618,13 @@ setMethod("AddSamples",signature(Signatures="ANY", originalCounts="ANY",
                     cat(paste0("Running  Gibbs sampler for ",n2," signatures...",
                         collapse=""))
                 }
-                if(prlel){
+                if(parallel){
                     Samples <- GibbsSamplerParallel(M,W,Z,P2,E2,Ap2,Bp2,Ae2,Be2,
                         ap,bp,ae,be,lp,le,
                         var.ap,var.ae,burn=burn_it,eval=eval_it,
                         Pfixed=FALSE,Zfixed=FALSE,Thetafixed=FALSE,Afixed=FALSE,
-                        keep_par=keep_param, n_cor=n_cores, sGap=sampGap, 
-                        min_samples_c=min_samples_core)
+                        keep_par=keep_param, n_cor=ncore, sGap=samplerGap, 
+                        min_samples_c=min_samples_per_core)
                 }else{
                     Samples <- GibbsSamplerCpp(M,W,Z,P2,E2,Ap2,Bp2,Ae2,Be2,
                         ap,bp,ae,be,lp,le,
@@ -675,13 +676,13 @@ setMethod("AddSamples",signature(Signatures="ANY", originalCounts="ANY",
             cat(paste0("Running  Gibbs sampler for ",n," signatures...",
                 collapse=""))
         }
-        if(prlel){
+        if(parallel){
             Samples <- GibbsSamplerParallel(M,W,Z,P,E,Ap,Bp,Ae,Be,
                 ap,bp,ae,be,lp,le,
                 var.ap,var.ae,burn=main_burn,eval=main_eval,
                 Pfixed=fixP,Zfixed=FALSE,Thetafixed=FALSE,Afixed=FALSE,
-                keep_par=keep_param, n_cor=n_cores, sGap=sampGap, 
-                min_samples_c=min_samples_core)
+                keep_par=keep_param, n_cor=ncore, sGap=samplerGap, 
+                min_samples_c=min_samples_per_core)
         }else{
             Samples <- GibbsSamplerCpp(M,W,Z,P,E,Ap,Bp,Ae,Be,
                 ap,bp,ae,be,lp,le,

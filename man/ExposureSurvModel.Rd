@@ -2,6 +2,7 @@
 \docType{methods}
 \alias{ExposureSurvModel}
 \alias{ExposureSurvModel,SignExp,character-method}
+\alias{ExposureSurvModel,SignExp,Surv-method}
 
 \title{Exposure Cox model}
 
@@ -11,14 +12,14 @@
 }
 
 \usage{
-\S4method{ExposureSurvModel}{SignExp,Surv}(signexp_obj, surv,addata
-    quant=0.5, cutoff_pvalue=0.05, cutoff_hr=NA,
-    plot_to_file=FALSE, file="ExposureSurvival_plot.pdf",
-    colors=TRUE, ...)
+\S4method{ExposureSurvModel}{SignExp,Surv}(Exposures, surv, addata,
+    quant=0.5, cutoff_pvalue=0.05, cutoff_hr=NA, plot_to_file=FALSE, 
+    file="ExposureSurvival_plot.pdf", colors=TRUE, ...)
 }
 
 \arguments{
-    \item{signexp_obj}{a SignExp object returned by signeR function.}
+    \item{Exposures}{A SignExp object returned by signeR function or a matrix of 
+    exposures (with signatures in rows and a column for each sample).}
     \item{surv}{a Surv object from package survival or a matrix with columns 
     "time" and "status" (the last indicates whether 1:an event occurred or 
     0:there was a loss of follow up).}
@@ -56,11 +57,12 @@ whether its levels of exposure are significant to survival.}
 \dontshow{
     # mock data
     muts <- t(rmultinom(30, 500, rep(1:6,each=16))) #30 samples
-    signatures <- signeR(M=muts, Mheader=FALSE, nsig=1, EMit_lim=10, EM_eval=10, 
+    signatures <- signeR(M=muts, Mheader=FALSE, nsig=2, EMit_lim=10, EM_eval=10, 
     main_eval=10, main_burn=10)
 }
 # feature vector, with one value for each sample
-my_surv <- Surv(rnorm(30,730,100),sample(c(0:1),30,replace=T))
+library(survival)
+my_surv <- Surv(rnorm(30,730,100),sample(c(0:1), 30, replace = TRUE))
 
 Exp_corr <- ExposureSurvModel(signatures$SignExposures, surv = my_surv)
 

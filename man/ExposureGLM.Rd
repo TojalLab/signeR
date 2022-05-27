@@ -1,7 +1,7 @@
 \name{ExposureGLM}
 \docType{methods}
 \alias{ExposureGLM}
-\alias{ExposureGLM,SignExp,character-method}
+\alias{ExposureGLM,SignExp,numeric-method}
 
 \title{Exposure Generalized Linear Model}
 
@@ -11,16 +11,19 @@
 }
 
 \usage{
-\S4method{ExposureGLM}{SignExp,numeric}(signexp_obj, feature,
+\S4method{ExposureGLM}{SignExp,numeric}(Exposures, feature,
      cutoff_pvalue=0.05,quant=0.5, plot_to_file=FALSE,
-     file="ExposureGLM_plot.pdf",colors=TRUE, ...)
+     file="ExposureGLM_plot.pdf",colors=TRUE)
 }
 \arguments{
-    \item{signexp_obj}{A SignExp object returned by signeR function.}
+    \item{Exposures}{A SignExp object returned by signeR function or a matrix of 
+    exposures (with signatures in rows and a column for each sample).}
     \item{feature}{numeric feature associated to each sample, such as
      age, weight or the expression of a gene.}
     \item{cutoff_pvalue}{threshold for p-values quantile for signatures to be
     considered as significant on the model.}
+    \item{quant}{p-values quantile used to evaluate if signatures are 
+    significant. Default is 0.5, meaning that median p-values are adopted.}
     \item{plot_to_file}{Whether to save plots to the file parameter.
     Default is FALSE.}
     \item{file}{Output file to export p-values boxplot and scatterplots 
@@ -30,8 +33,6 @@
     cutoff line will be colored in red and line segments showing the 
     transformed p-value quantile used for significance evaluation will be 
     colored in blue. Otherwise the plot will be black & white.}
-    \item{...}{additional parameters for classification algorithm (defined by
-"method" above).}
 }
 
 \value{
@@ -47,7 +48,7 @@ A list with the following items:
 \dontshow{
     # mock data
     muts <- t(rmultinom(30, 500, rep(1:6,each=16))) #30 samples
-    signatures <- signeR(M=muts, Mheader=FALSE, nsig=1, EMit_lim=10, EM_eval=10, 
+    signatures <- signeR(M=muts, Mheader=FALSE, nsig=2, EMit_lim=10, EM_eval=10, 
     main_eval=10, main_burn=10)
 }
 

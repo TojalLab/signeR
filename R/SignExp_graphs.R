@@ -208,7 +208,7 @@ setMethod("ExposureBoxplot",signature(signexp_obj="SignExp", plot_to_file="ANY",
             }
         }
         if(is.na(reord[1])) reord<-1:n
-        if(is.na(show_samples)){show_samples <- (j<=30)}
+        if(is.na(show_samples)){show_samples <- (j<=50)}
         ####################### ggplot2
         m = signexp_obj@Exp
         if(show_samples){
@@ -217,11 +217,16 @@ setMethod("ExposureBoxplot",signature(signexp_obj="SignExp", plot_to_file="ANY",
             colnames(m) <-NULL
         }
         m = reshape2::melt(m)
-        m$Var1=factor(paste0("S",m$Var1), levels=paste0("S",1:n))
-        m = group_by(m, Var1,Var2) %>% summarize(q1=min(value),q2=quantile(value,p=0.25),q3=median(value),q4=quantile(value,p=0.75),q5=max(value))
-        g<-ggplot(m, aes(x=Var2,ymin=q1,lower=q2,middle=q3,upper=q4,ymax=q5)) + 
+        colnames(m)<-c("Signatures","Samples","r","value")
+        m$Signatures=factor(paste0("S",m$Signatures), levels=paste0("S",1:n))
+        m = group_by(m, Signatures, Samples) %>% summarize(q1=min(value),
+                                                           q2=quantile(value,p=0.25),
+                                                           q3=median(value),
+                                                           q4=quantile(value,p=0.75),
+                                                           q5=max(value))
+        g<-ggplot(m, aes(x=Samples,ymin=q1,lower=q2,middle=q3,upper=q4,ymax=q5)) + 
             geom_boxplot(stat='identity') + 
-            facet_grid(Var1~.,scales="free") + 
+            facet_grid(Signatures~.,scales="free") + 
             theme_bw() +
             theme(axis.text.x=element_text(angle=90,size=8,vjust=.5,hjust=0,family="mono",face="bold")) +
             scale_y_log10()+
@@ -240,13 +245,13 @@ setMethod("ExposureBoxplot",signature(signexp_obj="SignExp", plot_to_file="ANY",
 setGeneric("ExposureBarplot",
     def=function(signexp_obj, plot_to_file=FALSE,
         file="Exposure_barplot.pdf",col='tan2',threshold=0,relative=FALSE,
-        title="", samplenames=TRUE, ...){
+        title="", show_samples=TRUE, ...){
         standardGeneric("ExposureBarplot")
     }
 )
 setMethod("ExposureBarplot",signature(signexp_obj="SignExp", plot_to_file="ANY",
     file="ANY", col="ANY", threshold="ANY",relative="ANY",title="ANY",
-    samplenames="ANY"),
+    show_samples="ANY"),
     function(signexp_obj, plot_to_file, file, col, threshold,...){
         if(!signexp_obj@normalized) signexp_obj<-Normalize(signexp_obj)
         dp <- dim(signexp_obj@Sign) #[i,n,r]
@@ -263,8 +268,8 @@ setMethod("ExposureBarplot",signature(signexp_obj="SignExp", plot_to_file="ANY",
         }else{
             ylabel<-"Signature contribution to mutation counts"
         }
-        if(j>50){ samplenames<-FALSE }
-        if(!samplenames){ colnames(Ehat)<-NULL }
+        if(j>50){ show_samples<-FALSE }
+        if(!show_samples){ colnames(Ehat)<-NULL }
         mycolors<-terrain.colors(n)[n:1]
         #Plot
         if(plot_to_file){
@@ -283,22 +288,23 @@ setMethod("ExposureBarplot",signature(signexp_obj="SignExp", plot_to_file="ANY",
         colnames(m) = signexp_obj@samples
         rownames(m) = paste0("S",1:n)
         m = reshape2::melt(m)
+        colnames(m)<-c("Signatures","Samples","value")
         if(relative){
-            g<-ggplot(m, aes(x=Var2,y=value,fill=Var1)) + 
+            g<-ggplot(m, aes(x=Samples,y=value,fill=Signatures)) + 
                 geom_bar(stat='identity',position='fill') + 
                 theme_bw()+
                 theme(axis.text.x=element_text(angle=90,vjust=.5)) + 
                 coord_cartesian(expand=0) + 
                 scale_y_continuous(labels=percent_format()) +
-                labs(x="",fill="signatures")
+                labs(x="",fill="Signatures")
         }else{
-            g<-ggplot(m, aes(x=Var2,y=value,fill=Var1)) + 
+            g<-ggplot(m, aes(x=Samples,y=value,fill=Signatures)) + 
                 geom_col(position='stack') + 
                 theme_bw()+
                 theme(axis.text.x=element_text(angle=90,vjust=.5)) + 
                 coord_cartesian(expand=0) + 
                 #scale_y_continuous(labels=percent_format()) + 
-                labs(x="",fill="signatures")
+                labs(x="",fill="Signatures")
         }
         plot(g)
         #######################

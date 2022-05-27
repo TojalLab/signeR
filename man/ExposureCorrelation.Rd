@@ -1,7 +1,7 @@
 \name{ExposureCorrelation}
 \docType{methods}
 \alias{ExposureCorrelation}
-\alias{ExposureCorrelation,SignExp,character-method}
+\alias{ExposureCorrelation,SignExp,numeric-method}
 
 \title{Exposure correlation analysis (given a known sample feature)}
 
@@ -11,14 +11,15 @@
 }
 
 \usage{
-\S4method{ExposureCorrelation}{SignExp,numeric}(signexp_obj, feature,
-    method=spearman, quant=0.5, cutoff_pvalue=0.05,
-    plot_to_file=FALSE, file="ExposureCorr.pdf",
-    colored=TRUE, ...)
+\S4method{ExposureCorrelation}{SignExp,numeric}(Exposures, feature,
+    method=spearman, cutoff_pvalue=0.05, quant=0.5,
+    plot_to_file=FALSE, file="ExposureCorrelation_plot.pdf",
+    colors=TRUE)
 }
 
 \arguments{
-    \item{signexp_obj}{a SignExp object returned by signeR function.}
+    \item{Exposures}{a SignExp object returned by signeR function or a matrix of 
+    exposures (with signatures in rows and a column for each sample).}
     \item{feature}{numeric feature associated to each sample, such as
      age, weight or the expression of a gene.}
     \item{method}{a character string indicating which correlation 
@@ -33,13 +34,11 @@
     Default is FALSE.}
     \item{file}{Output file to export p-values boxplot and scatterplots 
     showing the correlations of exposures and the provided feature.}
-    \item{colored}{Boolean variable, if TRUE p-values boxplots of 
+    \item{colors}{Boolean variable, if TRUE p-values boxplots of 
     significantly correlated signatures will be colored in green, 
     cutoff line will be colored in red and line segments showing the 
     transformed p-value quantile used for significance evaluation will be 
     colored in blue. Otherwise the plot will be black & white.}
-    \item{...}{additional parameters for test algorithm defined by the method
-    parameter.}
 }
 
 \value{
@@ -61,7 +60,7 @@ signature.}
 \dontshow{
     # mock data
     muts <- t(rmultinom(30, 500, rep(1:6,each=16))) #30 samples
-    signatures <- signeR(M=muts, Mheader=FALSE, nsig=1, EMit_lim=10, EM_eval=10, 
+    signatures <- signeR(M=muts, Mheader=FALSE, nsig=2, EMit_lim=10, EM_eval=10, 
     main_eval=10, main_burn=10)
 }
 # feature vector, with one value for each sample
