@@ -822,7 +822,7 @@ setMethod("ExposureSurvModel",signature(Exposures="SignExp",surv="ANY",
 setGeneric("FuzzyClustExp",
     def=function(signexp_obj, Med_exp=NA, Clim=NA ,method.dist="euclidean", 
         method.clust="fcm", relative=FALSE, m=2, plot_to_file=FALSE,
-        file="FuzzyClustExp.pdf",colored=TRUE, iseed=NA, try_all=FALSE, 
+        file="FuzzyClustExp.pdf",colored=TRUE, iseed=NA_integer_, try_all=FALSE, 
         fast=TRUE, ...){
         standardGeneric("FuzzyClustExp")
     }
@@ -832,13 +832,18 @@ setMethod("FuzzyClustExp",signature(signexp_obj="SignExp", Med_exp="ANY",
     relative="ANY", m="ANY", plot_to_file="ANY",
     file="ANY",colored="ANY",iseed="ANY",try_all="ANY",fast="ANY"),
     function(signexp_obj, Med_exp, method.dist, method.clust,
-        relative, plot_to_file, file, colored, iseed,...){
+        relative=FALSE, plot_to_file, file, colored=TRUE, iseed=NA, 
+        try_all=FALSE,fast=TRUE,...){
         if(!is.na(iseed)) set.seed(seed = iseed)
         dp <- dim(signexp_obj@Sign) #[i,n,r]
         de <- dim(signexp_obj@Exp) #[n,j,r]
         i<-dp[[1]]; n<-dp[[2]]; j<-de[[2]]; r<-de[[3]]
         Es<-signexp_obj@Exp
-        if (is.na(Clim[1])) Clim <- c(2,j-1)
+        if (is.na(Clim[1])){
+            Clim <- c(2,j-1)
+        }else{
+            if(length(Clim)==1) Clim<-rep(Clim,2)    
+        } 
         Cmin<-Clim[1]
         Cmax<-Clim[2]
         if(try_all){
@@ -846,50 +851,86 @@ setMethod("FuzzyClustExp",signature(signexp_obj="SignExp", Med_exp="ANY",
         }else{
             step0 <- 2^max((floor(log2(Cmax-Cmin+1))-2),0)
         }
-        cat(paste("Evaluating models with the number of groups ranging from ",
-            Cmin," to ",Cmax,", please be patient.\n",sep=""))
+        if(is.na(Med_exp[1])){
+            Med_exp<-as.matrix(Median_exp(signexp_obj))
+        }
         if(fast){
-            my_obj<-as.matrix(Median_exp(signexp_obj))
+            my_obj<-Med_exp
         }else{
             my_obj<-signexp_obj    
-            }
-        Ops<-Optimal_sigs(testfun=function(n){
-            cat(paste("Testing ",n," groups.\n",sep=""))
-            Cm<-CmeansExp(my_obj, Med_exp, C=n, method.dist, method.clust,
-                relative, ,plot=FALSE, plot_to_file, file, colored, iseed,...)
-            U<-Cm[[1]]
-            PBMF<-sapply(1:r,function(k){PBMFindex(U,Data=Es[,,k],m)})
-            # PBMF<-rep(0,r)
-            # for (k in 1:r){
-            #     PBMF[k]<-PBMFindex(U,Data=Es[,,k],m)
-            # }
-            return(list(median(PBMF),PBMF))
-        },
+        }
+        aseed<-iseed
+        if(Cmin<Cmax){
+            cat(paste("Evaluating models with the number of groups ranging from ",
+                      Cmin," to ",Cmax,", please be patient.\n",sep=""))
+            Ops<-Optimal_sigs(testfun=function(n){
+                cat(paste("Testing ",n," groups.\n",sep=""))
+                Cm<-CmeansExp(my_obj, Med_exp, C=n, method.dist, method.clust,
+                              relative, iseed=aseed,...)
+                U<-Cm[[1]]
+                PBMF<-as.vector(future_apply(Es,3,function(E){PBMFindex(U,Data=E,m)}))
+                return(list(median(PBMF),PBMF))
+            },
             liminf=Cmin,limsup=Cmax,step=step0,significance=FALSE
-        )
-        bestn<-Ops[[1]]
-        cat(paste("Optimum number of groups is ",bestn,
-                  ". Performing final clustering.\n",sep=""))
+            )
+            bestn<-as.numeric(Ops[[1]])
+            rm(Ops)
+            cat(paste("Optimum number of groups is ",bestn,
+                      ". Performing final clustering.\n",sep=""))
+        }else{
+            bestn<-Cmin
+            cat(paste("Performing clustering in ",bestn," groups.\n",sep=""))
+        }
+        # cat(class(signexp_obj));cat("\n")
+        # cat(class(Med_exp));cat("\n")
+        # cat(class(bestn));cat("\n")
+        # cat(bestn);cat("\n")
+        # cat(method.dist);cat("\n")
+        # cat(method.clust);cat("\n")
+        # cat(relative);cat("\n")
+        # cat(iseed);cat("\n")
         Cm<-CmeansExp(signexp_obj, Med_exp, C=bestn, method.dist, method.clust,
-            relative, plot=TRUE, plot_to_file, file, colored, iseed,...)
+            relative, iseed=aseed,...)
+        if(plot_to_file){
+            if(length(grep("\\.pdf$",file))==0){
+                file<-paste(file,"pdf",sep=".")
+            }
+            pdf(file,width=max(5,2*j),height=7)
+        }else{
+            if(!grepl("pdf|postscript|cairo_|png|tiff|jpeg|bmp",
+                      names(dev.cur()),perl=TRUE)){
+                dev.new(width=max(5,2*j), height=7)
+            }
+        }
+        if(colored){
+            clr = rev(colorRampPalette(brewer.pal(name="Spectral",n=11))(100))
+        }else{
+            clr=rev(colorRampPalette(brewer.pal(name="Greys",n=9))(100)) 
+        }
+        pheatmap(Cm$Meanfuzzy,border_color=NA, color=clr, 
+                 clustering_method='ward.D2',
+                 clustering_distance_rows='canberra',
+                 cluster_cols = FALSE)
+        if(plot_to_file){
+            dev.off()
+        }
         return(Cm)
     }
 )
+
+#CmeansExp
 setGeneric("CmeansExp",
     def=function(signexp_obj, Med_exp=NA, C, method.dist="euclidean", 
-        method.clust="average", relative=FALSE, plot=TRUE, plot_to_file=FALSE,
-        file="CmeansExp.pdf",colored=TRUE, iseed=NA, ...){
+        method.clust="fcm", relative=FALSE, iseed=NA_integer_, ...){
         standardGeneric("CmeansExp")
     }
 )
-#############################
 #For matrix:
 setMethod("CmeansExp",signature(signexp_obj="matrix", Med_exp="ANY", C="ANY",
                                 method.dist="ANY", method.clust="ANY", 
-                                relative="ANY", plot="ANY", plot_to_file="ANY",
-                                file="ANY",colored="ANY",iseed="ANY"),
+                                relative="ANY", iseed="ANY"),
           function(signexp_obj, Med_exp, C, method.dist, method.clust,
-                   relative, plot_to_file, file, colored, iseed,...){
+                   relative, plot_to_file, file, colored, iseed=NA,...){
               # initialize random seed
               if(!is.na(iseed)) set.seed(seed = iseed)
               de <- dim(signexp_obj) #[n,j]
@@ -906,69 +947,21 @@ setMethod("CmeansExp",signature(signexp_obj="matrix", Med_exp="ANY", C="ANY",
                   }))
               }else{ 
                   if(method.clust=="fcm"){
-                      baseclust<-fcm(t(Med_exp),centers=C)
+                      baseclust<-ppclust::fcm(t(Med_exp),centers=C)
                   }else if (method.clust=="pcm"){
-                      baseclust<-pcm(t(Med_exp),centers=C)
+                      baseclust<-ppclust::pcm(t(Med_exp),centers=C)
                   }else if (method.clust=="fpcm"){
-                      baseclust<-fpcm(t(Med_exp),centers=C)
+                      baseclust<-ppclust::fpcm(t(Med_exp),centers=C)
                   }else stop("method.clust should be 'fcm', 'pcm' or 'fpcm'!\n")
                   basefuzzy<-baseclust$u
               }
-              # Es<-signexp_obj@Exp
-              # Fuzzy2<-apply(Es,3,function(Exposure){
-              #     if(n==1) Exposure <- matrix(as.vector(Exposure),n,j)
-              #     if(relative){ Exposure<-t(t(Exposure)/colSums(Exposure)) }
-              #     colnames(Exposure)<-signexp_obj@samples
-              #     if(method.clust=="km"){
-              #         thisclust<-kmeans(t(Exposure),centers=C)
-              #         thisfuzzy<-t(sapply(thisclust$cluster,function(n){
-              #             as.numeric(c(1:C)==n)
-              #         }))
-              #     }else{ 
-              #         if(method.clust=="fcm"){
-              #             thisclust<-fcm(t(Exposure),centers=C)
-              #         }else if (method.clust=="pcm"){
-              #             thisclust<-pcm(t(Exposure),centers=C)
-              #         }else if (method.clust=="fpcm"){
-              #             thisclust<-fpcm(t(Exposure),centers=C)
-              #         }else stop("method.clust should be 'fcm', 'pcm' or 'fpcm'!\n")
-              #         thisfuzzy<-thisclust$u
-              #     }
-              #     #hungarian algorithm to assign clusters
-              #     D<-sapply(1:C,function(j){
-              #         sapply(1:C,function(i){
-              #             sum(abs(basefuzzy[,i]-thisfuzzy[,j]))
-              #         })
-              #     })#rows correspond to basefuzzy clusters, cols to thisfuzzy clusters 
-              #     assignment <- solve_LSAP(D)
-              #     thisfuzzy <- thisfuzzy[,as.vector(assignment)]
-              #     colnames(thisfuzzy)<-colnames(basefuzzy)
-              #     return(thisfuzzy)
-              # })
-              # Fuzzy<-array(as.vector(Fuzzy2),dim=c('j'=j, 'c'=C, 'r'=r))
-              # rownames(Fuzzy)<-rownames(basefuzzy)
-              # colnames(Fuzzy)<-colnames(basefuzzy)
-              # Meanfuzzy<-apply(Fuzzy,c(1,2),mean)
-              # 
-              # if(plot){
-              #     clr=rev(colorRampPalette(brewer.pal(name="Spectral",n=11))(100))
-              #     pheatmap(Meanfuzzy,border_color=NA, color=clr, 
-              #              clustering_method='ward.D2',
-              #              clustering_distance_rows='canberra',
-              #              cluster_cols = FALSE)
-              #     #ggplot(melt(data.frame(Meanfuzzy)), aes(X, Y, fill= Z)) + 
-              #     #   geom_tile()
-              #     ###
-              # }
               return(list(Meanfuzzy=basefuzzy,AllFuzzy=basefuzzy,Fuzzy=basefuzzy))
           })
-#############################
+#For SignExp
 setMethod("CmeansExp",signature(signexp_obj="SignExp", Med_exp="ANY", C="ANY",
-    method.dist="ANY", method.clust="ANY", 
-    relative="ANY", plot="ANY", plot_to_file="ANY",
-    file="ANY",colored="ANY",iseed="ANY"),
+    method.dist="ANY", method.clust="ANY", relative="ANY",iseed="ANY"),
     function(signexp_obj, Med_exp, C, method.dist, method.clust,
-        relative, plot_to_file, file, colored, iseed,...){
+        relative, iseed=NA,...){
         # initialize random seed
         if(!is.na(iseed)) set.seed(seed = iseed)
         if(!signexp_obj@normalized) signexp_obj<-Normalize(signexp_obj)
@@ -987,16 +980,16 @@ setMethod("CmeansExp",signature(signexp_obj="SignExp", Med_exp="ANY", C="ANY",
             }))
         }else{ 
             if(method.clust=="fcm"){
-                baseclust<-fcm(t(Med_exp),centers=C)
+                baseclust<-ppclust::fcm(t(Med_exp),centers=C)
             }else if (method.clust=="pcm"){
-                baseclust<-pcm(t(Med_exp),centers=C)
+                baseclust<-ppclust::pcm(t(Med_exp),centers=C)
             }else if (method.clust=="fpcm"){
-                baseclust<-fpcm(t(Med_exp),centers=C)
+                baseclust<-ppclust::fpcm(t(Med_exp),centers=C)
             }else stop("method.clust should be 'fcm', 'pcm' or 'fpcm'!\n")
             basefuzzy<-baseclust$u
         }
         Es<-signexp_obj@Exp
-        Fuzzy2<-apply(Es,3,function(Exposure){
+        Fuzzy2<-future_apply(Es,3,function(Exposure){
             if(n==1) Exposure <- matrix(as.vector(Exposure),n,j)
             if(relative){ Exposure<-t(t(Exposure)/colSums(Exposure)) }
             colnames(Exposure)<-signexp_obj@samples
@@ -1007,11 +1000,11 @@ setMethod("CmeansExp",signature(signexp_obj="SignExp", Med_exp="ANY", C="ANY",
                 }))
             }else{ 
                 if(method.clust=="fcm"){
-                    thisclust<-fcm(t(Exposure),centers=C)
+                    thisclust<-ppclust::fcm(t(Exposure),centers=C)
                 }else if (method.clust=="pcm"){
-                    thisclust<-pcm(t(Exposure),centers=C)
+                    thisclust<-ppclust::pcm(t(Exposure),centers=C)
                 }else if (method.clust=="fpcm"){
-                    thisclust<-fpcm(t(Exposure),centers=C)
+                    thisclust<-ppclust::fpcm(t(Exposure),centers=C)
                 }else stop("method.clust should be 'fcm', 'pcm' or 'fpcm'!\n")
                 thisfuzzy<-thisclust$u
             }
@@ -1021,7 +1014,7 @@ setMethod("CmeansExp",signature(signexp_obj="SignExp", Med_exp="ANY", C="ANY",
                     sum(abs(basefuzzy[,i]-thisfuzzy[,j]))
                 })
             })#rows correspond to basefuzzy clusters, cols to thisfuzzy clusters 
-            assignment <- solve_LSAP(D)
+            assignment <- clue::solve_LSAP(D)
             thisfuzzy <- thisfuzzy[,as.vector(assignment)]
             colnames(thisfuzzy)<-colnames(basefuzzy)
             return(thisfuzzy)
@@ -1030,37 +1023,26 @@ setMethod("CmeansExp",signature(signexp_obj="SignExp", Med_exp="ANY", C="ANY",
         rownames(Fuzzy)<-rownames(basefuzzy)
         colnames(Fuzzy)<-colnames(basefuzzy)
         Meanfuzzy<-apply(Fuzzy,c(1,2),mean)
-        
-        if(plot){
-        clr=rev(colorRampPalette(brewer.pal(name="Spectral",n=11))(100))
-        pheatmap(Meanfuzzy,border_color=NA, color=clr, 
-                 clustering_method='ward.D2',
-                 clustering_distance_rows='canberra',
-                 cluster_cols = FALSE)
-        #ggplot(melt(data.frame(Meanfuzzy)), aes(X, Y, fill= Z)) + 
-        #   geom_tile()
-        ###
-        }
-        return(list(Meanfuzzy=Meanfuzzy,AllFuzzy=Fuzzy,Fuzzy=basefuzzy))
+        return(list(Meanfuzzy=Meanfuzzy,
+                    AllFuzzy=Fuzzy,
+                    Fuzzy=basefuzzy))
     })
+####
 PBMFindex<-function(U,Data,m=2){
     U<-as.matrix(U)
     Data<-as.matrix(Data)
-    K<-NCOL(U)
-    N<-NROW(U)
+    k<-NCOL(U)
+    n<-NROW(U)
     Um<-U^m
-    Centroids<-t(t(Data%*%(Um))/colSums(Um))
+    Centroids<-t(t(Data%*%Um)/colSums(Um))
     v0<-rowMeans(Data)
     D0<-Data-v0
-    E<-sum(sqrt(colSums(D0^2)))
-    Dk<-max(dist(t(Centroids)))
-    Dc<-sapply(1:K,function(q){
-        sapply(1:N,function(m){
-            sum((Data[,m]-Centroids[,q])^2)
-            })
-        })
+    e<-sum(sqrt(colSums(D0^2)))
+    dk<-max(dist(t(Centroids)))
+    Dc<-(as.matrix(dist(t(cbind(Data,Centroids))))[1:n,(n+1):(n+k)])^2
+    #Dc<-(proxy::dist(t(Data),t(Centroids)))^2
     J<-sum(Um*Dc)
-    PBMF<-((E*Dk)/(K*J))^2
+    PBMF<-((e*dk)/(k*J))^2
     return(PBMF)
 }
 

@@ -18,7 +18,7 @@ Imports: BiocGenerics, Biostrings, class, graphics, grDevices,
         maxstat, survivalAnalysis, forestplot, grid, future, VGAM,
         MASS, kknn, glmnet, e1071, randomForest, ada, future.apply,
         ggplot2, pROC, pheatmap, RColorBrewer, listenv, reshape2,
-        scales, survminer, dplyr, ggpubr
+        scales, survminer, dplyr, ggpubr, cowplot
 Depends: VariantAnnotation, NMF
 LinkingTo: Rcpp, RcppArmadillo (>= 0.7.100)
 SystemRequirements: C++11

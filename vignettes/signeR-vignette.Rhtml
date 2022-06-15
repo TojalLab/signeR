@@ -675,7 +675,7 @@ end.rcode-->
 <p><b>signeR</b> can also perform a Fuzzy clustering of the samples according to their exposures to mutational signatures. The function <code>FuzzyClustExp</code> applies a clustering algorithm (hard or fuzzy) on each sampled exposure matrix and averages the fuzzy memberships degrees of samples to clusters. The number of cluster can be defined by the user (Clim parameter), otherwise different numbers of clusters are tested and the one that maximizes the PBMF index is used (the search algorithm used is similar to the one applied to estimate the number of signatures present in a dataset):</p> 
 
 <!--begin.rcode eval=TRUE
-FCE <- FuzzyClustExp(signatures$SignExposures, Clim=c(3,5))
+FCE <- FuzzyClustExp(signatures$SignExposures, Clim=5)
 end.rcode-->
 
 <p class='legend'>Heatmap showing the mean fuzzy memberships degrees of 

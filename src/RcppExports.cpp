@@ -6,6 +6,11 @@
 
 using namespace Rcpp;
 
+#ifdef RCPP_USE_GLOBAL_ROSTREAM
+Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
+Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
+#endif
+
 // GibbsSamplerCpp
 Rcpp::List GibbsSamplerCpp(arma::mat M, arma::mat W, arma::cube Z, arma::mat P, arma::mat E, arma::mat Ap, arma::mat Bp, arma::mat Ae, arma::mat Be, double ap, double bp, double ae, double be, double lp, double le, double var_ap, double var_ae, int burn, int eval, bool Pfixed, bool Zfixed, bool Thetafixed, bool Afixed, bool keep_par);
 RcppExport SEXP _signeR_GibbsSamplerCpp(SEXP MSEXP, SEXP WSEXP, SEXP ZSEXP, SEXP PSEXP, SEXP ESEXP, SEXP ApSEXP, SEXP BpSEXP, SEXP AeSEXP, SEXP BeSEXP, SEXP apSEXP, SEXP bpSEXP, SEXP aeSEXP, SEXP beSEXP, SEXP lpSEXP, SEXP leSEXP, SEXP var_apSEXP, SEXP var_aeSEXP, SEXP burnSEXP, SEXP evalSEXP, SEXP PfixedSEXP, SEXP ZfixedSEXP, SEXP ThetafixedSEXP, SEXP AfixedSEXP, SEXP keep_parSEXP) {

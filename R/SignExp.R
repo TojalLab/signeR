@@ -436,14 +436,13 @@ setMethod("SignPlot",signature(signexp_obj="SignExp",plot_to_file="ANY",
             mp <- barplot(medians, names=NULL, axes=FALSE, cex.names=1,
                 cex.axis=0.8,las=2, col=bar.col, border=border,
                 ylim=c(0,y.max), xlim=c(0,100*(1+gap)),
-                space=c(0,rep(gap,95)),tcl=NA,family="mono",
-                font=2)
+                space=c(0,rep(gap,95)),tcl=NA, font=2)
             MP <- mp + (mp[2,] - mp[1,])/2 #positions
             if(top){ #big text mutations
                 adj<-16*(1+gap)
                 text(c(MP[8]+adj*(0:5)), c(rep(y.max+y.max*0.15, 6)),
                     labels=muttypes,
-                    cex=1, col=c(rep("black",6)),family="mono",font=2)
+                    cex=1, col=c(rep("black",6)),font=2)
             }
             axis(side=2,pos=-2,cex.axis=1,font=2)
             if(bottom){ #trinucleotides
@@ -456,12 +455,11 @@ setMethod("SignPlot",signature(signexp_obj="SignExp",plot_to_file="ANY",
                         middlecolor<-xcolores[floor((s-1)/16)+1]
                     }
                     mtext(letters[1],side=1,line=0,at=mp[s],cex=0.55,
-                        las=2,col="grey30",adj=3.8,family="mono")
+                        las=2,col="grey30",adj=3.8)
                     mtext(letters[2],side=1,line=0,at=mp[s],cex=0.55,
-                        las=2,col=middlecolor,font=2,adj=2.7,
-                        family="mono")
+                        las=2,col=middlecolor,font=2,adj=2.7)
                     mtext(letters[3],side=1,line=0,at=mp[s],cex=0.55,
-                        las=2,col="grey30",adj=1.6,family="mono")
+                        las=2,col="grey30",adj=1.6)
                 }
             }
             #vertical lines

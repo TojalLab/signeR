@@ -180,7 +180,7 @@ setMethod("SignPlot",signature(signexp_obj="SignExp",plot_to_file="ANY",
 setGeneric("ExposureBoxplot",
     def=function(signexp_obj, plot_to_file=FALSE,
         file="Exposure_boxplot.pdf", col='tan2', threshold=0,
-        show_samples=NA_real_, plots_per_page=4, reord=NA_real_,...){
+        show_samples=NA_integer_, plots_per_page=4, reord=NA_real_,...){
         standardGeneric("ExposureBoxplot")
     }
 )
@@ -211,26 +211,33 @@ setMethod("ExposureBoxplot",signature(signexp_obj="SignExp", plot_to_file="ANY",
         if(is.na(show_samples)){show_samples <- (j<=50)}
         ####################### ggplot2
         m = signexp_obj@Exp
-        if(show_samples){
-            colnames(m) = signexp_obj@samples
-        }else{
-            colnames(m) <-NULL
-        }
+        colnames(m) = signexp_obj@samples
         m = reshape2::melt(m)
         colnames(m)<-c("Signatures","Samples","r","value")
         m$Signatures=factor(paste0("S",m$Signatures), levels=paste0("S",1:n))
+        m$Samples<-as.factor(m$Samples)
         m = group_by(m, Signatures, Samples) %>% summarize(q1=min(value),
                                                            q2=quantile(value,p=0.25),
                                                            q3=median(value),
                                                            q4=quantile(value,p=0.75),
                                                            q5=max(value))
-        g<-ggplot(m, aes(x=Samples,ymin=q1,lower=q2,middle=q3,upper=q4,ymax=q5)) + 
+        if(show_samples){
+            g<-ggplot(m, aes(x=Samples,ymin=q1,lower=q2,middle=q3,upper=q4,ymax=q5)) + 
             geom_boxplot(stat='identity') + 
             facet_grid(Signatures~.,scales="free") + 
-            theme_bw() +
-            theme(axis.text.x=element_text(angle=90,size=8,vjust=.5,hjust=0,family="mono",face="bold")) +
+            theme_cowplot() +
+            theme(axis.text.x=element_text(angle=90,size=8,vjust=.5,hjust=0,face="bold")) +
             scale_y_log10()+
             labs(x="")
+        }else{
+            g<-ggplot(m, aes(x=Samples,ymin=q1,lower=q2,middle=q3,upper=q4,ymax=q5)) + 
+                geom_boxplot(stat='identity') + 
+                facet_grid(Signatures~.,scales="free") + 
+                theme_cowplot() +
+                theme(axis.text.x=element_blank(), axis.ticks.x = element_blank()) +
+                scale_y_log10()+
+                labs(x="")
+        }
         plot(g)
         #######################
         if(plot_to_file){
@@ -292,7 +299,7 @@ setMethod("ExposureBarplot",signature(signexp_obj="SignExp", plot_to_file="ANY",
         if(relative){
             g<-ggplot(m, aes(x=Samples,y=value,fill=Signatures)) + 
                 geom_bar(stat='identity',position='fill') + 
-                theme_bw()+
+                theme_cowplot()+
                 theme(axis.text.x=element_text(angle=90,vjust=.5)) + 
                 coord_cartesian(expand=0) + 
                 scale_y_continuous(labels=percent_format()) +
@@ -300,7 +307,7 @@ setMethod("ExposureBarplot",signature(signexp_obj="SignExp", plot_to_file="ANY",
         }else{
             g<-ggplot(m, aes(x=Samples,y=value,fill=Signatures)) + 
                 geom_col(position='stack') + 
-                theme_bw()+
+                theme_cowplot()+
                 theme(axis.text.x=element_text(angle=90,vjust=.5)) + 
                 coord_cartesian(expand=0) + 
                 #scale_y_continuous(labels=percent_format()) + 

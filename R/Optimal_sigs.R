@@ -1,14 +1,14 @@
 Optimal_sigs<-function(testfun,liminf,limsup,step,
   significance=FALSE,pcrit=0.05,parplan="multisession"){
-  plan(parplan)
+  future::plan(parplan)
   points<-seq(liminf,limsup,by=1)
-  values<-listenv()
+  values<-listenv::listenv()
   for(k in 1:length(points)) values[[k]]<-NA
   names(values)<-as.character(points)
   to_eval<-seq(liminf,limsup,by=step)
   if (to_eval[length(to_eval)]<limsup) to_eval<-c(to_eval,limsup)
   evalued<-c()
-  ncores<-detectCores()-1
+  ncores<-parallel::detectCores()-1
   downhill<-FALSE
   nmax<-c()
   if(length(to_eval)>ncores){

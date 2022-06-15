@@ -16,6 +16,7 @@ import(graphics, utils, methods, future, future.apply,
        class, VGAM, glmnet, e1071, ada,
        kknn, forestplot, grid, ggplot2, pheatmap,
        scales, reshape2, RColorBrewer, dplyr)
+importFrom("cowplot","theme_cowplot")
 importFrom("parallel", "detectCores", "makeCluster", "clusterExport", "parLapply", "stopCluster")
 importFrom("stats", "kruskal.test", "cor.test", 'quantile', 'median', 'sd')
 importFrom("MASS", "lda")

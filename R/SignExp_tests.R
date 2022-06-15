@@ -157,7 +157,7 @@ setMethod("DiffExp",signature(signexp_obj="SignExp", labels="character",
             geom_segment(aes(x = x_bgn, y = y_bgn, xend = x_end, yend = y_end), col = col3,
                          data = segments, show.legend = FALSE)+
             theme_bw()+
-            theme(axis.text.x=element_text(angle=0,vjust=.5,hjust=0,family="mono",face="bold")) + 
+            theme(axis.text.x=element_text(angle=0,vjust=.5,hjust=0,face="bold")) + 
             labs(x="",y=my.ylab)
         #######################
         if(multicompare){
@@ -186,15 +186,15 @@ setMethod("DiffExp",signature(signexp_obj="SignExp", labels="character",
                                                  q4=quantile(exp,p=0.75),
                                                  q5=max(exp),
                                                  "fc"=classdiffs[1])
-            
+            ymean<-mean(ms$q3)
             g2<-ggplot(ms, aes(x=class,lower=q2, upper=q4, middle=q3, 
                               ymin=q1, ymax=q5)) + 
                 geom_boxplot(stat='identity',show.legend = FALSE) +
-                facet_wrap(vars(Sig),nrow = n) +
+                facet_wrap(vars(Sig),nrow = n)+
                 theme_bw()+
-                theme(axis.text.x=element_text(angle=0,vjust=.5,hjust=0,family="mono",face="bold")) + 
-                labs(x="",y="Exposure") +
-                geom_text(aes(x=class,y=-1,label=fc),data=ms)
+                theme(axis.text.x=element_text(angle=0,vjust=0,hjust=0,face="bold"))+
+                labs(x="",y="Exposure")+
+                geom_text(aes(x=class,y=ymean,label=fc),data=ms)
             #######################
             figure <- ggarrange(g1, g2, ncol = 1, nrow = 2)
         }else{
@@ -416,7 +416,7 @@ setMethod("ExposureCorrelation",signature(Exposures="matrix",feature="numeric",
                   geom_segment(aes(x = x_bgn, y = y_bgn, xend = x_end, yend = y_end), col = col3,
                                data = segments, show.legend = FALSE)+
                   theme_bw()+
-                  theme(axis.text.x=element_text(angle=0,vjust=.5,hjust=0,family="mono",face="bold")) + 
+                  theme(axis.text.x=element_text(angle=0,vjust=.5,hjust=0,face="bold")) + 
                   labs(x="",y="-log(pvalue)")
               #######################
               #correlation plots
@@ -428,7 +428,7 @@ setMethod("ExposureCorrelation",signature(Exposures="matrix",feature="numeric",
                   stat_smooth(method="lm", se=FALSE,col="red") +
                   facet_wrap(vars(Sig),nrow = ceiling(n/2)) +
                   theme_bw()+
-                  theme(axis.text.x=element_text(angle=0,vjust=.5,hjust=0,family="mono",face="bold")) + 
+                  theme(axis.text.x=element_text(angle=0,vjust=.5,hjust=0,face="bold")) + 
                   labs(x="Feature",y="Exposure")
               figure <- ggarrange(g1,g2, ncol = 1, nrow = 2)
               figure
@@ -505,7 +505,7 @@ setMethod("ExposureCorrelation",signature(Exposures="SignExp",feature="numeric",
                   geom_segment(aes(x = x_bgn, y = y_bgn, xend = x_end, yend = y_end), col = col3,
                                data = segments, show.legend = FALSE)+
                   theme_bw()+
-                  theme(axis.text.x=element_text(angle=0,vjust=.5,hjust=0,family="mono",face="bold")) + 
+                  theme(axis.text.x=element_text(angle=0,vjust=.5,hjust=0,face="bold")) + 
                   labs(x="",y="-log(pvalue)")
               #######################
               #Correlation plots
@@ -518,7 +518,7 @@ setMethod("ExposureCorrelation",signature(Exposures="SignExp",feature="numeric",
                   stat_smooth(method="lm", se=FALSE,col="red") +
                   facet_wrap(vars(Sig),nrow = ceiling(n/2)) +
                   theme_bw()+
-                  theme(axis.text.x=element_text(angle=0,vjust=.5,hjust=0,family="mono",face="bold")) + 
+                  theme(axis.text.x=element_text(angle=0,vjust=.5,hjust=0,face="bold")) + 
                   labs(x="Feature",y="Exposure")
               figure <- ggarrange(g1,g2, ncol = 1, nrow = 2)
               if(plot_to_file){
@@ -686,7 +686,7 @@ setMethod("ExposureSurvival",signature(Exposures="matrix",surv="ANY",
                   geom_segment(aes(x = x_bgn, y = y_bgn, xend = x_end, yend = y_end), col = col3,
                                data = segments, show.legend = FALSE)+
                   theme_bw()+
-                  theme(axis.text.x=element_text(angle=0,vjust=.5,hjust=0,family="mono",face="bold")) + 
+                  theme(axis.text.x=element_text(angle=0,vjust=.5,hjust=0,face="bold")) + 
                   labs(x="",y="-log(pvalue)")
               #######################
               plotlist<-list(g1)
@@ -871,7 +871,7 @@ setMethod("ExposureSurvival",signature(Exposures="SignExp",surv="ANY",
                   geom_segment(aes(x = x_bgn, y = y_bgn, xend = x_end, yend = y_end), col = col3,
                                data = segments, show.legend = FALSE)+
                   theme_bw()+
-                  theme(axis.text.x=element_text(angle=0,vjust=.5,hjust=0,family="mono",face="bold")) + 
+                  theme(axis.text.x=element_text(angle=0,vjust=.5,hjust=0,face="bold")) + 
                   labs(x="",y="-log(pvalue)")
               #######################
               if(method=="logrank") {
