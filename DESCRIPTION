@@ -1,7 +1,7 @@
 Package: signeR
 Type: Package
 Title: Empirical Bayesian approach to mutational signature discovery
-Version: 1.99.1
+Version: 1.99.2
 Author: Rafael Rosales, Rodrigo Drummond, Renan Valieris, Israel Tojal
         da Silva
 Maintainer: Renan Valieris <renan.valieris@accamargo.org.br>
@@ -12,17 +12,20 @@ Description: The signeR package provides an empirical Bayesian approach
         to characterize signatures or genome samples according to
         exposure patterns are also provided.
 License: GPL-3
-Imports: BiocGenerics, Biostrings, class, graphics, grDevices,
+Imports: BiocGenerics, Biostrings, class, grDevices,
         GenomeInfoDb, GenomicRanges, IRanges, nloptr, methods, stats,
         utils, PMCMRplus, parallel, pvclust, ppclust, clue, survival,
         maxstat, survivalAnalysis, forestplot, grid, future, VGAM,
         MASS, kknn, glmnet, e1071, randomForest, ada, future.apply,
         ggplot2, pROC, pheatmap, RColorBrewer, listenv, reshape2,
-        scales, survminer, dplyr, ggpubr, cowplot
-Depends: VariantAnnotation, NMF
+        scales, survminer, dplyr, ggpubr, cowplot, tibble, readr,
+        shiny, shinydashboard, shinycssloaders, shinyWidgets,
+        bsplus, DT, magrittr, tidyr, BiocFileCache, proxy
+Depends: R (>= 3.0.2), VariantAnnotation, NMF
 LinkingTo: Rcpp, RcppArmadillo (>= 0.7.100)
 SystemRequirements: C++11
 URL: https://github.com/rvalieris/signeR
+LazyData: true
 NeedsCompilation: yes
 ByteCompile: TRUE
 biocViews: GenomicVariation, SomaticMutation, StatisticalMethod,

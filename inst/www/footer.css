@@ -1,0 +1,76 @@
+#acFooter {
+    background-color: #333333;
+    color: white;
+    font-size: 12px;
+    padding-top: 15px;
+    margin-top: 30px;
+}
+
+#acFooter .footer-copyright {
+    background-color: #3c3d41;
+    padding-top: 3px;
+    padding-bottom: 3px;
+    text-align: center;
+}
+
+#acFooter .row {
+    margin-bottom: 20px;
+}
+
+#acFooter .navbar-brand {
+    margin-top: 45px;
+    height: 65px;
+}
+
+#acFooter .footer-copyright p {
+    margin: 10px;
+    color: #ccc;
+}
+
+#acFooter ul {
+    list-style-type: none;
+    padding-left: 0;
+    line-height: 1.7;
+}
+
+#acFooter h5 {
+    font-size: 16px;
+    color: white;
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+#acFooter h2 a{
+    font-size: 50px;
+    text-align: center;
+    color: #fff;
+}
+
+#acFooter a {
+    color: #d2d1d1;
+    text-decoration: none;
+}
+
+#acFooter a:hover,
+#acFooter a:focus {
+    text-decoration: none;
+    color: white;
+}
+
+#acFooter .btn {
+    color: white;
+    background-color: #AC3E31;
+    border-radius: 20px;
+    border: none;
+    width: 150px;
+    display: block;
+    margin: 0 auto;
+    margin-top: 10px;
+    line-height: 25px;
+}
+
+@media screen and (max-width: 767px) {
+    #acFooter {
+        text-align: center;
+    }
+}

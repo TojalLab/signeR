@@ -5,20 +5,48 @@ exportMethods(setSamples, setMutations, Normalize,
     Reorder_signatures, Reorder_samples, Reorder_mutations,
     Average_sign, Median_sign, Average_exp, Median_exp,
     Paths, SignPlot, SignHeat, ExposureBoxplot,
-    ExposureBarplot, ExposureHeat, 
-    DiffExp, SignLRT, ExposureSurvival, ExposureSurvModel, 
+    ExposureBarplot, ExposureHeat,
+    DiffExp, SignLRT, ExposureSurvival, ExposureSurvModel,
     ExposureCorrelation, ExposureGLM,
     ExposureClassify, FuzzyClustExp, HClustExp)
-export(genOpportunityFromGenome, genCountMatrixFromVcf, signeR, 
-       BICboxplot, eBayesNMF, GibbsSamplerCpp)
+export(genOpportunityFromGenome, genCountMatrixFromVcf, signeR,
+    BICboxplot, eBayesNMF, GibbsSamplerCpp)
+export(signeRFlow)
 
-import(graphics, utils, methods, future, future.apply,
-       class, VGAM, glmnet, e1071, ada,
-       kknn, forestplot, grid, ggplot2, pheatmap,
-       scales, reshape2, RColorBrewer, dplyr)
+import(utils, methods, future, future.apply,
+    class, VGAM, glmnet, e1071, ada,
+    kknn, forestplot, grid, ggplot2,
+    scales, reshape2, RColorBrewer, dplyr)
+
+importFrom("readr", "read_tsv")
+importFrom("proxy", "dist")
+importFrom("shiny", "wellPanel", "fluidRow", "column", "p", "span", "strong",
+    "observeEvent", "callModule", "HTML", "renderUI", "tags",
+    "navbarPage", "includeCSS", "tabPanel", "icon", "em", "h5",
+    "selectInput", "actionButton", "NS", "tagList", "a", "hr",
+    "fileInput", "sliderInput", "div", "actionLink", "numericInput",
+    "uiOutput", "plotOutput", "conditionalPanel", "includeMarkdown",
+    "shinyApp", "fluidPage", "br", "downloadButton", "eventReactive",
+    "modalDialog", "reactive", "renderPlot", "renderPrint", "renderTable",
+    "showModal", "withProgress", "req", "downloadHandler")
+importFrom("shinydashboard", "dashboardPage", "tabBox", "box",
+    "dashboardHeader", "dashboardSidebar", sidebarMenu, menuItem,
+    "menuSubItem", "dashboardBody", "tabItems", "tabItem",
+    "infoBox")
+importFrom("shinycssloaders", "withSpinner")
+importFrom("shinyWidgets", "useSweetAlert", "radioGroupButtons",
+    "pickerInput", "tooltipOptions", "dropdownButton")
+importFrom("bsplus", "use_bs_tooltip", "bs_embed_tooltip",
+    "shinyInput_label_embed")
+importFrom("BiocFileCache", "BiocFileCache", "bfcrpath",
+    "bfcquery", "bfcadd", "bfcneedsupdate", "bfcdownload")
+importFrom("magrittr","%>%")
+importFrom("tidyr", "gather")
+importFrom(tibble, "column_to_rownames", "rownames_to_column")
+importFrom("pheatmap", "pheatmap")
 importFrom("cowplot","theme_cowplot")
 importFrom("parallel", "detectCores", "makeCluster", "clusterExport", "parLapply", "stopCluster")
-importFrom("stats", "kruskal.test", "cor.test", 'quantile', 'median', 'sd')
+importFrom("stats", "kruskal.test", "cor.test", 'quantile', 'median', 'sd', 'heatmap')
 importFrom("MASS", "lda")
 importFrom("randomForest","randomForest")
 importFrom("pROC","roc")
@@ -26,7 +54,7 @@ importFrom("listenv", "listenv")
 importFrom("BiocGenerics", "Reduce")
 importFrom("Biostrings","getSeq", "oligonucleotideFrequency",
     "reverseComplement", "DNAString", "DNAStringSetList")
-importFrom("grDevices", "colorRampPalette", "dev.cur", "dev.new", 
+importFrom("grDevices", "colorRampPalette", "dev.cur", "dev.new",
     "dev.off", "pdf", "png", "rainbow", "terrain.colors")
 importFrom("GenomicRanges", "resize", "granges", "reduce","GRanges")
 importFrom("IRanges","subsetByOverlaps")

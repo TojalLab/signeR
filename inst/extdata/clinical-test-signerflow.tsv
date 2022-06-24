@@ -1,0 +1,22 @@
+SampleID	age_at_index	gender	ajcc_pathologic_stage	ethnicity	race	status	time
+PD3851a	74	male	Stage I	not hispanic or latino	white	1	236
+PD3890a	66	male	Stage II	not hispanic or latino	white	1	1452
+PD3904a	56	male	Stage II	not reported	white	1	853
+PD3905a	49	male	Stage II	not hispanic or latino	white	0	50
+PD3945a	73	female	Stage II	not reported	not reported	1	745
+PD4005a	71	male	Stage II	not hispanic or latino	white	1	658
+PD4006a	71	male	Stage I	not hispanic or latino	white	1	539
+PD4085a	54	female	Stage II	not hispanic or latino	white	1	425
+PD4086a	74	female	Stage II	not hispanic or latino	black or african american	1	199
+PD4088a	70	male	Stage IV	not hispanic or latino	white	0	589
+PD4103a	76	female	Stage II	hispanic or latino	white	1	458
+PD4107a	75	male	Stage II	not hispanic or latino	white	0	736
+PD4109a	73	male	Stage II	not reported	white	0	799
+PD4115a	72	female	Stage II	not reported	white	0	801
+PD4116a	50	male	Stage II	not reported	asian	0	103
+PD4120a	64	female	Stage II	not hispanic or latino	white	1	463
+PD4192a	82	male	Stage II	not reported	white	1	236
+PD4194a	57	male	Stage II	not reported	white	1	501
+PD4198a	63	male	Stage II	not hispanic or latino	white	0	299
+PD4199a	67	male	Stage II	not hispanic or latino	white	1	387
+PD4248a							
