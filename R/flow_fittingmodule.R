@@ -473,7 +473,7 @@ fitting <- function(input,
     showModal(modalDialog(
       title = "SNV matrix help",
       includeMarkdown(
-        system.file("data", "snv_help.md", package = "signeR")
+        system.file("extdata", "snv_help.md", package = "signeR")
       ),
       size = "l", easyClose = TRUE
     ))
@@ -483,7 +483,7 @@ fitting <- function(input,
     showModal(modalDialog(
       title = "Opportunity matrix help",
       includeMarkdown(
-        system.file("data", "opp_help.md", package = "signeR")
+        system.file("extdata", "opp_help.md", package = "signeR")
       ),
       size = "l", easyClose = TRUE
     ))
@@ -493,7 +493,7 @@ fitting <- function(input,
     showModal(modalDialog(
       title = "Previous signatures matrix help",
       includeMarkdown(
-        system.file("data", "knownsigs_help.md", package = "signeR")
+        system.file("extdata", "knownsigs_help.md", package = "signeR")
       ),
       size = "l", easyClose = TRUE
     ))
