@@ -19,7 +19,7 @@ denovo_UI <- function(id) {
               uploaded (",
               a(
                 "see signeR documentation for details",
-                href = "https://www.google.com/"
+                href = "https://bioconductor.org/packages/release/bioc/vignettes/signeR/inst/doc/signeR-vignette.html"
               ),
               ").
               signeRFlow will estimate signatures and sample's exposure data

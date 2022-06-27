@@ -18,7 +18,7 @@ fitting_UI <- function(id) {
               with matching opportunities can be uploaded (",
               a(
                 "see signeR documentation for details",
-                href = "https://www.google.com/"
+                href = "https://bioconductor.org/packages/release/bioc/vignettes/signeR/inst/doc/signeR-vignette.html"
               ),
               "). signeR will estimate sample's exposures to known signatures,
               which can also be uploaded (a matrix with 96 lines, corresponding
