@@ -52,7 +52,7 @@ explorepage <- function() {
           selectInput(
             "tcga_tumor",
             "TCGA Study",
-            choices = tcga_tumors$projectID,
+            choices = tcga_tumors %>% arrange(projectID) %>% .$projectID,
           ),
           p(
             "This is a ", strong("global setting"), " used in TCGA Explorer
@@ -77,7 +77,7 @@ explorepage <- function() {
           sectionBox(
             title = "What's Inside",
             fluidRow(
-              infoBox("Analysis Modules:", 2,
+              infoBox("Analysis Modules:", 3,
                 width = 3, color = "olive",
                 fill = TRUE, icon = icon("chart-simple", verify_fa = FALSE)
               ),
@@ -101,10 +101,11 @@ explorepage <- function() {
               width = 12,
               p(
                 "In case you want to analyze you own data, please click on
-                signeR Analysis. Then you can infer signatures from your data
-                (de novo) or fit your data to known signatures (fitting).
-                Otherwise, click on TCGA Explorer to inquire exposure data
-                from the public dataset"
+                signeR Analysis. Then you can infer signatures from your data (",
+                span(em("de novo")), 
+                ") or fit your data to known signatures (fitting).", br(),
+                "Otherwise, click on TCGA Explorer to inquire exposure data
+                from the public dataset."
               )
             ),
             fluidRow(
@@ -116,7 +117,7 @@ explorepage <- function() {
                 boxText = "
                   This module provides access to signeR de novo
                   analysis to find signatures in your data,
-                  estimating both signatures and related exposures",
+                  estimating both signatures and related exposures.",
                 linkText = "Open Module"
               ),
               imgLinkBox(
@@ -128,7 +129,7 @@ explorepage <- function() {
                   This module provides access to signeR fitting
                   analysis to find exposures to known signatures in your data,
                   which can be uploaded or chosen from Cosmic database.
-                  Exposures are estimated and can be explored",
+                  Exposures are estimated and can be explored.",
                 linkText = "Open Module"
               )
             ),

@@ -19,7 +19,7 @@ denovo_UI <- function(id) {
               uploaded (",
               a(
                 "see signeR documentation for details",
-                href = "https://www.google.com/"
+                href = "https://bioconductor.org/packages/release/bioc/vignettes/signeR/inst/doc/signeR-vignette.html"
               ),
               ").
               signeRFlow will estimate signatures and sample's exposure data
@@ -289,7 +289,7 @@ denovo <- function(input,
     showModal(modalDialog(
       title = "Iterations parameters",
       includeMarkdown(
-        system.file("data", "iterations.md", package = "signeR")
+        system.file("extdata", "iterations.md", package = "signeR")
       ),
       size = "l", easyClose = TRUE
     ))
@@ -538,7 +538,7 @@ denovo <- function(input,
     showModal(modalDialog(
       title = "SNV matrix help",
       includeMarkdown(
-        system.file("extdata", "snv_help.md", package = "signerR")
+        system.file("extdata", "snv_help.md", package = "signeR")
       ),
       size = "l", easyClose = TRUE
     ))

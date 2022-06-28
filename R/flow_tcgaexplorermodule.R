@@ -12,6 +12,10 @@ tcgaexplorer_UI <- function(id) {
             width = 12, status = "success",
             messageBox(
               width = 12,
+              uiOutput(ns("dataset"))
+            ),
+            messageBox(
+              width = 12,
               includeMarkdown(
                 system.file(
                   "extdata", "tcga_analysis.md", package = "signeR"
@@ -950,6 +954,14 @@ tcgaexplorer <- function(input,
     return(NULL)
   })
 
+  output$dataset <- renderUI({
+    HTML(
+      "You are using the <span style='color:red'>complete</span>",
+      "<strong>", tcga_tumor(), "</strong> dataset for ",
+      "<strong>", analysis_type(), "</strong>", " analysis."
+    )
+  })
+
   output$filtered_value <- renderUI({
     feature <- input$feature
     filter_op <- input$filter_op
@@ -960,7 +972,9 @@ tcgaexplorer <- function(input,
       col <- names(data[feature_row + 1])
       HTML(
         "You have filtered the <em>", tcga_tumor(),
-        "</em> dataset by <strong>", col,
+        "</em> dataset for ",
+        "<strong>", analysis_type(), "</strong>", " analysis ",
+        " by <strong>", col,
         "</strong> using the values: <span style='color:red'>",
         paste(feature, collapse = ","),
         "</span>."
@@ -969,14 +983,17 @@ tcgaexplorer <- function(input,
       col <- names(data[feature_row + 1])
       HTML(
         "You have filtered the <em>", tcga_tumor(),
-        "</em> dataset by <strong>", col,
+        "</em> dataset for ",
+        "<strong>", analysis_type(), "</strong>", " analysis ",
+        " by <strong>", col,
         "</strong> using the values <span style='color:red'>",
         filter_op, " then ", filter_value, "</span>."
       )
     } else {
       HTML(
         "You are using the <span style='color:red'>complete</span>",
-        "<strong>", tcga_tumor(), "</strong> dataset."
+        "<strong>", tcga_tumor(), "</strong> dataset for ",
+        "<strong>", analysis_type(), "</strong>", " analysis."
       )
     }
   })

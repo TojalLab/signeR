@@ -18,7 +18,7 @@ fitting_UI <- function(id) {
               with matching opportunities can be uploaded (",
               a(
                 "see signeR documentation for details",
-                href = "https://www.google.com/"
+                href = "https://bioconductor.org/packages/release/bioc/vignettes/signeR/inst/doc/signeR-vignette.html"
               ),
               "). signeR will estimate sample's exposures to known signatures,
               which can also be uploaded (a matrix with 96 lines, corresponding
@@ -473,7 +473,7 @@ fitting <- function(input,
     showModal(modalDialog(
       title = "SNV matrix help",
       includeMarkdown(
-        system.file("data", "snv_help.md", package = "signeR")
+        system.file("extdata", "snv_help.md", package = "signeR")
       ),
       size = "l", easyClose = TRUE
     ))
@@ -483,7 +483,7 @@ fitting <- function(input,
     showModal(modalDialog(
       title = "Opportunity matrix help",
       includeMarkdown(
-        system.file("data", "opp_help.md", package = "signeR")
+        system.file("extdata", "opp_help.md", package = "signeR")
       ),
       size = "l", easyClose = TRUE
     ))
@@ -493,7 +493,7 @@ fitting <- function(input,
     showModal(modalDialog(
       title = "Previous signatures matrix help",
       includeMarkdown(
-        system.file("data", "knownsigs_help.md", package = "signeR")
+        system.file("extdata", "knownsigs_help.md", package = "signeR")
       ),
       size = "l", easyClose = TRUE
     ))
