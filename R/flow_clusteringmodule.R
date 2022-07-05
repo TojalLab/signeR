@@ -47,7 +47,7 @@ clustering_UI <- function(id) {
                   "canberra", "binary", "minkowski"
                 ),
                 selected = "euclidean", multiple = FALSE,
-                size = 4, selectize = FALSE
+                selectize = TRUE
               ),
               selectInput(
                 inputId = ns("mhclust"), label = "Method hclust:",
@@ -56,7 +56,7 @@ clustering_UI <- function(id) {
                   "average", "mcquitty", "median", "centroid"
                 ),
                 selected = "average", multiple = FALSE,
-                size = 4, selectize = FALSE
+                selectize = TRUE
               )
             )
           )
@@ -96,9 +96,9 @@ clustering_UI <- function(id) {
           fluidRow(
             box(
               width = 12, solidHeader = T, collapsible = F, background = "aqua",
-              sliderInput(ns("liminf"), "Number of group from:", 0, 10, 0, 1),
-              sliderInput(ns("limsup"), "Number of group to:", 0, 10, 0, 1),
-              p("Set groups to 0 to let the algorithm to estimate."),
+              sliderInput(ns("liminf"), "Number of group from:", 1, 10, 1, 1),
+              sliderInput(ns("limsup"), "Number of group to:", 1, 10, 1, 1),
+              p("Set groups to 1 to let the algorithm to estimate."),
               actionButton(ns("startfuzzy"), label = "Run fuzzy", icon = NULL)
             )
           )
@@ -175,7 +175,7 @@ clustering <- function(input,
     if (is.null(sigs)) {
       return(NULL)
     }
-    if (liminf == 0 & limsup == 0) {
+    if (liminf == 1 & limsup == 1) {
       withProgress(
         message = "Running Fuzzy...",
         detail = "This operation may take a while...",
