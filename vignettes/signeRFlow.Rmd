@@ -546,9 +546,47 @@ Some analysis also offer few parameters to perform the analysis.
 
 # TCGA Explorer
 
+Instead of uploading a private dataset, signeRFlow allows you to explore exposure data previously estimated for samples on TCGA public datasets.
+We executed signeR algorithm previously applied to genome samples from 33 cancer types and estimated mutational signatures and exposures were obtained for each cancer type.
+Also, known signatures from Cosmic database were fitted to TCGA mutation data, thus estimating related exposures on each cancer type.
+
+You can select the cancer type of interest and the analysis type on the sidebar. Also, samples can be filtered according to available features in the metadata. 
+
+![](figure/flow_tcga_explorer.png) 
+
+The first time you click in the button **TCGA Explorer** on the sidebar, signeRFlow will download all the necessary files (RData) according to cancer study and analysis type.
+
+> Warning:
+> The files are often small, but depends on the cancer study, this process can take a while. A message will show the download and rendering progress.
+
 ## Filter dataset
 
+Using the data summary table with all clinical data features downloaded from TCGA, you can select a feature to filter the dataset. According to the feature class, different options to filter will be shown.
+
+It is not mandatory to filter the dataset, you can use all the cases. The aim of this resource is to allow you to explore the dataset and select the cases you work with. 
+
+> Note:
+> If you filter a dataset using the data summary table, it will be used on the downstream analysis, such as clustering and covariate.
+
+As an example, we selected the feature *ajcc_pathologic_stage* from ACC cancer type and *de novo* analysis:
+
+![](figure/flow_tcga_data_summary.png) 
+
+and applied the filter on the dataset, selecting only groups Stage I and Stage II:
+
+![](figure/flow_tcga_filter.png) 
+
+For each change on feature and filters, the available plots are updated according to the filtered samples.
+
 ## Covariate analysis
+
+Similar to signeR analysis modules, the downstream analysis **Clustering** and **Covariate** are available on TCGA Explorer module and work the same, but you do not need to upload a clinical data in this module.
+
+As a reminder, in the top of **Covariate** tab you will see an information about the dataset and used filters.
+
+![](figure/flow_tcga_filter_covariate.png) 
+
+You can select a feature in the data summary table and perform a covariate analysis according to feature class.
 
 # SessionInfo  
 ```{r}
