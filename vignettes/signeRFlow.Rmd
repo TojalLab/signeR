@@ -3,15 +3,15 @@ title: "signeRFlow"
 author: "Alexandre Defelicibus"
 date: "`r Sys.Date()`"
 output:
-  html_document:
-    toc: true
+  rmarkdown::html_document:
+    toc: yes
     toc_depth: 3
-    toc_float: true
-    number_sections: true
+    toc_float: yes
+    number_sections: yes
     self_contained: yes
     highlight: pygments
 vignette: >
-  %\VignetteIndexEntry{02: signeRFlow}
+  %\VignetteIndexEntry{signeRFlow}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -41,7 +41,7 @@ signeRFlow()
 
 The app should open a new window or a tab at your browser.
 
-![](figure/flow_overview.png)
+![](flow_overview.png)
 
 # Modules
 
@@ -67,7 +67,7 @@ You can upload a SNV matrix file (mandatory) with your own samples to use in sig
 
 You can upload a SNV matrix file from your computer by clicking at the *Browse button*.
 
-![](figure/flow_snv_upload.png)
+![](flow_snv_upload.png)
 
 SNV matrix is a text file with a (tab-delimited) matrix of SNV counts found on analysed genomes. It must contain one row for each genome sample and 97 columns, the first one with sample ids and, after that, one column for each mutation type. Mutations should be specified in the column names (headers), by both the base change and the trinucleotide context were it occurs (for example: C>A:ACA). The table below shows a example of the SNV matrix structure.
 
@@ -150,7 +150,7 @@ Each row contain the sample ID and the counts for each trinucleotide contexts.
 
 You can upload a Opportunity matrix file from your computer by clicking at the *Browse button*.
 
-![](figure/flow_opp_upload.png)
+![](flow_opp_upload.png)
 
 Opportunity matrix is a tab-delimited text file with a matrix of counts of trinucleotide contexts found in studied genomes. It must structured as the SNV matrix, with mutations specified on the head line (for each SNV count, the Opportunity matrix shows the total number of genomic loci where the refereed mutation could have occurred). The table below shows a example of the opportunity matrix structure.
 
@@ -233,7 +233,7 @@ Each row contains the count frequency of the trinucleotides in the whole analyze
 
 There are some parameters that you can define before running the analysis by clicking at **Start de novo analysis** button:
 
-![](figure/flow_de_novo.png)
+![](flow_de_novo.png)
 
 Parameters:
 
@@ -285,7 +285,7 @@ This is the same file used on **de novo** module.
 #### Previous signatures
 
 You can upload a Previous signatures matrix file from your computer by clicking at the *Browse button*.
-![](figure/flow_previous_sig.png)
+![](flow_previous_sig.png)
 
 
 Previous signatures is a tab-delimited text file with a matrix of previously known signatures. It must contain one column for each signature and one row for each of the 96 SNV types (considering trinucleotide contexts). Mutation types should be contained on the first column, in the same form as the column names of the SNV matrix. The table below shows a example of the previous signatures matrix structure.
@@ -368,7 +368,7 @@ Each row contains the expected frequency of the given mutation in the apponted t
 
 There are some parameters that you can define before running the analysis by clicking at **Start Fitting analysis** button:
 
-![](figure/flow_fitting.png)
+![](flow_fitting.png)
 
 Parameters:
 
@@ -409,9 +409,9 @@ You can access those analysis in all modules using the tabs *Clustering* and *Co
 **Hierarchical Clustering**
 
 By using the Hierarchical clustering section, you can select different dist and hclust methods:
-![](figure/flow_clustering_dist.png)
+![](flow_clustering_dist.png)
 
-![](figure/flow_clustering_method.png)
+![](flow_clustering_method.png)
 
 When you select a new dist or hclust method, the dendogram plot is updated.
 
@@ -419,7 +419,7 @@ When you select a new dist or hclust method, the dendogram plot is updated.
 
 By using the Fuzzy clustering section, you can set the number of groups or let the algorithm to estimate (Set groups to 1) and click at the **Run fuzzy** to start the analysis:
 
-![](figure/flow_fuzzy.png)
+![](flow_fuzzy.png)
 
 During the execution, a message will be showed at the screen showing the progress.
 
@@ -432,7 +432,7 @@ The output of Fuzzy clustering is shown as a heatmap plot.
 
 To perform a Covariate analysis on signeRFlow, you must upload a clinical data, a tab-delimited file with samples in rows and features in columns. You can upload a file by clicking in the **Browse...** button:
 
-![](figure/flow_clinical.png)
+![](flow_clinical.png)
 
 Clinical data is a tab-delimited text file with a matrix of available metadata (clinical and/or survival) for each sample. It must have a first column of sample ids, named as **"SampleID"**, whose entries match the row names of the **SNV matrix**. The number and title of the remaning columns are optional, however if **survival** data is included it must be organized in a column named **time** (in months) and another named **status** (which contains 1 for death events and 0 for censored samples). The table below shows a example of the clinical data matrix structure.
 
@@ -513,32 +513,32 @@ Each row contains clinical information for one sample: its ID and all other data
 After the upload, a description table summarizes the data with all the features in rows, and the class, counts and missing for each feature.
 By selecting a feature (row) at the table, a small panel is shown next to the table summarizing the values, categorical or continuous, for the selected feature:
 
-![](figure/flow_clinical_summary.png)
+![](flow_clinical_summary.png)
 
 According to the class of the feature, a set of analysis are available in the **Plots** section:
 
   - *Categorical feature*:
     
-    ![](figure/flow_de.png) 
+    ![](flow_de.png) 
     **Differential Exposure Analysis**: highlight signatures that are differentially active among groups of samples.
     
-    ![](figure/flow_sc.png) 
+    ![](flow_sc.png) 
     **Sample Classification**: classify samples based on their exposures to mutational processes.
   
   - *Numeric feature*:
   
-    ![](figure/flow_cor.png) 
+    ![](flow_cor.png) 
     **Correlation Analysis**: evaluate feature correlation to exposures to mutational signatures.
     
-    ![](figure/flow_lr.png) 
+    ![](flow_lr.png) 
     **Linear Regression**: relevance of exposures in final model of provided feature.
   
   - *Survival feature*:
   
-    ![](figure/flow_sv.png) 
+    ![](flow_sv.png) 
     **Survival analysis**: evaluate the effect of exposure on survival.
     
-    ![](figure/flow_cox.png) 
+    ![](flow_cox.png) 
     **Cox Regression**: evaluate the combined effect on survival of exposure levels to different signatures.
 
 
@@ -552,7 +552,7 @@ Also, known signatures from Cosmic database were fitted to TCGA mutation data, t
 
 You can select the cancer type of interest and the analysis type on the sidebar. Also, samples can be filtered according to available features in the metadata. 
 
-![](figure/flow_tcga_explorer.png) 
+![](flow_tcga_explorer.png) 
 
 The first time you click in the button **TCGA Explorer** on the sidebar, signeRFlow will download all the necessary files (RData) according to cancer study and analysis type.
 
@@ -570,11 +570,11 @@ It is not mandatory to filter the dataset, you can use all the cases. The aim of
 
 As an example, we selected the feature *ajcc_pathologic_stage* from ACC cancer type and *de novo* analysis:
 
-![](figure/flow_tcga_data_summary.png) 
+![](flow_tcga_data_summary.png) 
 
 and applied the filter on the dataset, selecting only groups Stage I and Stage II:
 
-![](figure/flow_tcga_filter.png) 
+![](flow_tcga_filter.png) 
 
 For each change on feature and filters, the available plots are updated according to the filtered samples.
 
@@ -584,7 +584,7 @@ Similar to signeR analysis modules, the downstream analysis **Clustering** and *
 
 As a reminder, in the top of **Covariate** tab you will see an information about the dataset and used filters.
 
-![](figure/flow_tcga_filter_covariate.png) 
+![](flow_tcga_filter_covariate.png) 
 
 You can select a feature in the data summary table and perform a covariate analysis according to feature class.
 
