@@ -820,20 +820,23 @@ setMethod("ExposureSurvModel",signature(Exposures="SignExp",surv="ANY",
 # Fuzzy Clustering:
 ################################################################################
 setGeneric("FuzzyClustExp",
-    def=function(signexp_obj, Med_exp=NA, Clim=NA ,method.dist="euclidean", 
-        method.clust="fcm", relative=FALSE, m=2, plot_to_file=FALSE,
-        file="FuzzyClustExp.pdf",colored=TRUE, iseed=NA_integer_, try_all=FALSE, 
-        fast=TRUE, ...){
+    def=function(signexp_obj, Med_exp=NA, 
+                 Clim=NA_integer_,
+                 method.dist="euclidean", method.clust="fcm", relative=FALSE, 
+                 m=2, plot_to_file=FALSE, file="FuzzyClustExp.pdf",colored=TRUE,
+                 iseed=NA_integer_, try_all=FALSE,fast=TRUE,
+                 parplan="multisession",...){
         standardGeneric("FuzzyClustExp")
     }
 )
 setMethod("FuzzyClustExp",signature(signexp_obj="SignExp", Med_exp="ANY", 
     Clim="ANY", method.dist="ANY", method.clust="ANY", 
     relative="ANY", m="ANY", plot_to_file="ANY",
-    file="ANY",colored="ANY",iseed="ANY",try_all="ANY",fast="ANY"),
-    function(signexp_obj, Med_exp, method.dist, method.clust,
-        relative=FALSE, plot_to_file, file, colored=TRUE, iseed=NA, 
-        try_all=FALSE,fast=TRUE,...){
+    file="ANY",colored="ANY",iseed="ANY",try_all="ANY",
+    fast="ANY",parplan="ANY"),
+    function(signexp_obj, Med_exp, Clim, method.dist, method.clust,
+        relative=FALSE, m, plot_to_file, file, colored=TRUE, iseed=NA, 
+        try_all=FALSE,fast=TRUE,parplan){
         if(!is.na(iseed)) set.seed(seed = iseed)
         dp <- dim(signexp_obj@Sign) #[i,n,r]
         de <- dim(signexp_obj@Exp) #[n,j,r]
@@ -866,12 +869,12 @@ setMethod("FuzzyClustExp",signature(signexp_obj="SignExp", Med_exp="ANY",
             Ops<-Optimal_sigs(testfun=function(n){
                 cat(paste("Testing ",n," groups.\n",sep=""))
                 Cm<-CmeansExp(my_obj, Med_exp, C=n, method.dist, method.clust,
-                              relative, iseed=aseed,...)
+                              relative, iseed=aseed)
                 U<-Cm[[1]]
                 PBMF<-as.vector(future_apply(Es,3,function(E){PBMFindex(U,Data=E,m)}))
                 return(list(median(PBMF),PBMF))
             },
-            liminf=Cmin,limsup=Cmax,step=step0,significance=FALSE
+            liminf=Cmin,limsup=Cmax,step=step0,significance=FALSE,parplan=parplan
             )
             bestn<-as.numeric(Ops[[1]])
             rm(Ops)
@@ -881,16 +884,8 @@ setMethod("FuzzyClustExp",signature(signexp_obj="SignExp", Med_exp="ANY",
             bestn<-Cmin
             cat(paste("Performing clustering in ",bestn," groups.\n",sep=""))
         }
-        # cat(class(signexp_obj));cat("\n")
-        # cat(class(Med_exp));cat("\n")
-        # cat(class(bestn));cat("\n")
-        # cat(bestn);cat("\n")
-        # cat(method.dist);cat("\n")
-        # cat(method.clust);cat("\n")
-        # cat(relative);cat("\n")
-        # cat(iseed);cat("\n")
         Cm<-CmeansExp(signexp_obj, Med_exp, C=bestn, method.dist, method.clust,
-            relative, iseed=aseed,...)
+            relative, iseed=aseed,parplan=parplan)
         if(plot_to_file){
             if(length(grep("\\.pdf$",file))==0){
                 file<-paste(file,"pdf",sep=".")
@@ -921,16 +916,17 @@ setMethod("FuzzyClustExp",signature(signexp_obj="SignExp", Med_exp="ANY",
 #CmeansExp
 setGeneric("CmeansExp",
     def=function(signexp_obj, Med_exp=NA, C, method.dist="euclidean", 
-        method.clust="fcm", relative=FALSE, iseed=NA_integer_, ...){
+        method.clust="fcm", relative=FALSE, iseed=NA_integer_,
+        parplan="multisession",...){
         standardGeneric("CmeansExp")
     }
 )
 #For matrix:
 setMethod("CmeansExp",signature(signexp_obj="matrix", Med_exp="ANY", C="ANY",
                                 method.dist="ANY", method.clust="ANY", 
-                                relative="ANY", iseed="ANY"),
+                                relative="ANY", iseed="ANY",parplan="ANY"),
           function(signexp_obj, Med_exp, C, method.dist, method.clust,
-                   relative, plot_to_file, file, colored, iseed=NA,...){
+                   relative, plot_to_file, file, colored, iseed=NA, parplan){
               # initialize random seed
               if(!is.na(iseed)) set.seed(seed = iseed)
               de <- dim(signexp_obj) #[n,j]
@@ -959,9 +955,9 @@ setMethod("CmeansExp",signature(signexp_obj="matrix", Med_exp="ANY", C="ANY",
           })
 #For SignExp
 setMethod("CmeansExp",signature(signexp_obj="SignExp", Med_exp="ANY", C="ANY",
-    method.dist="ANY", method.clust="ANY", relative="ANY",iseed="ANY"),
+    method.dist="ANY", method.clust="ANY", relative="ANY",iseed="ANY",parplan="ANY"),
     function(signexp_obj, Med_exp, C, method.dist, method.clust,
-        relative, iseed=NA,...){
+        relative, iseed=NA,parplan){
         # initialize random seed
         if(!is.na(iseed)) set.seed(seed = iseed)
         if(!signexp_obj@normalized) signexp_obj<-Normalize(signexp_obj)
@@ -989,6 +985,8 @@ setMethod("CmeansExp",signature(signexp_obj="SignExp", Med_exp="ANY", C="ANY",
             basefuzzy<-baseclust$u
         }
         Es<-signexp_obj@Exp
+        avail.cores<-as.numeric(availableCores()-1)
+        future::plan(parplan,workers=avail.cores)
         Fuzzy2<-future_apply(Es,3,function(Exposure){
             if(n==1) Exposure <- matrix(as.vector(Exposure),n,j)
             if(relative){ Exposure<-t(t(Exposure)/colSums(Exposure)) }
@@ -997,6 +995,7 @@ setMethod("CmeansExp",signature(signexp_obj="SignExp", Med_exp="ANY", C="ANY",
                 thisclust<-kmeans(t(Exposure),centers=C)
                 thisfuzzy<-t(sapply(thisclust$cluster,function(n){
                     as.numeric(c(1:C)==n)
+                rm(thisclust)
                 }))
             }else{ 
                 if(method.clust=="fcm"){
@@ -1007,15 +1006,16 @@ setMethod("CmeansExp",signature(signexp_obj="SignExp", Med_exp="ANY", C="ANY",
                     thisclust<-ppclust::fpcm(t(Exposure),centers=C)
                 }else stop("method.clust should be 'fcm', 'pcm' or 'fpcm'!\n")
                 thisfuzzy<-thisclust$u
+                rm(thisclust)
             }
+            rm(Exposure)
             #hungarian algorithm to assign clusters
-            D<-sapply(1:C,function(j){
-                sapply(1:C,function(i){
-                    sum(abs(basefuzzy[,i]-thisfuzzy[,j]))
-                })
-            })#rows correspond to basefuzzy clusters, cols to thisfuzzy clusters 
+            D<-as.matrix(dist(rbind(t(basefuzzy),t(thisfuzzy)),"manhattan")) #L1 distance among clusters
+            D<-D[1:C,(1:C)+C]#rows contain basefuzzy clusters, cols thisfuzzy.
             assignment <- clue::solve_LSAP(D)
+            rm(D)
             thisfuzzy <- thisfuzzy[,as.vector(assignment)]
+            rm(assignment)
             colnames(thisfuzzy)<-colnames(basefuzzy)
             return(thisfuzzy)
         })
