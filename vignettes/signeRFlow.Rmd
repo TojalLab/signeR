@@ -29,17 +29,17 @@ knitr::opts_chunk$set(
 # Introduction
 
 signeRFlow is a shiny app that allows users to explore mutational signatures and exposures to related mutational processes.
-With the available modules, users is able to analysis theirs own data applying different approaches, such as de novo and fitting.
-Also, there is module to explore public datasets from TCGA.
+With the available modules, users are able to perform analysis on theirs own data applying different approaches, such as *de novo* and fitting.
+Also, there is a module to explore public datasets from TCGA.
 
 ## Running shiny app
 
-Start the app using either RStudio ou a terminal:
+Start the app using either RStudio or a terminal:
 ```r
 signeRFlow()
 ```
 
-The app should open a new window or a tab at your browser.
+The app will open on a new window or on a tab at your browser.
 
 ![](flow_overview.png)
 
@@ -48,14 +48,14 @@ The app should open a new window or a tab at your browser.
 There are three available modules in the app: 
 
  - signeR *de novo*: This module provides access to signeR *de novo* analysis to find signatures in your data, estimating both signatures and related exposures.
- - signer fitting: This module provides access to signeR fitting analysis to find exposures to known signatures in your data, which can be uploaded or chosen from Cosmic database. Exposures are estimated and can be explored.
+ - signeR fitting: This module provides access to signeR fitting analysis to find exposures to known signatures in your data, which can be uploaded or chosen from Cosmic database. Exposures are estimated and can be explored.
  - TCGA explorer: This module provides access to the results of signeR applications to 33 datasets from TCGA.
  
-You can go through the modules independently.
+You can go through the modules independently by using the app sidebar.
 
 ## signeR de novo
 
-In this module, you can upload a SNV matrix with counts of mutations and execute the signeR de novo algorithm, witch computes a Bayesian approach to the non-negative factorization (NMF) of the mutation counts in a matrix product of mutational signatures and exposures to mutational processes. 
+In this module, you can upload a SNV matrix with counts of mutations and execute the signeR *de novo* algorithm, which computes a Bayesian approach to the non-negative factorization (NMF) of the mutation counts in a matrix product of mutational signatures and exposures to mutational processes. 
 
 You can also provide a file with opportunities that are used as weights for the factorization. Further analysis parameters can be set, results can be visualized on different plots and found signatures can be compared to the ones in Cosmic database interactively.
 
@@ -69,7 +69,7 @@ You can upload a SNV matrix file from your computer by clicking at the *Browse b
 
 ![](flow_snv_upload.png)
 
-SNV matrix is a text file with a (tab-delimited) matrix of SNV counts found on analysed genomes. It must contain one row for each genome sample and 97 columns, the first one with sample ids and, after that, one column for each mutation type. Mutations should be specified in the column names (headers), by both the base change and the trinucleotide context were it occurs (for example: C>A:ACA). The table below shows a example of the SNV matrix structure.
+SNV matrix is a text file with a (tab-delimited) matrix of SNV counts found on analyzed genomes. It must contain one row for each genome sample and 97 columns, the first one with sample ids and, after that, one column for each mutation type. Mutations should be specified in the column names (headers), by both the base change and the trinucleotide context were it occurs (for example: C>A:ACA). The table below shows a example of the SNV matrix structure.
 
 <table class="table table-striped table-hover" style="margin-left: auto; margin-right: auto;">
  <thead>
@@ -128,7 +128,7 @@ SNV matrix is a text file with a (tab-delimited) matrix of SNV counts found on a
 </tbody>
 </table>
 
-You can create a SNV matrix from VCF using the method 
+You can generate a SNV matrix from VCF using the method:
 ```r
 genCountMatrixFromVcf
 ```
@@ -136,7 +136,7 @@ from signeR package. See the [documentation](https://bioconductor.org/packages/r
 
 **Columns:**
 
-The first columnn needs to contain the sample ID and other columns contain the 96 trinucleotide contexts.
+The first column needs to contain the sample ID and other columns contain the 96 trinucleotide contexts.
 
 **Rows:**
 
@@ -148,7 +148,7 @@ Each row contain the sample ID and the counts for each trinucleotide contexts.
 
 #### Opportunity matrix
 
-You can upload a Opportunity matrix file from your computer by clicking at the *Browse button*.
+You can upload an Opportunity matrix file from your computer by clicking at the *Browse button*. This is an optional file.
 
 ![](flow_opp_upload.png)
 
@@ -211,7 +211,7 @@ Opportunity matrix is a tab-delimited text file with a matrix of counts of trinu
 </tbody>
 </table>
 
-You can create a opportunity matrix from the reference genome using the method 
+You can create a opportunity matrix from the reference genome using the method:
 ```r
 genOpportunityFromGenome
 ```
@@ -253,7 +253,7 @@ number of Gibbs sampler iterations performed in warming phase, before signeR ass
 
 number of final Gibbs sampler iterations used to estimate signatures and exposures.
 
-During the execution, a message will be showed at the screen showing the progress.
+During the execution, a message will appear at the screen showing the progress.
 After, you can download the results by clicking the button **Download Rdata** below the button **Start de novo analysis** and
 can iterate with all available plots in signeR package.
 
@@ -354,17 +354,17 @@ Previous signatures is a tab-delimited text file with a matrix of previously kno
 
 **Columns:**
 
-The first columnn needs to contain the trinucleotide contexts and other columns contain the known signatures.
+The first column needs to contain the trinucleotide contexts and other columns contain the known signatures.
 
 **Rows:**
 
-Each row contains the expected frequency of the given mutation in the apponted trinucleotide context.
+Each row contains the expected frequency of the given mutation in the appointed trinucleotide context.
 
 **Example file:**
 
 [21 breast cancer](https://raw.githubusercontent.com/rvalieris/signeR/dev2.0/inst/extdata/Cosmic_signatures_BRC.txt)
 
-### fitting analysis
+### Fitting analysis
 
 There are some parameters that you can define before running the analysis by clicking at **Start Fitting analysis** button:
 
@@ -384,7 +384,7 @@ number of Gibbs sampler iterations performed in warming phase, before signeR ass
 
 number of final Gibbs sampler iterations used to estimate signatures and exposures.
 
-During the execution, a message will be showed at the screen showing the progress.
+During the execution, a message will appear at the screen showing the progress.
 After, you can download the results by clicking the button **Download Rdata** below the button **Start Fitting analysis** and
 can iterate with all available plots in signeR package.
 
@@ -398,9 +398,9 @@ There are two main downstream analysis:
     - *Hierarchical Clustering*: signeRFlow generates a dendogram for each generated sample of the exposure matrix. Consensus results, i.e. branches that are recurrently found, are reported. Different distance metrics and clustering algorithms are available to be selected.
     - *Fuzzy Clustering*: signeRFlow can apply the Fuzzy C-Means Clustering on each generated sample of the exposure matrix. Pertinence levels of samples to clusters are averaged over different runs of the algorithm. Means are considered as the final pertinence levels and are shown in a heatmap.
   - **Covariate**
-    - *Categorical feature*: differences in exposures among groups can be analysed and if some of the samples are unlabeled they can be labeled based on the similarity of their exposure profiles to those of labeled samples.
+    - *Categorical feature*: differences in exposures among groups can be analyzed and if some of the samples are unlabeled they can be labeled based on the similarity of their exposure profiles to those of labeled samples.
     - *Continuous feature*: its correlation to estimated exposures can be evaluated.
-    - *Survival feature*: survival data can also be analysed and the relation of signatures to survival can be accessed. 
+    - *Survival feature*: survival data can also be analyzed and the relation of signatures to survival can be accessed. 
 
 You can access those analysis in all modules using the tabs *Clustering* and *Covariate*.
 
@@ -434,7 +434,7 @@ To perform a Covariate analysis on signeRFlow, you must upload a clinical data, 
 
 ![](flow_clinical.png)
 
-Clinical data is a tab-delimited text file with a matrix of available metadata (clinical and/or survival) for each sample. It must have a first column of sample ids, named as **"SampleID"**, whose entries match the row names of the **SNV matrix**. The number and title of the remaning columns are optional, however if **survival** data is included it must be organized in a column named **time** (in months) and another named **status** (which contains 1 for death events and 0 for censored samples). The table below shows a example of the clinical data matrix structure.
+Clinical data is a tab-delimited text file with a matrix of available metadata (clinical and/or survival) for each sample. It must have a first column of sample ids, named as **"SampleID"**, whose entries match the row names of the **SNV matrix**. The number and title of the remaining columns are optional, however if **survival** data is included it must be organized in a column named **time** (in months) and another named **status** (which contains 1 for death events and 0 for censored samples). The table below shows a example of the clinical data matrix structure.
 
 <table class="table table-striped table-hover" style="margin-left: auto; margin-right: auto;">
  <thead>
@@ -500,7 +500,7 @@ Clinical data is a tab-delimited text file with a matrix of available metadata (
 
 **Columns:**
 
-The first columnn must contain the sample ID. Other columns may contain sample groupings or other features that you would like to co-analyze with exposure data.
+The first column must contains the sample ID. Other columns may contain sample groupings or other features that you would like to co-analyze with exposure data.
 
 **Rows:**
 

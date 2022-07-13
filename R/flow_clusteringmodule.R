@@ -14,14 +14,14 @@ clustering_UI <- function(id) {
           "Finding sample groups is a usual task in exploratory data analysis.
           Clustering is an unsupervised approach and as such does not require
           additonal sample data (i.e. sample labels). signeRFlow offers
-          hierarquical and fuzzy clustering algorithms to group samples
+          hierarchical and fuzzy clustering algorithms to group samples
           according to their exposure profiles"
         )
       )
     ),
     fluidRow(
       box(
-        title = p("Hierarquical Clustering"),
+        title = p("Hierarchical Clustering"),
         width = 12, solidHeader = T, collapsible = T,
         status = "info", collapsed = F,
         fluidRow(
