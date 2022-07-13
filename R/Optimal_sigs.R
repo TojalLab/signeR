@@ -1,6 +1,7 @@
 Optimal_sigs<-function(testfun,liminf,limsup,step,
   significance=FALSE,pcrit=0.05,parplan="multisession"){
-  future::plan(parplan)
+  avail.cores<-as.numeric(availableCores()-1)
+  future::plan(parplan,workers=avail.cores)
   points<-seq(liminf,limsup,by=1)
   values<-listenv::listenv()
   for(k in 1:length(points)) values[[k]]<-NA

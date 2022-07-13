@@ -252,7 +252,7 @@ setMethod("ExposureBoxplot",signature(signexp_obj="SignExp", plot_to_file="ANY",
 setGeneric("ExposureBarplot",
     def=function(signexp_obj, plot_to_file=FALSE,
         file="Exposure_barplot.pdf",col='tan2',threshold=0,relative=FALSE,
-        title="", show_samples=TRUE, ...){
+        title="", show_samples=NA_integer_, ...){
         standardGeneric("ExposureBarplot")
     }
 )
@@ -275,8 +275,7 @@ setMethod("ExposureBarplot",signature(signexp_obj="SignExp", plot_to_file="ANY",
         }else{
             ylabel<-"Signature contribution to mutation counts"
         }
-        if(j>50){ show_samples<-FALSE }
-        if(!show_samples){ colnames(Ehat)<-NULL }
+        if(is.na(show_samples)){show_samples <- (j<=50)}
         mycolors<-terrain.colors(n)[n:1]
         #Plot
         if(plot_to_file){
@@ -297,6 +296,7 @@ setMethod("ExposureBarplot",signature(signexp_obj="SignExp", plot_to_file="ANY",
         m = reshape2::melt(m)
         colnames(m)<-c("Signatures","Samples","value")
         if(relative){
+          if(show_samples){
             g<-ggplot(m, aes(x=Samples,y=value,fill=Signatures)) + 
                 geom_bar(stat='identity',position='fill') + 
                 theme_cowplot()+
@@ -304,7 +304,17 @@ setMethod("ExposureBarplot",signature(signexp_obj="SignExp", plot_to_file="ANY",
                 coord_cartesian(expand=0) + 
                 scale_y_continuous(labels=percent_format()) +
                 labs(x="",fill="Signatures")
+            }else{
+              g<-ggplot(m, aes(x=Samples,y=value,fill=Signatures)) + 
+                geom_bar(stat='identity',position='fill') + 
+                theme_cowplot()+
+                theme(axis.text.x=element_blank(), axis.ticks.x = element_blank()) + 
+                coord_cartesian(expand=0) + 
+                scale_y_continuous(labels=percent_format()) +
+                labs(x="",fill="Signatures")
+            }
         }else{
+          if(show_samples){
             g<-ggplot(m, aes(x=Samples,y=value,fill=Signatures)) + 
                 geom_col(position='stack') + 
                 theme_cowplot()+
@@ -312,6 +322,15 @@ setMethod("ExposureBarplot",signature(signexp_obj="SignExp", plot_to_file="ANY",
                 coord_cartesian(expand=0) + 
                 #scale_y_continuous(labels=percent_format()) + 
                 labs(x="",fill="Signatures")
+          }else{
+            g<-ggplot(m, aes(x=Samples,y=value,fill=Signatures)) + 
+              geom_col(position='stack') + 
+              theme_cowplot()+
+              theme(axis.text.x=element_blank(), axis.ticks.x = element_blank()) + 
+              coord_cartesian(expand=0) + 
+              #scale_y_continuous(labels=percent_format()) + 
+              labs(x="",fill="Signatures")
+          }
         }
         plot(g)
         #######################
@@ -408,14 +427,15 @@ setMethod("SignHeat",signature(signexp_obj="SignExp", plot_to_file="ANY",
 setGeneric("ExposureHeat",
     def=function(signexp_obj, plot_to_file=FALSE,
         file="Exposure_heatmap.pdf",nbins=20,pal="roh",distmethod="euclidean",
-        clustermethod="complete",...){
+        clustermethod="complete",show_samples=NA_integer_,...){
         standardGeneric("ExposureHeat")
     }
 )
 setMethod("ExposureHeat",signature(signexp_obj="SignExp", plot_to_file="ANY",
-    file="ANY", nbins="ANY", pal="ANY",distmethod="ANY",clustermethod="ANY"),
+    file="ANY", nbins="ANY", pal="ANY",distmethod="ANY",clustermethod="ANY",
+    show_samples="ANY"),
     function(signexp_obj, plot_to_file, file, nbins, pal, distmethod,
-        clustermethod,...){
+        clustermethod,show_samples,...){
         de <- dim(signexp_obj@Exp) #[n,j,r]
         n<-de[[1]]; j<-de[[2]]; r<-de[[3]]
         signat<-paste("S",1:n,sep="")
@@ -433,6 +453,7 @@ setMethod("ExposureHeat",signature(signexp_obj="SignExp", plot_to_file="ANY",
             colors<-colorRampPalette(c("#f0f0f0","#000000"))(nbins)
         }else stop("Unknown pallete.")
         if(!signexp_obj@normalized) signexp_obj<-Normalize(signexp_obj)
+        if(is.na(show_samples)){show_samples <- (j<=50)}
         Ehat<-Median_exp(signexp_obj)
         colnames(Ehat)<-signexp_obj@samples
         Dis<-dist(t(Ehat),method=distmethod)
@@ -463,7 +484,8 @@ setMethod("ExposureHeat",signature(signexp_obj="SignExp", plot_to_file="ANY",
         pheatmap(log(m), border_color=NA, color=clr, 
                  clustering_method='ward.D2',
                  clustering_distance_rows='canberra',
-                 clustering_distance_cols='canberra')
+                 clustering_distance_cols='canberra',
+                 show_colnames=show_samples)
         ###########################
         # layout(matrix(1:2,1,2),widths=c(4,1),heights=1)
         # ##Dendrogram##

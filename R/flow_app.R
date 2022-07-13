@@ -3,6 +3,8 @@ signeRFlow <- function() {
         stop("signeRFlow requires 'shiny'. Please install it using
          install.packages('shiny')")
     }
+  
+    options(shiny.usecairo = F)
 
     headerTagList <- list(
         tags$style(
