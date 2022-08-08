@@ -10,13 +10,14 @@ exportMethods(setSamples, setMutations, Normalize,
     ExposureCorrelation, ExposureGLM,
     ExposureClassify, FuzzyClustExp, HClustExp)
 export(genOpportunityFromGenome, genCountMatrixFromVcf, signeR,
-    BICboxplot, eBayesNMF, GibbsSamplerCpp)
+    BICboxplot, eBayesNMF, GibbsSamplerCpp, FuzzyClusterCpp,
+    Optimal_sigs,CmeansExp,PBMFindex)
 export(signeRFlow)
 
 import(utils, methods, future, future.apply,
     class, VGAM, glmnet, e1071, ada,
-    kknn, forestplot, grid, ggplot2,
-    scales, reshape2, RColorBrewer, dplyr)
+    kknn, ggplot2, scales, reshape2, 
+    RColorBrewer, dplyr)
 
 importFrom("readr", "read_tsv")
 importFrom("proxy", "dist")
@@ -70,5 +71,4 @@ importFrom("maxstat", "maxstat.test")
 importFrom("pvclust", "msfit")
 importFrom("ppclust", "fcm", "pcm", "fpcm")
 importFrom("clue", "solve_LSAP")
-importFrom("grid", "unit")
 importFrom("ggpubr","ggarrange")

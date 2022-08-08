@@ -61,7 +61,7 @@ setMethod("DiffExp",signature(signexp_obj="SignExp", labels="character",
         if (!method=="AUC"){
             Lpval <- -1*log(Pval) #n x r
             Lpval[Lpval>750]<-750 ### avoid Inf
-            rownames(Lpval)<-paste("S",1:n,sep="")
+            rownames(Lpval)<-signexp_obj@signames
             y.min<-min(Lpval); y.max<-max(Lpval)
             lcut <- -1*log(cutoff)
             invquant<-1-quant
@@ -72,7 +72,7 @@ setMethod("DiffExp",signature(signexp_obj="SignExp", labels="character",
             my.ylab <- "-log(pvalue)"
         }else{
             Lpval<-Pval
-            rownames(Lpval)<-paste("S",1:n,sep="")
+            rownames(Lpval)<-signexp_obj@signames
             y.min<-min(Lpval); y.max<-max(Lpval)
             lcut<-cutoff
             Lpmed<-apply(Lpval,1,quantile,quant,na.rm=TRUE)
@@ -82,7 +82,7 @@ setMethod("DiffExp",signature(signexp_obj="SignExp", labels="character",
             my.ylab <- "AUC"
         }
         bigexp<-rep(NA,n)
-        boxnames<-paste("S",1:n,sep="")
+        boxnames<-signexp_obj@signames
         boxlines<-rep(0.5,n)
         signif<-which(Lpmed>=lcut)
         for(k in signif){
@@ -124,8 +124,8 @@ setMethod("DiffExp",signature(signexp_obj="SignExp", labels="character",
                 rownames(Pv)<-classes[-1]
                 List_pval<-c(List_pval,list(Pv))
             }
-            names(List_sig)<-paste("Signature",signif,sep="_")
-            names(List_pval)<-paste("Signature",signif,sep="_")
+            names(List_sig) <- signexp_obj@signames[signif]
+            names(List_pval)<- signexp_obj@signames[signif]
         }
         new_plot <-FALSE
         if(plot_to_file){
@@ -142,14 +142,14 @@ setMethod("DiffExp",signature(signexp_obj="SignExp", labels="character",
         }
         ####### Plotting
         ####################### ggplot2
-        md<-data.frame("Sig"=rep(paste("S",1:n,sep=""),each=r),
+        md<-data.frame("Sig"=rep(signexp_obj@signames,each=r),
                        "Pvalues"=as.vector(t(Lpval)))
         ms = group_by(md, Sig) %>% summarise(q1=min(Pvalues),
                                              q2=quantile(Pvalues,p=0.25),
                                              q3=median(Pvalues),
                                              q4=quantile(Pvalues,p=0.75),
                                              q5=max(Pvalues))
-        segments<-data.frame("Sig"=paste("S",1:n,sep=""),"x_bgn"=c(1:n)-0.4,"x_end"=c(1:n)+0.4,
+        segments<-data.frame("Sig"=signexp_obj@signames,"x_bgn"=c(1:n)-0.4,"x_end"=c(1:n)+0.4,
                              "y_bgn"=Lpmed,"y_end"=Lpmed,"q1"=0,"q2"=0,"q3"=0,"q4"=0,"q5"=0)
         g1<-ggplot(ms, aes(x=Sig,ymin=q1,lower=q2,middle=q3,upper=q4,ymax=q5)) + 
             geom_boxplot(stat='identity',show.legend = FALSE) +
@@ -165,13 +165,13 @@ setMethod("DiffExp",signature(signexp_obj="SignExp", labels="character",
             ####################### ggplot2
             Allclass<-rep(as.vector(used_labels),each=n,times=r)
             classdiffs<-rep(NA,length(Allclass))
-            fullsigs<-rep(paste("S",1:n,sep=""),times=j*r)
+            fullsigs<-rep(signexp_obj@signames,times=j*r)
             fullsignif<-rep(c(1:n %in% signif),times=j*r)
             for (c in 1:nclasses){
                 cl<-classes[c]
                 for (i in 1:length(signif)){
                     s<-signif[i]
-                    thissig<-paste("S",s,sep="")
+                    thissig<-signexp_obj@signames[s]
                     classdiffs[Allclass==cl & fullsigs==thissig]<-paste(Allcomp[[i]][[c]],collapse=",")
                 }
             }
@@ -211,7 +211,7 @@ setMethod("DiffExp",signature(signexp_obj="SignExp", labels="character",
         Pmed<-apply(Pval,1,quantile,quant)
         signif_cond <- Pmed<=cutoff
         mainresult<-data.frame(matrix(signif_cond,1,n))
-        colnames(mainresult)<-paste("S",1:n,sep="")
+        colnames(mainresult)<-signexp_obj@signames
         result_list<-list(result=mainresult, Pvquant=Pmed, Pvalues=Pval,
             MostExposed=bigexp)
         if(multicompare){ result_list<-c(result_list,list(Differences=List_sig,
@@ -353,12 +353,7 @@ setMethod("ExposureCorrelation",signature(Exposures="matrix",feature="numeric",
               de <- dim(Exposures) #[n,j]
               n<-de[[1]]; j<-de[[2]]
               Ehat <- Exposures
-              if(is.null(rownames(Ehat))){
-                  signature_names<-paste("Sig",1:n,sep="")
-                  rownames(Ehat)<-signature_names
-              }else{
-                  signature_names<-rownames(Ehat)
-              }
+              signature_names<-rownames(Ehat)
               if(colors){ col1<-"darkgreen"; col2<-"red"; col3<-"blue"
               }else{ col1<-"black"; col2<-"black"; col3<-"black"  }
               if(plot_to_file){
@@ -398,17 +393,17 @@ setMethod("ExposureCorrelation",signature(Exposures="matrix",feature="numeric",
               cor<-rep("black",n)
               cor[signif_signatures]<-col1
               bigexp<-rep(NA,n)
-              boxnames<-paste("S",1:n,sep="")
+              boxnames<-signature_names
               boxlines<-rep(0.5,n)
               ####################### ggplot2
-              md<-data.frame(Sig=paste("S",1:n,sep=""),
+              md<-data.frame(Sig=signature_names,
                              Pvalues=as.vector(t(Lpval)))
               ms = group_by(md, Sig) %>% summarize(q1=min(Pvalues),
                                                    q2=quantile(Pvalues,p=0.25),
                                                    q3=median(Pvalues),
                                                    q4=quantile(Pvalues,p=0.75),
                                                    q5=max(Pvalues))
-              segments<-data.frame(Sig=paste("S",1:n,sep=""),x_bgn=c(1:n)-0.4,x_end=c(1:n)+0.4,
+              segments<-data.frame(Sig=signature_names,x_bgn=c(1:n)-0.4,x_end=c(1:n)+0.4,
                                    y_bgn=Lpmed,y_end=Lpmed,q1=0,q2=0,q3=0,q4=0,q5=0)
               g1<-ggplot(ms, aes(x=Sig,ymin=q1,lower=q2,middle=q3,upper=q4,ymax=q5)) + 
                   geom_boxplot(stat='identity',show.legend = FALSE) +
@@ -420,7 +415,7 @@ setMethod("ExposureCorrelation",signature(Exposures="matrix",feature="numeric",
                   labs(x="",y="-log(pvalue)")
               #######################
               #correlation plots
-              md<-data.frame(Sig=rep(paste("S",1:n,sep=""),times=j),
+              md<-data.frame(Sig=rep(signature_names,times=j),
                              exposure=as.vector(Ehat),
                              Feature=rep(feature,each=n))
               g2<-ggplot(md, aes(x=Feature,y=exposure)) + 
@@ -456,6 +451,13 @@ setMethod("ExposureCorrelation",signature(Exposures="SignExp",feature="numeric",
               de <- dim(Exposures@Exp) #[n,j,r]
               i<-dp[[1]]; n<-dp[[2]]; j<-de[[2]]; r<-de[[3]]
               Es <- Exposures@Exp
+              Em <- Median_exp(Exposures)
+              if(is.null(rownames(Em))){
+                signature_names<-Exposures@signames
+                rownames(Em)<-signature_names
+              }else{
+                signature_names<-rownames(Em)
+              }
               if(colors){ col1<-"darkgreen"; col2<-"red"; col3<-"blue"
               }else{ col1<-"black"; col2<-"black"; col3<-"black"  }
               Estimates_and_Pvalues<-future_apply(Es,c(1,3),function(thisexposure){
@@ -486,18 +488,18 @@ setMethod("ExposureCorrelation",signature(Exposures="SignExp",feature="numeric",
               cor<-rep("black",n)
               cor[signif_signatures]<-col1
               bigexp<-rep(NA,n)
-              boxnames<-paste("S",1:n,sep="")
+              boxnames<-Exposures@signames
               boxlines<-rep(0.5,n)
               ####### Plotting
               ####################### ggplot2
-              md<-data.frame(Sig=rep(paste("S",1:n,sep=""),each=r),
+              md<-data.frame(Sig=rep(Exposures@signames,each=r),
                              Pvalues=as.vector(t(Lpval)))
               ms = group_by(md, Sig) %>% summarize(q1=min(Pvalues),
                                                    q2=quantile(Pvalues,p=0.25),
                                                    q3=median(Pvalues),
                                                    q4=quantile(Pvalues,p=0.75),
                                                    q5=max(Pvalues))
-              segments<-data.frame(Sig=paste("S",1:n,sep=""),x_bgn=c(1:n)-0.4,x_end=c(1:n)+0.4,
+              segments<-data.frame(Sig=Exposures@signames,x_bgn=c(1:n)-0.4,x_end=c(1:n)+0.4,
                                    y_bgn=Lpmed,y_end=Lpmed,q1=0,q2=0,q3=0,q4=0,q5=0)
               g1<-ggplot(ms, aes(x=Sig,ymin=q1,lower=q2,middle=q3,upper=q4,ymax=q5)) + 
                   geom_boxplot(stat='identity',show.legend = FALSE) +
@@ -509,8 +511,7 @@ setMethod("ExposureCorrelation",signature(Exposures="SignExp",feature="numeric",
                   labs(x="",y="-log(pvalue)")
               #######################
               #Correlation plots
-              Em<-Median_exp(Exposures)
-              md<-data.frame(Sig=rep(paste("S",1:n,sep=""),times=j),
+              md<-data.frame(Sig=rep(Exposures@signames,times=j),
                              exposure=as.vector(Em),
                              Feature=rep(feature,each=n))
               g2<-ggplot(md, aes(x=Feature,y=exposure)) + 
@@ -586,12 +587,7 @@ setMethod("ExposureSurvival",signature(Exposures="matrix",surv="ANY",
               de <- dim(Exposures) #[n,j]
               n<-de[[1]]; j<-de[[2]]
               Ehat<-Exposures
-              if(is.null(rownames(Ehat))){
-                  signature_names<-paste("Sig",1:n,sep="")
-                  rownames(Ehat)<-signature_names
-              }else{
-                  signature_names<-rownames(Ehat)
-              }
+              signature_names<-rownames(Ehat)
               cutvalues<-rep(NA,n)
               Sigfactors<-matrix(NA,j,n)
               Pvalues_diff<-rep(NA,n)
@@ -667,18 +663,18 @@ setMethod("ExposureSurvival",signature(Exposures="matrix",surv="ANY",
               cor<-rep("black",n)
               cor[signif_signatures]<-col1
               bigexp<-rep(NA,n)
-              boxnames<-paste("S",1:n,sep="")
+              boxnames<-signature_names
               boxlines<-rep(0.5,n)
               ####### Plotting
               ####################### ggplot2
-              md<-data.frame(Sig=paste("S",1:n,sep=""),
+              md<-data.frame(Sig=signature_names,
                              Pvalues=as.vector(t(Lpval)))
               ms = group_by(md, Sig) %>% summarize(q1=min(Pvalues),
                                                    q2=quantile(Pvalues,p=0.25),
                                                    q3=median(Pvalues),
                                                    q4=quantile(Pvalues,p=0.75),
                                                    q5=max(Pvalues))
-              segments<-data.frame(Sig=paste("S",1:n,sep=""),x_bgn=c(1:n)-0.4,x_end=c(1:n)+0.4,
+              segments<-data.frame(Sig=signature_names,x_bgn=c(1:n)-0.4,x_end=c(1:n)+0.4,
                                    y_bgn=Lpval,y_end=Lpval,q1=0,q2=0,q3=0,q4=0,q5=0)
               g1<-ggplot(ms, aes(x=Sig,ymin=q1,lower=q2,middle=q3,upper=q4,ymax=q5)) + 
                   geom_boxplot(stat='identity',show.legend = FALSE,col=cor) +
@@ -719,7 +715,7 @@ setMethod("ExposureSurvival",signature(Exposures="matrix",surv="ANY",
               }else{
                   forestplotlist<-list()
                   for(m in which(signif_signatures)){
-                      fp<-ggforest(univ.list[[m]],main = paste("Signature",m,sep=" "))
+                      fp<-ggforest(univ.list[[m]],main = signature_names[m])
                       forestplotlist<-c(forestplotlist,list(fp))
                   }
                   plotlist<-c(plotlist,forestplotlist)
@@ -757,7 +753,7 @@ setMethod("ExposureSurvival",signature(Exposures="SignExp",surv="ANY",
               Ehat<-Median_exp(Exposures)
               Es<-Exposures@Exp
               if(is.null(rownames(Ehat))){
-                  signature_names<-paste("Sig",1:n,sep="")
+                  signature_names<-Exposures@signames
                   rownames(Ehat)<-signature_names
               }else{
                   signature_names<-rownames(Ehat)
@@ -852,18 +848,18 @@ setMethod("ExposureSurvival",signature(Exposures="SignExp",surv="ANY",
               cor<-rep("black",n)
               cor[signif_signatures]<-col1
               bigexp<-rep(NA,n)
-              boxnames<-paste("S",1:n,sep="")
+              boxnames<-signature_names
               boxlines<-rep(0.5,n)
               ####### Plotting
               ####################### ggplot2
-              md<-data.frame(Sig=rep(paste("S",1:n,sep=""),each=r),
+              md<-data.frame(Sig=rep(signature_names,each=r),
                              Pvalues=as.vector(t(Lpval)))
               ms = group_by(md, Sig) %>% summarize(q1=min(Pvalues),
                                                    q2=quantile(Pvalues,p=0.25),
                                                    q3=median(Pvalues),
                                                    q4=quantile(Pvalues,p=0.75),
                                                    q5=max(Pvalues))
-              segments<-data.frame(Sig=paste("S",1:n,sep=""),x_bgn=c(1:n)-0.4,x_end=c(1:n)+0.4,
+              segments<-data.frame(Sig=signature_names,x_bgn=c(1:n)-0.4,x_end=c(1:n)+0.4,
                                    y_bgn=Lpmed,y_end=Lpmed,q1=0,q2=0,q3=0,q4=0,q5=0)
               g1<-ggplot(ms, aes(x=Sig,ymin=q1,lower=q2,middle=q3,upper=q4,ymax=q5)) + 
                   geom_boxplot(stat='identity',show.legend = FALSE,col=cor) +

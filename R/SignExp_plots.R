@@ -144,7 +144,7 @@ setMethod("SignPlot",signature(signexp_obj="SignExp",plot_to_file="ANY",
             Pdata<-signexp_obj@Psummary[mutord,reord[k],1:6,drop=TRUE]
             Pdata[Pdata<threshold]<-0
             Pdata<-data.frame(Pdata)
-            Pdata$Sig<-paste("S",k,sep="")
+            Pdata$Sig<-signexp_obj@signames
             Pdata$y.max <- max(Pdata[,6])
             Pdata$y.width <- Pdata$y.max*1.05
             Pdata<-Pdata[,-6]
@@ -212,9 +212,9 @@ setMethod("ExposureBoxplot",signature(signexp_obj="SignExp", plot_to_file="ANY",
         ####################### ggplot2
         m = signexp_obj@Exp
         colnames(m) = signexp_obj@samples
+        rownames(m) = signexp_obj@signames
         m = reshape2::melt(m)
         colnames(m)<-c("Signatures","Samples","r","value")
-        m$Signatures=factor(paste0("S",m$Signatures), levels=paste0("S",1:n))
         m$Samples<-as.factor(m$Samples)
         m = group_by(m, Signatures, Samples) %>% summarize(q1=min(value),
                                                            q2=quantile(value,p=0.25),
@@ -292,7 +292,7 @@ setMethod("ExposureBarplot",signature(signexp_obj="SignExp", plot_to_file="ANY",
         ################ggplot2
         m = Median_exp(signexp_obj)
         colnames(m) = signexp_obj@samples
-        rownames(m) = paste0("S",1:n)
+        rownames(m) = signexp_obj@signames
         m = reshape2::melt(m)
         colnames(m)<-c("Signatures","Samples","value")
         if(relative){
@@ -397,7 +397,7 @@ setMethod("SignHeat",signature(signexp_obj="SignExp", plot_to_file="ANY",
         ###################ggplot2
         m <- Median_sign(signexp_obj)[]
         rownames(m) <- signexp_obj@mutations
-        colnames(m) <- paste0("S",1:n)
+        colnames(m) <- signexp_obj@signames
         rmut<-read.snv.context(signexp_obj@mutations)
         mutord<-order(rmut[[2]],rmut[[1]])
         m = t(m[mutord,])
@@ -479,7 +479,7 @@ setMethod("ExposureHeat",signature(signexp_obj="SignExp", plot_to_file="ANY",
         ####################ggplot2
         m = Median_exp(signexp_obj)
         colnames(m) = signexp_obj@samples
-        rownames(m) = paste0("S",1:n)
+        rownames(m) = signexp_obj@signames
         clr=rev(colorRampPalette(brewer.pal(name="Spectral",n=11))(100))
         pheatmap(log(m), border_color=NA, color=clr, 
                  clustering_method='ward.D2',

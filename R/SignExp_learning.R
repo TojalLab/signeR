@@ -77,7 +77,7 @@ setMethod("ExposureClassify",signature(signexp_obj="ANY",labels="character",
                           weights<-as.numeric(weights)
                       }
                       D<-D*weights
-                      rownames(D)<-c(paste("Sig",1:n0,sep="_"),colnames(addata))
+                      rownames(D)<-c(signexp_obj@signames,colnames(addata))
                       D<-D/median(D[D>0]) #avoid too small values
                       Train<-t(D[,!is.na(labels),drop=FALSE])
                       Test<-t(D[,is.na(labels),drop=FALSE])
@@ -335,7 +335,11 @@ setMethod("ExposureGLM",signature(Exposures="matrix",feature="numeric",
               cor<-rep("black",n)
               cor[signif_signatures]<-col1
               bigexp<-rep(NA,n)
-              boxnames<-paste("S",1:n,sep="")
+              if(!is.null(rownames(Exposures)[1])){
+                  boxnames<-rownames(Exposures)
+              }else{
+                  boxnames<-paste("S",1:n,sep="")
+              }
               boxlines<-rep(0.5,n)
               ####### Plotting
               plot(1:n,rep(lcut,n),type="n",main="",xlab="",ylab="-log(pvalue)",
@@ -410,7 +414,7 @@ setMethod("ExposureGLM",signature(Exposures="SignExp",feature="numeric",
               cor<-rep("black",n)
               cor[signif_signatures]<-col1
               bigexp<-rep(NA,n)
-              boxnames<-paste("S",1:n,sep="")
+              boxnames<-Exposures@signames
               boxlines<-rep(0.5,n)
               ####### Plotting
               plot(1:n,rep(lcut,n),type="n",main="",xlab="",ylab="-log(pvalue)",
@@ -472,6 +476,7 @@ setMethod("ExposureSurvModel",signature(Exposures="matrix",surv="ANY",
               de <- dim(Exposures) #[n,j]
               n<-de[[1]]; j<-de[[2]]
               Ehat<-t(Exposures)
+              invquant<-1-quant
               if(is.null(colnames(Ehat))){
                   signature_names<-paste("Sig",1:n,sep="")
                   colnames(Ehat)<-signature_names
@@ -515,6 +520,10 @@ setMethod("ExposureSurvModel",signature(Exposures="matrix",surv="ANY",
               if(model0){
                   thisAnova<-anova(cph0,cph)
                   pvalAnova<-thisAnova[[4]][2]
+                  LpvalAnova <- -1*log(pvalAnova)
+                  y.max_anova<-max(LpvalAnova)
+                  y.min_anova<-min(LpvalAnova)
+                  Lp_quant_Anova<-quantile(LpvalAnova,invquant,na.rm=TRUE)
               }
               signif_signatures <- rep(TRUE,n)
               if(!is.na(cutoff_pvalue)){
@@ -532,10 +541,11 @@ setMethod("ExposureSurvModel",signature(Exposures="matrix",surv="ANY",
               y.min<-min(Lpval)
               y.max<-max(Lpval)
               lcut <- -1*log(cutoff_pvalue)
-              cor<-rep("black",n)
+              lcut <- -1*log(cutoff_pvalue)
+              Lp_quant<-Lpval
               cor[signif_signatures]<-col1
               bigexp<-rep(NA,n)
-              boxnames<-paste("S",1:n,sep="")
+              boxnames<-signature_names
               boxlines<-rep(0.5,n)
               pos=c(1:n)
               box_width=0.8
@@ -549,47 +559,127 @@ setMethod("ExposureSurvModel",signature(Exposures="matrix",surv="ANY",
               #p-values boxplots &
               #forestplots univariate
               ####### Plotting
-              grid.newpage()
-              pushViewport(viewport(layout = grid.layout(5,3,
-                                    heights=unit(rep(1,5),c("lines","null","lines","null","lines")),
-                                    widths=unit(c(4,1,3),c("lines","null","lines"))),
-                                    just=c("center","center")))
-              pushViewport(viewport(layout.pos.row = 2, layout.pos.col = 2, 
-                                    xscale = c(0, n+1), yscale = c(0,1.5*y.max),
-                                    width = n+1, height = 1.5*y.max))
-              grid.rect(x = unit((n+1)/2, "native"), y = unit(0.75*y.max, "native"),
-                        width = unit(n+0.5, "native"), height = unit(1.5*y.max, "native"),
-                        just = "centre", hjust = NULL, vjust = NULL,
-                        default.units = "native", name = NULL,
-                        gp=gpar(), draw = TRUE, vp = NULL)
-              grid.xaxis(at=c(1:n),label=paste("S",1:n,sep=""))
-              grid.yaxis()
-              grid.text("-log(pvalue)", x = unit(-2.75, "lines"),
-                        gp = gpar(fontsize = 14), rot = 90)
-              grid.segments(0.25, lcut, 
-                            n+0.75, lcut, 
-                            default.units = "native", gp = gpar(col = "red"))
-              for(k in 1:n){
-                  grid.segments(pos[k] - 0.5 * box_width, Lpval[k], 
-                                pos[k] + 0.5 * box_width, Lpval[k], 
-                                default.units = "native", gp = gpar(col = col3))
-              }
-              popViewport()
-              pushViewport(viewport(layout.pos.row = 4, layout.pos.col = 2))
-              forestplot(labeltext=tabletext[-2,], graph.pos=3, 
-                         mean=c(NA,data$HR), 
-                         lower=c(NA,data$Lower_CI), upper=c(NA,data$Upper_CI),
-                         xlab="Hazard ratio [95% CI]",
-                         hrzl_lines=list("2" = gpar(lwd=1, col="black")),
-                         txt_gp=fpTxtGp(label=gpar(cex=1, fontface="bold"),
-                                        ticks=gpar(cex=1.1),
-                                        xlab=gpar(cex = 1.1),
-                                        title=gpar(cex = 1.1)),
-                         col=fpColors(box="black", lines="black", zero = "gray50"),
-                         zero=1, cex=0.9, boxsize=0.5, colgap=unit(6,"mm"),
-                         lwd.ci=2, ci.vertices=TRUE, title="",new_page = FALSE)
+              # grid.newpage()
+              # pushViewport(viewport(layout = grid.layout(5,3,
+              #                       heights=unit(rep(1,5),c("lines","null","lines","null","lines")),
+              #                       widths=unit(c(4,1,3),c("lines","null","lines"))),
+              #                       just=c("center","center")))
+              # pushViewport(viewport(layout.pos.row = 2, layout.pos.col = 2, 
+              #                       xscale = c(0, n+1), yscale = c(0,1.5*y.max),
+              #                       width = n+1, height = 1.5*y.max))
+              # grid.rect(x = unit((n+1)/2, "native"), y = unit(0.75*y.max, "native"),
+              #           width = unit(n+0.5, "native"), height = unit(1.5*y.max, "native"),
+              #           just = "centre", hjust = NULL, vjust = NULL,
+              #           default.units = "native", name = NULL,
+              #           gp=gpar(), draw = TRUE, vp = NULL)
+              # grid.xaxis(at=c(1:n),label=signature_names)
+              # grid.yaxis()
+              # grid.text("-log(pvalue)", x = unit(-2.75, "lines"),
+              #           gp = gpar(fontsize = 14), rot = 90)
+              # grid.segments(0.25, lcut, 
+              #               n+0.75, lcut, 
+              #               default.units = "native", gp = gpar(col = "red"))
+              # for(k in 1:n){
+              #     grid.segments(pos[k] - 0.5 * box_width, Lpval[k], 
+              #                   pos[k] + 0.5 * box_width, Lpval[k], 
+              #                   default.units = "native", gp = gpar(col = col3))
+              # }
+              # popViewport()
+              # pushViewport(viewport(layout.pos.row = 4, layout.pos.col = 2))
+              # forestplot(labeltext=tabletext[-2,], graph.pos=3, 
+              #            mean=c(NA,data$HR), 
+              #            lower=c(NA,data$Lower_CI), upper=c(NA,data$Upper_CI),
+              #            xlab="Hazard ratio [95% CI]",
+              #            hrzl_lines=list("2" = gpar(lwd=1, col="black")),
+              #            txt_gp=fpTxtGp(label=gpar(cex=1, fontface="bold"),
+              #                           ticks=gpar(cex=1.1),
+              #                           xlab=gpar(cex = 1.1),
+              #                           title=gpar(cex = 1.1)),
+              #            col=fpColors(box="black", lines="black", zero = "gray50"),
+              #            zero=1, cex=0.9, boxsize=0.5, colgap=unit(6,"mm"),
+              #            lwd.ci=2, ci.vertices=TRUE, title="",new_page = FALSE)
+              # 
+              # popViewport(2)
+              ####################### ggplot2
+              md<-data.frame(Sig=signature_names,
+                             Pvalues=as.vector(Lpval))
+              ms = group_by(md, Sig) %>% summarize(q1=min(Pvalues),
+                                                   q2=quantile(Pvalues,p=0.25),
+                                                   q3=median(Pvalues),
+                                                   q4=quantile(Pvalues,p=0.75),
+                                                   q5=max(Pvalues))
+              segments<-data.frame(Sig=signature_names,x_bgn=c(1:n)-0.4,x_end=c(1:n)+0.4,
+                                   y_bgn=Lp_quant,y_end=Lp_quant,q1=0,q2=0,q3=0,q4=0,q5=0)
+              g1<-ggplot(ms, aes(x=Sig,ymin=q1,lower=q2,middle=q3,upper=q4,ymax=q5)) + 
+                geom_boxplot(stat='identity',show.legend = FALSE,col=cor) +
+                geom_hline(yintercept=lcut,col=col2) +
+                geom_segment(aes(x = x_bgn, y = y_bgn, xend = x_end, yend = y_end), col = col3,
+                             data = segments, show.legend = FALSE)+
+                theme_bw()+
+                theme(axis.text.x=element_text(angle=0,vjust=.5,hjust=0,face="bold")) + 
+                labs(x="",y="-log(pvalue)")
               
-              popViewport(2)
+              fp <- ggplot(multiv.tests, aes(x = HR, y = labels, xmin = Lower_CI, xmax = Upper_CI)) +
+                geom_hline(aes(yintercept = labels, colour = colour), size = 7) + 
+                geom_pointrange(shape = 22, fill = "black") +
+                geom_vline(xintercept = 1, linetype = 3) +
+                ylab("") +
+                xlab("Hazard Ratio with 95% CI") +
+                theme_classic() +
+                scale_colour_identity() +
+                scale_y_discrete(limits = rev(multiv.tests$labels)) +
+                scale_x_log10(limits = c(0.25, 4), 
+                              breaks = c(0.25, 0.5, 1, 2, 4), 
+                              labels = c("0.25", "0.5", "1", "2", "4"), expand = c(0,0)) +
+                theme(axis.text.y = element_blank(), axis.title.y = element_blank())
+              
+              multiv.table<-data.frame(labels=multiv.tests[,"labels"],
+                                       HR_CI=paste(round(multiv.tests$HR,3)," (",
+                                                   round(multiv.tests$Lower_CI,3),"-",
+                                                   round(multiv.tests$Upper_CI,3),")",sep=""),
+                                       P.value=signif(multiv.tests$P.value,3),
+                                       colour=multiv.tests$colour)
+              
+              ggtable <- ggplot(data = multiv.table, aes(y = labels)) +
+                geom_hline(aes(yintercept = labels, colour = colour), size = 7) +
+                geom_text(aes(x = 0, label = labels), hjust = 0) +
+                geom_text(aes(x = 3, label = HR_CI)) +
+                geom_text(aes(x = 3, y=n+0.5, label = "HR(CI)")) +
+                geom_text(aes(x = 7, label = P.value), hjust = 1) +
+                geom_text(aes(x = 7, y=n+0.5, label = "P.value"), hjust = 1) +
+                scale_colour_identity() +
+                theme_void() + 
+                theme(plot.margin = margin(5, 0, 35, 0))
+              
+              forestplot <- ggarrange(plotlist = list(ggtable,fp),
+                                      ncol = 2, nrow = 1)
+              if(model0){
+                md<-data.frame(Sig="Anova",
+                               Pvalues=as.vector(LpvalAnova))
+                ms = group_by(md, Sig) %>% summarize(q1=min(Pvalues),
+                                                     q2=quantile(Pvalues,p=0.25),
+                                                     q3=median(Pvalues),
+                                                     q4=quantile(Pvalues,p=0.75),
+                                                     q5=max(Pvalues))
+                segments<-data.frame(Sig="Anova",x_bgn=0.6,x_end=1.4,
+                                     y_bgn=Lp_quant_Anova,y_end=Lp_quant_Anova,
+                                     q1=Lp_quant_Anova,q2=Lp_quant_Anova,
+                                     q3=Lp_quant_Anova,q4=Lp_quant_Anova,
+                                     q5=Lp_quant_Anova)
+                g2<-ggplot(ms, aes(x=Sig,ymin=q1,lower=q2,middle=q3,upper=q4,ymax=q5)) + 
+                  geom_boxplot(stat='identity',show.legend = FALSE,col=cor) +
+                  geom_hline(yintercept=lcut,col=col2) +
+                  geom_segment(aes(x = x_bgn, y = y_bgn, xend = x_end, yend = y_end), col = col3,
+                               data = segments, show.legend = FALSE)+
+                  theme_bw()+
+                  theme(axis.text.x=element_text(angle=0,vjust=.5,hjust=0,face="bold")) + 
+                  labs(x="",y="-log(pvalue)")
+                final_figure <- ggarrange(g1,forestplot,g2,ncol = 1)
+              }else{
+                final_figure <- ggarrange(g1,forestplot,ncol = 1)
+              } 
+              plot(final_figure)
+              
               ####### Plotting end
               if(plot_to_file){
                   dev.off()
@@ -601,6 +691,7 @@ setMethod("ExposureSurvModel",signature(Exposures="matrix",surv="ANY",
               return(list("Significance"=signif,
                           "Stats"=multiv.tests))
           })
+
 
 setMethod("ExposureSurvModel",signature(Exposures="SignExp",surv="ANY",
                                         addata="ANY", 
@@ -623,14 +714,11 @@ setMethod("ExposureSurvModel",signature(Exposures="SignExp",surv="ANY",
               }
               de <- dim(Exposures@Exp) #[n,j,r]
               n<-de[[1]]; j<-de[[2]]; r<-de[[3]]
+              invquant<-1-quant
               Ehat<-Median_exp(Exposures)
               Es<-Exposures@Exp
-              if(is.null(rownames(Ehat))){
-                  signature_names<-paste("Sig",1:n,sep="")
-                  rownames(Ehat)<-signature_names
-              }else{
-                  signature_names<-rownames(Ehat)
-              }
+              signature_names<-Exposures@signames
+              rownames(Ehat)<-signature_names
               model0<-!is.na(addata[[1]][1])
               if(model0){ 
                   cph0<-coxph(Surv(dtime,os)~., data=data.frame(dtime,os,addata))
@@ -663,10 +751,17 @@ setMethod("ExposureSurvModel",signature(Exposures="SignExp",surv="ANY",
               HR.df<-data.frame(Allstats[(2*n+3):(3*n+2),])
               multiv.tests.ar<-array(as.vector(Allstats[(3*n+3):(10*n+2),]),dim=c(n,7,r))
               if(model0){
-                  LpvalAnova <- -1*log(pvalAnova)
-                  dev.new(width=7, height=7)
-                  par(mfrow=c(1,1))
-                  boxplot(LpvalAnova,ylab="-log(p-value)",main="Anova.coxph comparison of surv models")
+                 LpvalAnova <- -1*log(pvalAnova)
+                 #bplt_anova<-boxplot(data.frame(logpvalues=LpvalAnova),at=1,plot=FALSE,
+                 #             names="-log(pvalues)",pch=45)
+                 #boxplot_stats_anova<-bplt_anova$stats
+                 y.max_anova<-max(LpvalAnova)
+                 y.min_anova<-min(LpvalAnova)
+                 Lp_quant_Anova<-quantile(LpvalAnova,invquant,na.rm=TRUE)
+                 
+              #     dev.new(width=7, height=7)
+              #     par(mfrow=c(1,1))
+              #     boxplot(LpvalAnova,ylab="-log(p-value)",main="Anova.coxph comparison of surv models")
               }
               if(colors){ col1<-"darkgreen"; col2<-"red"; col3<-"blue"
               }else{ col1<-"black"; col2<-"black"; col3<-"black"  }
@@ -681,7 +776,6 @@ setMethod("ExposureSurvModel",signature(Exposures="SignExp",surv="ANY",
                   }
                   par(mfrow=c(n,2),mar=c(4.2,5.2,2,2))
               }
-              invquant<-1-quant
               Pvalues_quant<-apply(Pvalues.df,1,function(v){quantile(v,probs=quant)})
               HR_quantiles=apply(multiv.tests.ar[,1,],1,function(v){quantile(v,probs=c(invquant,0.5,quant))})
               cond<-HR_quantiles[2,]>=1
@@ -706,7 +800,7 @@ setMethod("ExposureSurvModel",signature(Exposures="SignExp",surv="ANY",
               cor<-rep("black",n)
               cor[signif_signatures]<-col1
               bigexp<-rep(NA,n)
-              boxnames<-paste("S",1:n,sep="")
+              boxnames<-signature_names
               boxlines<-rep(0.5,n)
               pos=c(1:n)
               box_width=0.8
@@ -729,79 +823,200 @@ setMethod("ExposureSurvModel",signature(Exposures="SignExp",surv="ANY",
                                         P.value=P.value_quant
               )
               rownames(multiv.tests)<-signature_names
-              data<-multiv.tests
-              np <- ifelse((data$P.value < 0.05), ifelse((data$P.value < 0.01), paste0(round(data$P.value, 3)," **"), 
-                                                         paste0(round(data$P.value, 3)," *")), round(data$P.value,3))
-              hr.ic <- ifelse((!is.na(data$HR)), paste0(round(data$HR, 4),' [',round(data$Lower_CI,3),',',round(data$Upper_CI,3),']'), NA)
-              tabletext <- cbind(c("Variable",rownames(data)), 
-                                 c("Hazard Ratio [95% CI]",hr.ic),
-                                 c("P-Value",np))
-              #p-values boxplots &
+              multiv.tests$labels<-signature_names
+              multiv.tests$colour <- rep(c("white", "gray95"), ceiling(nrow(multiv.tests)/2))[1:nrow(multiv.tests)]
+              # data<-multiv.tests
+              # np <- ifelse((data$P.value < 0.05), ifelse((data$P.value < 0.01), paste0(round(data$P.value, 3)," **"), 
+              #                                            paste0(round(data$P.value, 3)," *")), round(data$P.value,3))
+              # hr.ic <- ifelse((!is.na(data$HR)), paste0(round(data$HR, 4),' [',round(data$Lower_CI,3),',',round(data$Upper_CI,3),']'), NA)
+              # tabletext <- cbind(c("Variable",rownames(data)), 
+              #                    c("Hazard Ratio [95% CI]",hr.ic),
+              #                    c("P-Value",np))
+              # #p-values boxplots &
               #forestplots multivariate
               ####### Plotting
-              grid.newpage()
-              pushViewport(viewport(layout = grid.layout(5,3,
-                                                         heights=unit(rep(1,5),c("lines","null","lines","null","lines")),
-                                                         widths=unit(c(4,1,3),c("lines","null","lines"))),
-                                    just=c("center","center")))
-              pushViewport(viewport(layout.pos.row = 2, layout.pos.col = 2, 
-                                    xscale = c(0, n+1), yscale = c(0,1.5*y.max),
-                                    width = n+1, height = 1.5*y.max))
-              grid.rect(x = unit((n+1)/2, "native"), y = unit(0.75*y.max, "native"),
-                        width = unit(n+0.5, "native"), height = unit(1.5*y.max, "native"),
-                        just = "centre", hjust = NULL, vjust = NULL,
-                        default.units = "native", name = NULL,
-                        gp=gpar(), draw = TRUE, vp = NULL)
-              grid.xaxis(at=c(1:n),label=paste("S",1:n,sep=""))
-              grid.yaxis()
-              grid.text("-log(pvalue)", x = unit(-2.75, "lines"),
-                        gp = gpar(fontsize = 14), rot = 90)
-              grid.segments(0.25, lcut, 
-                            n+0.75, lcut, 
-                            default.units = "native", gp = gpar(col = "red"))
-              for(k in 1:n){
-                  grid.rect(x = pos[k], y = boxplot_stats[2, k], 
-                            height = boxplot_stats[4,k] - boxplot_stats[2, k], 
-                            width = 1 * box_width,
-                            just = "bottom", default.units = "native", gp = gpar(col = cor[k]))
-                  grid.segments(pos[k] - 0.25 * box_width, boxplot_stats[5,k], 
-                                pos[k] + 0.25 * box_width, boxplot_stats[5,k], 
-                                default.units = "native", gp = gpar(fill = "#CCCCCC"))
-                  grid.segments(pos[k], boxplot_stats[5, k], pos[k], boxplot_stats[4,k], 
-                                default.units = "native", gp = gpar(fill = "#CCCCCC"))
-                  grid.segments(pos[k], boxplot_stats[1, k], pos[k], boxplot_stats[2,k], 
-                                default.units = "native", gp = gpar(fill = "#CCCCCC"))
-                  grid.segments(pos[k] - 0.25 * box_width, boxplot_stats[1,k], 
-                                pos[k] + 0.25 * box_width, boxplot_stats[1,k], 
-                                default.units = "native", gp = gpar(fill = "#CCCCCC"))
-                  grid.segments(pos[k] - 0.5 * box_width, boxplot_stats[3,k], 
-                                pos[k] + 0.5 * box_width, boxplot_stats[3,k], 
-                                default.units = "native", gp = gpar(fill = "#CCCCCC"))
-                  grid.segments(pos[k] - 0.5 * box_width, Lp_quant[k], 
-                                pos[k] + 0.5 * box_width, Lp_quant[k], 
-                                default.units = "native", gp = gpar(col = col3))
-                  outliers<-bplt$out[bplt$group==k]
-                  if(length(outliers)>0){
-                      grid.points(x = rep(pos[k], length(outliers)), y = outliers, 
-                                  default.units = "native", pch=45)
-                  }
-              }
-              popViewport()
-              pushViewport(viewport(layout.pos.row = 4, layout.pos.col = 2))
-              forestplot(labeltext=tabletext, graph.pos=3, 
-                         mean=c(NA,data$HR), 
-                         lower=c(NA,data$Lower_CI), upper=c(NA,data$Upper_CI),
-                         xlab="Hazard ratio [95% CI]",
-                         hrzl_lines=list("2" = gpar(lwd=1, col="black")),
-                         txt_gp=fpTxtGp(label=gpar(cex=1, fontface="bold"),
-                                        ticks=gpar(cex=1.1),
-                                        xlab=gpar(cex = 1.1),
-                                        title=gpar(cex = 1.1)),
-                         col=fpColors(box="black", lines="black", zero = "gray50"),
-                         zero=1, cex=0.9, boxsize=0.5, colgap=unit(6,"mm"),
-                         lwd.ci=2, ci.vertices=TRUE, title="",new_page = FALSE)
+              ####################### ggplot2
+              md<-data.frame(Sig=rep(signature_names,each=r),
+                             Pvalues=as.vector(t(Lpval)))
+              ms = group_by(md, Sig) %>% summarize(q1=min(Pvalues),
+                                                   q2=quantile(Pvalues,p=0.25),
+                                                   q3=median(Pvalues),
+                                                   q4=quantile(Pvalues,p=0.75),
+                                                   q5=max(Pvalues))
+              segments<-data.frame(Sig=signature_names,x_bgn=c(1:n)-0.4,x_end=c(1:n)+0.4,
+                                   y_bgn=Lp_quant,y_end=Lp_quant,q1=0,q2=0,q3=0,q4=0,q5=0)
+              g1<-ggplot(ms, aes(x=Sig,ymin=q1,lower=q2,middle=q3,upper=q4,ymax=q5)) + 
+                geom_boxplot(stat='identity',show.legend = FALSE,col=cor) +
+                geom_hline(yintercept=lcut,col=col2) +
+                geom_segment(aes(x = x_bgn, y = y_bgn, xend = x_end, yend = y_end), col = col3,
+                             data = segments, show.legend = FALSE)+
+                theme_bw()+
+                theme(axis.text.x=element_text(angle=0,vjust=.5,hjust=0,face="bold")) + 
+                labs(x="",y="-log(pvalue)")
+              # grid.newpage()
+              # if(model0){
+              #   pushViewport(viewport(layout = grid.layout(7,3,
+              #                                              heights=unit(rep(1,5),c("lines","null","lines","null","lines","null","lines")),
+              #                                              widths=unit(c(4,1,3),c("lines","null","lines"))),
+              #                         just=c("center","center")))
+              # }else{
+              #   pushViewport(viewport(layout = grid.layout(5,3,
+              #                                              heights=unit(rep(1,5),c("lines","null","lines","null","lines")),
+              #                                              widths=unit(c(4,1,3),c("lines","null","lines"))),
+              #                         just=c("center","center")))
+              # }
+              # pushViewport(viewport(layout.pos.row = 2, layout.pos.col = 2, 
+              #                       xscale = c(0, n+1), yscale = c(0,1.5*y.max),
+              #                       width = n+1, height = 1.5*y.max))
+              # grid.rect(x = unit((n+1)/2, "native"), y = unit(0.75*y.max, "native"),
+              #           width = unit(n+0.5, "native"), height = unit(1.5*y.max, "native"),
+              #           just = "centre", hjust = NULL, vjust = NULL,
+              #           default.units = "native", name = NULL,
+              #           gp=gpar(), draw = TRUE, vp = NULL)
+              # grid.xaxis(at=c(1:n),label=signature_names)
+              # grid.yaxis()
+              # grid.text("-log(pvalue)", x = unit(-2.75, "lines"),
+              #           gp = gpar(fontsize = 14), rot = 90)
+              # grid.segments(0.25, lcut, 
+              #               n+0.75, lcut, 
+              #               default.units = "native", gp = gpar(col = "red"))
+              # for(k in 1:n){
+              #     grid.rect(x = pos[k], y = boxplot_stats[2, k], 
+              #               height = boxplot_stats[4,k] - boxplot_stats[2, k], 
+              #               width = 1 * box_width,
+              #               just = "bottom", default.units = "native", gp = gpar(col = cor[k]))
+              #     grid.segments(pos[k] - 0.25 * box_width, boxplot_stats[5,k], 
+              #                   pos[k] + 0.25 * box_width, boxplot_stats[5,k], 
+              #                   default.units = "native", gp = gpar(fill = "#CCCCCC"))
+              #     grid.segments(pos[k], boxplot_stats[5, k], pos[k], boxplot_stats[4,k], 
+              #                   default.units = "native", gp = gpar(fill = "#CCCCCC"))
+              #     grid.segments(pos[k], boxplot_stats[1, k], pos[k], boxplot_stats[2,k], 
+              #                   default.units = "native", gp = gpar(fill = "#CCCCCC"))
+              #     grid.segments(pos[k] - 0.25 * box_width, boxplot_stats[1,k], 
+              #                   pos[k] + 0.25 * box_width, boxplot_stats[1,k], 
+              #                   default.units = "native", gp = gpar(fill = "#CCCCCC"))
+              #     grid.segments(pos[k] - 0.5 * box_width, boxplot_stats[3,k], 
+              #                   pos[k] + 0.5 * box_width, boxplot_stats[3,k], 
+              #                   default.units = "native", gp = gpar(fill = "#CCCCCC"))
+              #     grid.segments(pos[k] - 0.5 * box_width, Lp_quant[k], 
+              #                   pos[k] + 0.5 * box_width, Lp_quant[k], 
+              #                   default.units = "native", gp = gpar(col = col3))
+              #     outliers<-bplt$out[bplt$group==k]
+              #     if(length(outliers)>0){
+              #         grid.points(x = rep(pos[k], length(outliers)), y = outliers, 
+              #                     default.units = "native", pch=45)
+              #     }
+              # }
+              # popViewport()
+              # pushViewport(viewport(layout.pos.row = 4, layout.pos.col = 2))
+              # forestplot(labeltext=tabletext, graph.pos=3, 
+              #            mean=c(NA,data$HR), 
+              #            lower=c(NA,data$Lower_CI), upper=c(NA,data$Upper_CI),
+              #            xlab="Hazard ratio [95% CI]",
+              #            hrzl_lines=list("2" = gpar(lwd=1, col="black")),
+              #            txt_gp=fpTxtGp(label=gpar(cex=1, fontface="bold"),
+              #                           ticks=gpar(cex=1.1),
+              #                           xlab=gpar(cex = 1.1),
+              #                           title=gpar(cex = 1.1)),
+              #            col=fpColors(box="black", lines="black", zero = "gray50"),
+              #            zero=1, cex=0.9, boxsize=0.5, colgap=unit(6,"mm"),
+              #            lwd.ci=2, ci.vertices=TRUE, title="",new_page = FALSE)
+              fp <- ggplot(multiv.tests, aes(x = HR, y = labels, xmin = Lower_CI, xmax = Upper_CI)) +
+                geom_hline(aes(yintercept = labels, colour = colour), size = 7) + 
+                geom_pointrange(shape = 22, fill = "black") +
+                geom_vline(xintercept = 1, linetype = 3) +
+                ylab("") +
+                xlab("Hazard Ratio with 95% CI") +
+                theme_classic() +
+                scale_colour_identity() +
+                scale_y_discrete(limits = rev(multiv.tests$labels)) +
+                scale_x_log10(limits = c(0.25, 4), 
+                              breaks = c(0.25, 0.5, 1, 2, 4), 
+                              labels = c("0.25", "0.5", "1", "2", "4"), expand = c(0,0)) +
+                theme(axis.text.y = element_blank(), axis.title.y = element_blank())
               
-              popViewport(2)
+              multiv.table<-data.frame(labels=multiv.tests[,"labels"],
+                                       HR_CI=paste(round(multiv.tests$HR,3)," (",
+                                                   round(multiv.tests$Lower_CI,3),"-",
+                                                   round(multiv.tests$Upper_CI,3),")",sep=""),
+                                       P.value=signif(multiv.tests$P.value,3),
+                                       colour=multiv.tests$colour)
+              
+              ggtable <- ggplot(data = multiv.table, aes(y = labels)) +
+                geom_hline(aes(yintercept = labels, colour = colour), size = 7) +
+                geom_text(aes(x = 0, label = labels), hjust = 0) +
+                geom_text(aes(x = 3, label = HR_CI)) +
+                geom_text(aes(x = 3, y=n+0.5, label = "HR(CI)")) +
+                geom_text(aes(x = 7, label = P.value), hjust = 1) +
+                geom_text(aes(x = 7, y=n+0.5, label = "P.value"), hjust = 1) +
+                scale_colour_identity() +
+                theme_void() + 
+                theme(plot.margin = margin(5, 0, 35, 0))
+              
+              forestplot <- ggarrange(plotlist = list(ggtable,fp),
+                                  ncol = 2, nrow = 1)
+              if(model0){
+              #   popViewport()
+              #   pushViewport(viewport(layout.pos.row = 6, layout.pos.col = 2, 
+              #                         xscale = c(0, 2), yscale = c(0,1.5*y.max_anova),
+              #                         width = 2, height = 1.5*y.max))
+              #   grid.rect(x = unit(1, "native"), y = unit(0.75*y.max_anova, "native"),
+              #             width = unit(1.5, "native"), height = unit(1.5*y.max_anova, "native"),
+              #             just = "centre", hjust = NULL, vjust = NULL,
+              #             default.units = "native", name = NULL,
+              #             gp=gpar(), draw = TRUE, vp = NULL)
+              #   grid.xaxis(at=1,label="Anova.coxph")
+              #   grid.yaxis()
+              #   grid.text("-log(pvalue)", x = unit(-2.75, "lines"),
+              #             gp = gpar(fontsize = 14), rot = 90)
+              #   grid.segments(0.25, lcut, 
+              #                 1.75, lcut, 
+              #                 default.units = "native", gp = gpar(col = "red"))
+              #   grid.rect(x = 1, y = boxplot_stats_anova[2, 1], 
+              #             height = boxplot_stats_anova[4,1] - boxplot_stats_anova[2, 1], 
+              #             width = 1 * box_width,
+              #             just = "bottom", default.units = "native", gp = gpar(col = cor[1]))
+              #   grid.segments(1 - 0.25 * box_width, boxplot_stats_anova[5,1], 
+              #                 1 + 0.25 * box_width, boxplot_stats_anova[5,1], 
+              #                 default.units = "native", gp = gpar(fill = "#CCCCCC"))
+              #   grid.segments(1, boxplot_stats_anova[5, 1], 1, boxplot_stats_anova[4,1], 
+              #                 default.units = "native", gp = gpar(fill = "#CCCCCC"))
+              #   grid.segments(1, boxplot_stats_anova[1, 1], 1, boxplot_stats_anova[2,1], 
+              #                 default.units = "native", gp = gpar(fill = "#CCCCCC"))
+              #   grid.segments(1 - 0.25 * box_width, boxplot_stats_anova[1,1], 
+              #                 1 + 0.25 * box_width, boxplot_stats_anova[1,1], 
+              #                 default.units = "native", gp = gpar(fill = "#CCCCCC"))
+              #   grid.segments(1 - 0.5 * box_width, boxplot_stats_anova[3,1], 
+              #                 1 + 0.5 * box_width, boxplot_stats_anova[3,1], 
+              #                 default.units = "native", gp = gpar(fill = "#CCCCCC"))
+              #   outliers<-bplt_anova$out
+              #   if(length(outliers)>0){
+              #     grid.points(x = rep(1, length(outliers)), y = outliers, 
+              #                 default.units = "native", pch=45)
+              #   }
+                md<-data.frame(Sig=rep("Anova",r),
+                               Pvalues=as.vector(LpvalAnova))
+                ms = group_by(md, Sig) %>% summarize(q1=min(Pvalues),
+                                                     q2=quantile(Pvalues,p=0.25),
+                                                     q3=median(Pvalues),
+                                                     q4=quantile(Pvalues,p=0.75),
+                                                     q5=max(Pvalues))
+                segments<-data.frame(Sig=signature_names,x_bgn=0.6,x_end=1.4,
+                                     y_bgn=Lp_quant_Anova,y_end=Lp_quant_Anova,q1=0,q2=0,q3=0,q4=0,q5=0)
+                g2<-ggplot(ms, aes(x=Sig,ymin=q1,lower=q2,middle=q3,upper=q4,ymax=q5)) + 
+                  geom_boxplot(stat='identity',show.legend = FALSE,col='black') +
+                  geom_hline(yintercept=lcut,col=col2) +
+                  geom_segment(aes(x = x_bgn, y = y_bgn, xend = x_end, yend = y_end), col = col3,
+                               data = segments, show.legend = FALSE)+
+                  theme_bw()+
+                  theme(axis.text.x=element_text(angle=0,vjust=.5,hjust=0,face="bold")) + 
+                  labs(x="",y="-log(pvalue)")
+                final_figure <- ggarrange(g1,forestplot,g2,ncol = 1)
+              }else{
+                final_figure <- ggarrange(g1,forestplot,ncol = 1)
+              } 
+              plot(final_figure)
+              # popViewport(2)
               ####### Plotting end
               if(plot_to_file){
                   dev.off()
@@ -813,7 +1028,6 @@ setMethod("ExposureSurvModel",signature(Exposures="SignExp",surv="ANY",
               return(list("Significance"=signif,
                           "Stats"=multiv.tests))
           })
-
 
 
 ################################################################################
@@ -871,7 +1085,7 @@ setMethod("FuzzyClustExp",signature(signexp_obj="SignExp", Med_exp="ANY",
                 Cm<-CmeansExp(my_obj, Med_exp, C=n, method.dist, method.clust,
                               relative, iseed=aseed)
                 U<-Cm[[1]]
-                PBMF<-as.vector(future_apply(Es,3,function(E){PBMFindex(U,Data=E,m)}))
+                PBMF<-as.vector(apply(Cm[[4]],3,function(E){PBMFindex(U,Data=E,m)}))
                 return(list(median(PBMF),PBMF))
             },
             liminf=Cmin,limsup=Cmax,step=step0,significance=FALSE,parplan=parplan
@@ -902,10 +1116,13 @@ setMethod("FuzzyClustExp",signature(signexp_obj="SignExp", Med_exp="ANY",
         }else{
             clr=rev(colorRampPalette(brewer.pal(name="Greys",n=9))(100)) 
         }
-        pheatmap(Cm$Meanfuzzy,border_color=NA, color=clr, 
+        MF<-Cm$Meanfuzzy
+        rownames(MF)<-signexp_obj@samples
+        srn<- j<30
+        pheatmap(MF,border_color=NA, color=clr, 
                  clustering_method='ward.D2',
                  clustering_distance_rows='canberra',
-                 cluster_cols = FALSE)
+                 cluster_cols = FALSE,show_rownames=srn)
         if(plot_to_file){
             dev.off()
         }
@@ -927,106 +1144,143 @@ setMethod("CmeansExp",signature(signexp_obj="matrix", Med_exp="ANY", C="ANY",
                                 relative="ANY", iseed="ANY",parplan="ANY"),
           function(signexp_obj, Med_exp, C, method.dist, method.clust,
                    relative, plot_to_file, file, colored, iseed=NA, parplan){
-              # initialize random seed
-              if(!is.na(iseed)) set.seed(seed = iseed)
-              de <- dim(signexp_obj) #[n,j]
-              n<-de[[1]]; j<-de[[2]]
-              if(is.na(Med_exp[1])){
-                  Med_exp<-signexp_obj
+            # initialize random seed
+            if(!is.na(iseed)) set.seed(seed = iseed)
+            de <- dim(signexp_obj) #[n,j]
+            n<-de[[1]]; j<-de[[2]]
+            if(is.na(Med_exp[1])){
+              Med_exp<-signexp_obj
+            }
+            if(relative){ 
+              signexp_obj<-t(t(signexp_obj)/colSums(signexp_obj))
+              Med_exp<-t(t(Med_exp)/colSums(Med_exp))
               }
-              if(relative){ Med_exp<-t(t(Med_exp)/colSums(Med_exp)) }
-              colnames(Med_exp)<-colnames(signexp_obj)
-              if(method.clust=="km"){
-                  baseclust<-kmeans(t(Med_exp),centers=C)
-                  basefuzzy<-t(sapply(baseclust$cluster,function(n){
-                      as.numeric(c(1:C)==n)
-                  }))
-              }else{ 
-                  if(method.clust=="fcm"){
-                      baseclust<-ppclust::fcm(t(Med_exp),centers=C)
-                  }else if (method.clust=="pcm"){
-                      baseclust<-ppclust::pcm(t(Med_exp),centers=C)
-                  }else if (method.clust=="fpcm"){
-                      baseclust<-ppclust::fpcm(t(Med_exp),centers=C)
-                  }else stop("method.clust should be 'fcm', 'pcm' or 'fpcm'!\n")
-                  basefuzzy<-baseclust$u
-              }
-              return(list(Meanfuzzy=basefuzzy,AllFuzzy=basefuzzy,Fuzzy=basefuzzy))
+            colnames(Med_exp)<-colnames(signexp_obj)
+            # if(method.clust=="km"){
+            #     baseclust<-kmeans(t(Med_exp),centers=C)
+            #     basefuzzy<-t(sapply(baseclust$cluster,function(n){
+            #         as.numeric(c(1:C)==n)
+            #     }))
+            # }else{ 
+            #     if(method.clust=="fcm"){
+            #         baseclust<-ppclust::fcm(t(Med_exp),centers=C)
+            #     }else if (method.clust=="pcm"){
+            #         baseclust<-ppclust::pcm(t(Med_exp),centers=C)
+            #     }else if (method.clust=="fpcm"){
+            #         baseclust<-ppclust::fpcm(t(Med_exp),centers=C)
+            #     }else stop("method.clust should be 'fcm', 'pcm' or 'fpcm'!\n")
+            #     basefuzzy<-baseclust$u
+            # }
+            if(method.clust=="km"){
+              m <- 1        
+            }else{ 
+              if(method.clust=="fcm"){
+                m <- 2
+              }else stop("method.clust should be 'km' or 'fcm'!\n")
+            }
+            Es<-array(0,dim=c("n"=n,"j"=j,"r"=1))
+            Es[,,1]<-signexp_obj
+            Fuzzy<-FuzzyClusterCpp(Es,Med_exp,C,m,0.01)
+            #return(list(Meanfuzzy=basefuzzy,AllFuzzy=basefuzzy))
+            Meanfuzzy<-apply(Fuzzy[[1]],c(1,2),mean)
+            return(list(Meanfuzzy=Meanfuzzy,
+                        AllFuzzy=Fuzzy[[1]],
+                        Centroids=Fuzzy[[2]],
+                        Es=Es))
           })
 #For SignExp
 setMethod("CmeansExp",signature(signexp_obj="SignExp", Med_exp="ANY", C="ANY",
-    method.dist="ANY", method.clust="ANY", relative="ANY",iseed="ANY",parplan="ANY"),
-    function(signexp_obj, Med_exp, C, method.dist, method.clust,
-        relative, iseed=NA,parplan){
-        # initialize random seed
-        if(!is.na(iseed)) set.seed(seed = iseed)
-        if(!signexp_obj@normalized) signexp_obj<-Normalize(signexp_obj)
-        dp <- dim(signexp_obj@Sign) #[i,n,r]
-        de <- dim(signexp_obj@Exp) #[n,j,r]
-        i<-dp[[1]]; n<-dp[[2]]; j<-de[[2]]; r<-de[[3]]
-        if(is.na(Med_exp[1])){
-            Med_exp<-Median_exp(signexp_obj)
-        }
-        if(relative){ Med_exp<-t(t(Med_exp)/colSums(Med_exp)) }
-        colnames(Med_exp)<-signexp_obj@samples
-        if(method.clust=="km"){
-            baseclust<-kmeans(t(Med_exp),centers=C)
-            basefuzzy<-t(sapply(baseclust$cluster,function(n){
-                as.numeric(c(1:C)==n)
-            }))
-        }else{ 
-            if(method.clust=="fcm"){
-                baseclust<-ppclust::fcm(t(Med_exp),centers=C)
-            }else if (method.clust=="pcm"){
-                baseclust<-ppclust::pcm(t(Med_exp),centers=C)
-            }else if (method.clust=="fpcm"){
-                baseclust<-ppclust::fpcm(t(Med_exp),centers=C)
-            }else stop("method.clust should be 'fcm', 'pcm' or 'fpcm'!\n")
-            basefuzzy<-baseclust$u
-        }
-        Es<-signexp_obj@Exp
-        avail.cores<-as.numeric(availableCores()-1)
-        future::plan(parplan,workers=avail.cores)
-        Fuzzy2<-future_apply(Es,3,function(Exposure){
-            if(n==1) Exposure <- matrix(as.vector(Exposure),n,j)
-            if(relative){ Exposure<-t(t(Exposure)/colSums(Exposure)) }
-            colnames(Exposure)<-signexp_obj@samples
-            if(method.clust=="km"){
-                thisclust<-kmeans(t(Exposure),centers=C)
-                thisfuzzy<-t(sapply(thisclust$cluster,function(n){
-                    as.numeric(c(1:C)==n)
-                rm(thisclust)
-                }))
-            }else{ 
-                if(method.clust=="fcm"){
-                    thisclust<-ppclust::fcm(t(Exposure),centers=C)
-                }else if (method.clust=="pcm"){
-                    thisclust<-ppclust::pcm(t(Exposure),centers=C)
-                }else if (method.clust=="fpcm"){
-                    thisclust<-ppclust::fpcm(t(Exposure),centers=C)
-                }else stop("method.clust should be 'fcm', 'pcm' or 'fpcm'!\n")
-                thisfuzzy<-thisclust$u
-                rm(thisclust)
+                                method.dist="ANY", method.clust="ANY", relative="ANY",iseed="ANY",parplan="ANY"),
+          function(signexp_obj, Med_exp, C, method.dist, method.clust,
+                   relative, iseed=NA,parplan){
+            # initialize random seed
+            if(!is.na(iseed)) set.seed(seed = iseed)
+            if(!signexp_obj@normalized) signexp_obj<-Normalize(signexp_obj)
+            dp <- dim(signexp_obj@Sign) #[i,n,r]
+            de <- dim(signexp_obj@Exp) #[n,j,r]
+            i<-dp[[1]]; n<-dp[[2]]; j<-de[[2]]; r<-de[[3]]
+            if(is.na(Med_exp[1])){
+              Med_exp<-Median_exp(signexp_obj)
             }
-            rm(Exposure)
-            #hungarian algorithm to assign clusters
-            D<-as.matrix(dist(rbind(t(basefuzzy),t(thisfuzzy)),"manhattan")) #L1 distance among clusters
-            D<-D[1:C,(1:C)+C]#rows contain basefuzzy clusters, cols thisfuzzy.
-            assignment <- clue::solve_LSAP(D)
-            rm(D)
-            thisfuzzy <- thisfuzzy[,as.vector(assignment)]
-            rm(assignment)
-            colnames(thisfuzzy)<-colnames(basefuzzy)
-            return(thisfuzzy)
-        })
-        Fuzzy<-array(as.vector(Fuzzy2),dim=c('j'=j, 'c'=C, 'r'=r))
-        rownames(Fuzzy)<-rownames(basefuzzy)
-        colnames(Fuzzy)<-colnames(basefuzzy)
-        Meanfuzzy<-apply(Fuzzy,c(1,2),mean)
-        return(list(Meanfuzzy=Meanfuzzy,
-                    AllFuzzy=Fuzzy,
-                    Fuzzy=basefuzzy))
-    })
+            Es<-signexp_obj@Exp
+            if(relative){ 
+              Med_exp<-t(t(Med_exp)/colSums(Med_exp)) 
+              colnames(Med_exp)<-signexp_obj@samples
+              for(s in 1:r){
+                thisE<-Es[,,s]
+                Es[,,s]<-t(t(thisE)/colSums(thisE))
+              }
+            }
+            if(method.clust=="km"){
+              m <- 1        
+            }else{ 
+              if(method.clust=="fcm"){
+                m <- 2
+              }else stop("method.clust should be 'km' or 'fcm'!\n")
+            }
+            Fuzzy<-FuzzyClusterCpp(Es,Med_exp,C,m,0.01)
+            
+            
+            #        if(method.clust=="km"){
+            #            baseclust<-kmeans(t(Med_exp),centers=C)
+            #            basefuzzy<-t(sapply(baseclust$cluster,function(n){
+            #                as.numeric(c(1:C)==n)
+            #            }))
+            #        }else{ 
+            #            if(method.clust=="fcm"){
+            #                baseclust<-ppclust::fcm(t(Med_exp),centers=C)
+            #            }else if (method.clust=="pcm"){
+            #                baseclust<-ppclust::pcm(t(Med_exp),centers=C)
+            #            }else if (method.clust=="fpcm"){
+            #                baseclust<-ppclust::fpcm(t(Med_exp),centers=C)
+            #            }else stop("method.clust should be 'fcm', 'pcm' or 'fpcm'!\n")
+            #            basefuzzy<-baseclust$u
+            #        }
+            #        avail.cores<-as.numeric(availableCores()-1)
+            #        future::plan(parplan,workers=avail.cores)
+            #        Fuzzy2<-apply(Es,3,function(Exposure){
+            #            if(n==1) Exposure <- matrix(as.vector(Exposure),n,j)
+            #            if(relative){ Exposure<-t(t(Exposure)/colSums(Exposure)) }
+            #            colnames(Exposure)<-signexp_obj@samples
+            #            if(method.clust=="km"){
+            #                thisclust<-kmeans(t(Exposure),centers=C)
+            #                thisfuzzy<-t(sapply(thisclust$cluster,function(n){
+            #                    as.numeric(c(1:C)==n)
+            #                rm(thisclust)
+            #                }))
+            #            }else{ 
+            #                if(method.clust=="fcm"){
+            #                    thisclust<-ppclust::fcm(t(Exposure),centers=C)
+            #                }else if (method.clust=="pcm"){
+            #                    thisclust<-ppclust::pcm(t(Exposure),centers=C)
+            #                }else if (method.clust=="fpcm"){
+            #                    thisclust<-ppclust::fpcm(t(Exposure),centers=C)
+            #                }else stop("method.clust should be 'fcm', 'pcm' or 'fpcm'!\n")
+            #                thisfuzzy<-thisclust$u
+            #                rm(thisclust)
+            #            }
+            #            rm(Exposure)
+            #            #hungarian algorithm to assign clusters
+            #            D<-as.matrix(dist(rbind(t(basefuzzy),t(thisfuzzy)),"manhattan")) #L1 distance among clusters
+            #            D<-D[1:C,(1:C)+C]#rows contain basefuzzy clusters, cols thisfuzzy.
+            #            assignment <- clue::solve_LSAP(D)
+            #            rm(D)
+            #            thisfuzzy <- thisfuzzy[,as.vector(assignment)]
+            #            rm(assignment)
+            #            colnames(thisfuzzy)<-colnames(basefuzzy)
+            #            return(thisfuzzy)
+            #        })
+            #        Fuzzy<-array(as.vector(Fuzzy2),dim=c('j'=j, 'c'=C, 'r'=r))
+            #        rownames(Fuzzy)<-rownames(basefuzzy)
+            #        colnames(Fuzzy)<-colnames(basefuzzy)
+            
+            
+            Meanfuzzy<-apply(Fuzzy[[1]],c(1,2),mean)
+            return(list(Meanfuzzy=Meanfuzzy,
+                        AllFuzzy=Fuzzy[[1]],
+                        Centroids=Fuzzy[[2]],
+                        Es=Es))
+          })
 ####
 PBMFindex<-function(U,Data,m=2){
     U<-as.matrix(U)
