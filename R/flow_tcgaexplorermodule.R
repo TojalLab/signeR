@@ -24,30 +24,31 @@ tcgaexplorer_UI <- function(id) {
             )
           )
         ),
-        fluidRow(
-          box(
-            width = 6,
-            withSpinner(
-              plotOutput(
-                ns("signplot"),
-                width = "auto",
-                height = "400px"
-              ),
-              color = "#0dc5c1"
-            )
-          ),
-          box(
-            width = 6,
-            withSpinner(
-              plotOutput(
-                ns("signheatplot"),
-                width = "auto",
-                height = "400px"
-              ),
-              color = "#0dc5c1"
-            )
-          )
-        ),
+        uiOutput(ns("signplots")),
+        # fluidRow(
+        #   box(
+        #     width = 6,
+        #     withSpinner(
+        #       plotOutput(
+        #         ns("signplot"),
+        #         width = "auto",
+        #         height = "400px"
+        #       ),
+        #       color = "#0dc5c1"
+        #     )
+        #   ),
+        #   box(
+        #     width = 6,
+        #     withSpinner(
+        #       plotOutput(
+        #         ns("signheatplot"),
+        #         width = "auto",
+        #         height = "400px"
+        #       ),
+        #       color = "#0dc5c1"
+        #     )
+        #   )
+        # ),
         fluidRow(
           box(
             title = "Data summary", width = 12, solidHeader = T,
@@ -229,6 +230,12 @@ tcgaexplorer <- function(input,
 
     return(data)
   }
+
+  sigs_raw <- reactive({
+    req(signatures())
+    sigs <- signatures()
+    return(sigs)
+  })
 
   sigs_obj <- reactive({
     req(signatures())
@@ -562,9 +569,53 @@ tcgaexplorer <- function(input,
     }
   })
 
+  output$signplots <- renderUI({
+    if (analysis_type() == "de novo"){
+      fluidRow(
+        box(
+          width = 6,
+          withSpinner(
+            plotOutput(
+              ns("signplot"),
+              width = "auto",
+              height = "400px"
+            ),
+            color = "#0dc5c1"
+          )
+        ),
+        box(
+          width = 6,
+          withSpinner(
+            plotOutput(
+              ns("signheatplot"),
+              width = "auto",
+              height = "400px"
+            ),
+            color = "#0dc5c1"
+          )
+        )
+      )
+    } else {
+      fluidRow(
+        box(
+          width = 12,
+          withSpinner(
+            plotOutput(
+              ns("signplot"),
+              width = "auto",
+              height = "400px"
+            ),
+            color = "#0dc5c1"
+          )
+        )
+      )
+    }
+  })
+
   output$signplot <- renderPlot({
     tcga_tumor()
-    sigs <- sigs_obj()
+    # sigs <- sigs_obj()
+    sigs <- sigs_raw()
     if (!is.null(sigs)) {
       withProgress(
         message = "Generating the signature barplot...",
@@ -579,7 +630,8 @@ tcgaexplorer <- function(input,
 
   output$signheatplot <- renderPlot({
     tcga_tumor()
-    sigs <- sigs_obj()
+    # sigs <- sigs_obj()
+    sigs <- sigs_raw()
     similarities <- get_similarities_tcga()
     if (!is.null(sigs)) {
       pheatmap(
