@@ -110,6 +110,8 @@ tcgaexplorer_UI <- function(id) {
             title = "Filtered data summary", width = 12, solidHeader = T,
             collapsible = F, status = "primary",
             messageBox(
+              title = "Warning:",
+              solidHeader = TRUE,
               width = 12,
               uiOutput(ns("filtered_value"))
             ),

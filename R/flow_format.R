@@ -12,6 +12,11 @@ textBox <- function(...) {
   shinydashboard::box(..., status = "success")
 }
 
+tableBox <- function(...) {
+  shinydashboard::box(..., status = "warning")
+}
+
+
 sectionBox <- function(..., title) {
   fluidRow(
     shinydashboard::box(...,
