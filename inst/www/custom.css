@@ -12,7 +12,7 @@ body {
 }
 
 .navbar-inverse .navbar-nav>.active>a, .navbar-inverse .navbar-nav>.active>a:focus, .navbar-inverse .navbar-nav>.active>a:hover {
-  background: rgba(172, 62, 49, 1);
+  background: rgb(0, 114, 48);
 }
 
 .wrapper {
@@ -43,10 +43,10 @@ body {
 .main-sidebar {
   /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#333333+0,488a99+100 */
   background: #333333; /* Old browsers */
-  background: -moz-linear-gradient(top, #333333 0%, #488a99 100%); /* FF3.6-15 */
-  background: -webkit-linear-gradient(top, #333333 0%,#488a99 100%); /* Chrome10-25,Safari5.1-6 */
-  background: linear-gradient(to bottom, #333333 0%,#488a99 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
-  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#333333', endColorstr='#488a99',GradientType=0 ); /* IE6-9 */
+  background: -moz-linear-gradient(top, #333333 0%, #015d43 100%); /* FF3.6-15 */
+  background: -webkit-linear-gradient(top, #333333 0%,#015d43 100%); /* Chrome10-25,Safari5.1-6 */
+  background: linear-gradient(to bottom, #333333 0%,#015d43 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#333333', endColorstr='#015d43',GradientType=0 ); /* IE6-9 */
   border-left-color: rgba(0, 0, 0, 1)!important;
 }
 
@@ -64,12 +64,12 @@ body {
 /*sidebar menu hover*/
 .sidebar-menu>li>a:hover {
   background: rgba(34, 34, 34, 1)!important;
-  border-left-color: rgba(219, 174, 88, 1)!important;
+  border-left-color: rgb(25, 91, 129)!important;
 }
 
 /*sidebar menu link active*/
 .sidebar-menu>li.active>a {
-  background: rgba(219, 174, 88, 1)!important;
+  background: rgb(25, 91, 129)!important;
   border-left-color: rgba(51, 51, 51, 1)!important;
 }
 
@@ -91,7 +91,7 @@ body {
 
 /*sidebar submenu link active*/
 .sidebar-menu>li>.treeview-menu>li.active>a {
-  background: rgba(219, 174, 88, 1)!important;
+  background: rgb(25, 91, 129)!important;
   border-left-color: rgba(51, 51, 51, 1)!important;
   color: #FFF!important;
 }
