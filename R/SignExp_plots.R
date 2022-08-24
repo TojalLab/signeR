@@ -144,7 +144,7 @@ setMethod("SignPlot",signature(signexp_obj="SignExp",plot_to_file="ANY",
             Pdata<-signexp_obj@Psummary[mutord,reord[k],1:6,drop=TRUE]
             Pdata[Pdata<threshold]<-0
             Pdata<-data.frame(Pdata)
-            Pdata$Sig<-signexp_obj@signames
+            Pdata$Sig<-signexp_obj@signames[reord[k]]
             Pdata$y.max <- max(Pdata[,6])
             Pdata$y.width <- Pdata$y.max*1.05
             Pdata<-Pdata[,-6]

@@ -556,50 +556,7 @@ setMethod("ExposureSurvModel",signature(Exposures="matrix",surv="ANY",
               tabletext <- cbind(c("Variable",rownames(data)), 
                                  c("Hazard Ratio [95% CI]",hr.ic),
                                  c("P-Value",np))
-              #p-values boxplots &
-              #forestplots univariate
-              ####### Plotting
-              # grid.newpage()
-              # pushViewport(viewport(layout = grid.layout(5,3,
-              #                       heights=unit(rep(1,5),c("lines","null","lines","null","lines")),
-              #                       widths=unit(c(4,1,3),c("lines","null","lines"))),
-              #                       just=c("center","center")))
-              # pushViewport(viewport(layout.pos.row = 2, layout.pos.col = 2, 
-              #                       xscale = c(0, n+1), yscale = c(0,1.5*y.max),
-              #                       width = n+1, height = 1.5*y.max))
-              # grid.rect(x = unit((n+1)/2, "native"), y = unit(0.75*y.max, "native"),
-              #           width = unit(n+0.5, "native"), height = unit(1.5*y.max, "native"),
-              #           just = "centre", hjust = NULL, vjust = NULL,
-              #           default.units = "native", name = NULL,
-              #           gp=gpar(), draw = TRUE, vp = NULL)
-              # grid.xaxis(at=c(1:n),label=signature_names)
-              # grid.yaxis()
-              # grid.text("-log(pvalue)", x = unit(-2.75, "lines"),
-              #           gp = gpar(fontsize = 14), rot = 90)
-              # grid.segments(0.25, lcut, 
-              #               n+0.75, lcut, 
-              #               default.units = "native", gp = gpar(col = "red"))
-              # for(k in 1:n){
-              #     grid.segments(pos[k] - 0.5 * box_width, Lpval[k], 
-              #                   pos[k] + 0.5 * box_width, Lpval[k], 
-              #                   default.units = "native", gp = gpar(col = col3))
-              # }
-              # popViewport()
-              # pushViewport(viewport(layout.pos.row = 4, layout.pos.col = 2))
-              # forestplot(labeltext=tabletext[-2,], graph.pos=3, 
-              #            mean=c(NA,data$HR), 
-              #            lower=c(NA,data$Lower_CI), upper=c(NA,data$Upper_CI),
-              #            xlab="Hazard ratio [95% CI]",
-              #            hrzl_lines=list("2" = gpar(lwd=1, col="black")),
-              #            txt_gp=fpTxtGp(label=gpar(cex=1, fontface="bold"),
-              #                           ticks=gpar(cex=1.1),
-              #                           xlab=gpar(cex = 1.1),
-              #                           title=gpar(cex = 1.1)),
-              #            col=fpColors(box="black", lines="black", zero = "gray50"),
-              #            zero=1, cex=0.9, boxsize=0.5, colgap=unit(6,"mm"),
-              #            lwd.ci=2, ci.vertices=TRUE, title="",new_page = FALSE)
-              # 
-              # popViewport(2)
+              ####### Plotting p-values boxplots & forestplots univariate
               ####################### ggplot2
               md<-data.frame(Sig=signature_names,
                              Pvalues=as.vector(Lpval))
@@ -608,8 +565,11 @@ setMethod("ExposureSurvModel",signature(Exposures="matrix",surv="ANY",
                                                    q3=median(Pvalues),
                                                    q4=quantile(Pvalues,p=0.75),
                                                    q5=max(Pvalues))
-              segments<-data.frame(Sig=signature_names,x_bgn=c(1:n)-0.4,x_end=c(1:n)+0.4,
-                                   y_bgn=Lp_quant,y_end=Lp_quant,q1=0,q2=0,q3=0,q4=0,q5=0)
+              sig_order<-order(signature_names)
+              segments<-data.frame(Sig=signature_names[sig_order],x_bgn=c(1:n)-0.4,x_end=c(1:n)+0.4,
+                                   y_bgn=Lp_quant[sig_order],
+                                   y_end=Lp_quant[sig_order],
+                                   q1=0,q2=0,q3=0,q4=0,q5=0)
               g1<-ggplot(ms, aes(x=Sig,ymin=q1,lower=q2,middle=q3,upper=q4,ymax=q5)) + 
                 geom_boxplot(stat='identity',show.legend = FALSE,col=cor) +
                 geom_hline(yintercept=lcut,col=col2) +
@@ -661,6 +621,7 @@ setMethod("ExposureSurvModel",signature(Exposures="matrix",surv="ANY",
                                                      q3=median(Pvalues),
                                                      q4=quantile(Pvalues,p=0.75),
                                                      q5=max(Pvalues))
+
                 segments<-data.frame(Sig="Anova",x_bgn=0.6,x_end=1.4,
                                      y_bgn=Lp_quant_Anova,y_end=Lp_quant_Anova,
                                      q1=Lp_quant_Anova,q2=Lp_quant_Anova,
@@ -723,8 +684,7 @@ setMethod("ExposureSurvModel",signature(Exposures="SignExp",surv="ANY",
               if(model0){ 
                   cph0<-coxph(Surv(dtime,os)~., data=data.frame(dtime,os,addata))
               }else{
-                  addata<-matrix(0,j,0)
-                  # empty matrix
+                  addata<-matrix(0,j,0) # empty matrix
               }
               Allstats<-future_apply(Es,3,function(D){
                   E<-t(D)
@@ -752,16 +712,9 @@ setMethod("ExposureSurvModel",signature(Exposures="SignExp",surv="ANY",
               multiv.tests.ar<-array(as.vector(Allstats[(3*n+3):(10*n+2),]),dim=c(n,7,r))
               if(model0){
                  LpvalAnova <- -1*log(pvalAnova)
-                 #bplt_anova<-boxplot(data.frame(logpvalues=LpvalAnova),at=1,plot=FALSE,
-                 #             names="-log(pvalues)",pch=45)
-                 #boxplot_stats_anova<-bplt_anova$stats
                  y.max_anova<-max(LpvalAnova)
                  y.min_anova<-min(LpvalAnova)
                  Lp_quant_Anova<-quantile(LpvalAnova,invquant,na.rm=TRUE)
-                 
-              #     dev.new(width=7, height=7)
-              #     par(mfrow=c(1,1))
-              #     boxplot(LpvalAnova,ylab="-log(p-value)",main="Anova.coxph comparison of surv models")
               }
               if(colors){ col1<-"darkgreen"; col2<-"red"; col3<-"blue"
               }else{ col1<-"black"; col2<-"black"; col3<-"black"  }
@@ -825,15 +778,6 @@ setMethod("ExposureSurvModel",signature(Exposures="SignExp",surv="ANY",
               rownames(multiv.tests)<-signature_names
               multiv.tests$labels<-signature_names
               multiv.tests$colour <- rep(c("white", "gray95"), ceiling(nrow(multiv.tests)/2))[1:nrow(multiv.tests)]
-              # data<-multiv.tests
-              # np <- ifelse((data$P.value < 0.05), ifelse((data$P.value < 0.01), paste0(round(data$P.value, 3)," **"), 
-              #                                            paste0(round(data$P.value, 3)," *")), round(data$P.value,3))
-              # hr.ic <- ifelse((!is.na(data$HR)), paste0(round(data$HR, 4),' [',round(data$Lower_CI,3),',',round(data$Upper_CI,3),']'), NA)
-              # tabletext <- cbind(c("Variable",rownames(data)), 
-              #                    c("Hazard Ratio [95% CI]",hr.ic),
-              #                    c("P-Value",np))
-              # #p-values boxplots &
-              #forestplots multivariate
               ####### Plotting
               ####################### ggplot2
               md<-data.frame(Sig=rep(signature_names,each=r),
@@ -843,8 +787,11 @@ setMethod("ExposureSurvModel",signature(Exposures="SignExp",surv="ANY",
                                                    q3=median(Pvalues),
                                                    q4=quantile(Pvalues,p=0.75),
                                                    q5=max(Pvalues))
-              segments<-data.frame(Sig=signature_names,x_bgn=c(1:n)-0.4,x_end=c(1:n)+0.4,
-                                   y_bgn=Lp_quant,y_end=Lp_quant,q1=0,q2=0,q3=0,q4=0,q5=0)
+              sig_order<-order(signature_names)
+              segments<-data.frame(Sig=signature_names[sig_order],x_bgn=c(1:n)-0.4,x_end=c(1:n)+0.4,
+                                   y_bgn=Lp_quant[sig_order],
+                                   y_end=Lp_quant[sig_order],
+                                   q1=0,q2=0,q3=0,q4=0,q5=0)
               g1<-ggplot(ms, aes(x=Sig,ymin=q1,lower=q2,middle=q3,upper=q4,ymax=q5)) + 
                 geom_boxplot(stat='identity',show.legend = FALSE,col=cor) +
                 geom_hline(yintercept=lcut,col=col2) +
@@ -853,74 +800,7 @@ setMethod("ExposureSurvModel",signature(Exposures="SignExp",surv="ANY",
                 theme_bw()+
                 theme(axis.text.x=element_text(angle=0,vjust=.5,hjust=0,face="bold")) + 
                 labs(x="",y="-log(pvalue)")
-              # grid.newpage()
-              # if(model0){
-              #   pushViewport(viewport(layout = grid.layout(7,3,
-              #                                              heights=unit(rep(1,5),c("lines","null","lines","null","lines","null","lines")),
-              #                                              widths=unit(c(4,1,3),c("lines","null","lines"))),
-              #                         just=c("center","center")))
-              # }else{
-              #   pushViewport(viewport(layout = grid.layout(5,3,
-              #                                              heights=unit(rep(1,5),c("lines","null","lines","null","lines")),
-              #                                              widths=unit(c(4,1,3),c("lines","null","lines"))),
-              #                         just=c("center","center")))
-              # }
-              # pushViewport(viewport(layout.pos.row = 2, layout.pos.col = 2, 
-              #                       xscale = c(0, n+1), yscale = c(0,1.5*y.max),
-              #                       width = n+1, height = 1.5*y.max))
-              # grid.rect(x = unit((n+1)/2, "native"), y = unit(0.75*y.max, "native"),
-              #           width = unit(n+0.5, "native"), height = unit(1.5*y.max, "native"),
-              #           just = "centre", hjust = NULL, vjust = NULL,
-              #           default.units = "native", name = NULL,
-              #           gp=gpar(), draw = TRUE, vp = NULL)
-              # grid.xaxis(at=c(1:n),label=signature_names)
-              # grid.yaxis()
-              # grid.text("-log(pvalue)", x = unit(-2.75, "lines"),
-              #           gp = gpar(fontsize = 14), rot = 90)
-              # grid.segments(0.25, lcut, 
-              #               n+0.75, lcut, 
-              #               default.units = "native", gp = gpar(col = "red"))
-              # for(k in 1:n){
-              #     grid.rect(x = pos[k], y = boxplot_stats[2, k], 
-              #               height = boxplot_stats[4,k] - boxplot_stats[2, k], 
-              #               width = 1 * box_width,
-              #               just = "bottom", default.units = "native", gp = gpar(col = cor[k]))
-              #     grid.segments(pos[k] - 0.25 * box_width, boxplot_stats[5,k], 
-              #                   pos[k] + 0.25 * box_width, boxplot_stats[5,k], 
-              #                   default.units = "native", gp = gpar(fill = "#CCCCCC"))
-              #     grid.segments(pos[k], boxplot_stats[5, k], pos[k], boxplot_stats[4,k], 
-              #                   default.units = "native", gp = gpar(fill = "#CCCCCC"))
-              #     grid.segments(pos[k], boxplot_stats[1, k], pos[k], boxplot_stats[2,k], 
-              #                   default.units = "native", gp = gpar(fill = "#CCCCCC"))
-              #     grid.segments(pos[k] - 0.25 * box_width, boxplot_stats[1,k], 
-              #                   pos[k] + 0.25 * box_width, boxplot_stats[1,k], 
-              #                   default.units = "native", gp = gpar(fill = "#CCCCCC"))
-              #     grid.segments(pos[k] - 0.5 * box_width, boxplot_stats[3,k], 
-              #                   pos[k] + 0.5 * box_width, boxplot_stats[3,k], 
-              #                   default.units = "native", gp = gpar(fill = "#CCCCCC"))
-              #     grid.segments(pos[k] - 0.5 * box_width, Lp_quant[k], 
-              #                   pos[k] + 0.5 * box_width, Lp_quant[k], 
-              #                   default.units = "native", gp = gpar(col = col3))
-              #     outliers<-bplt$out[bplt$group==k]
-              #     if(length(outliers)>0){
-              #         grid.points(x = rep(pos[k], length(outliers)), y = outliers, 
-              #                     default.units = "native", pch=45)
-              #     }
-              # }
-              # popViewport()
-              # pushViewport(viewport(layout.pos.row = 4, layout.pos.col = 2))
-              # forestplot(labeltext=tabletext, graph.pos=3, 
-              #            mean=c(NA,data$HR), 
-              #            lower=c(NA,data$Lower_CI), upper=c(NA,data$Upper_CI),
-              #            xlab="Hazard ratio [95% CI]",
-              #            hrzl_lines=list("2" = gpar(lwd=1, col="black")),
-              #            txt_gp=fpTxtGp(label=gpar(cex=1, fontface="bold"),
-              #                           ticks=gpar(cex=1.1),
-              #                           xlab=gpar(cex = 1.1),
-              #                           title=gpar(cex = 1.1)),
-              #            col=fpColors(box="black", lines="black", zero = "gray50"),
-              #            zero=1, cex=0.9, boxsize=0.5, colgap=unit(6,"mm"),
-              #            lwd.ci=2, ci.vertices=TRUE, title="",new_page = FALSE)
+              
               fp <- ggplot(multiv.tests, aes(x = HR, y = labels, xmin = Lower_CI, xmax = Upper_CI)) +
                 geom_hline(aes(yintercept = labels, colour = colour), size = 7) + 
                 geom_pointrange(shape = 22, fill = "black") +
@@ -956,44 +836,6 @@ setMethod("ExposureSurvModel",signature(Exposures="SignExp",surv="ANY",
               forestplot <- ggarrange(plotlist = list(ggtable,fp),
                                   ncol = 2, nrow = 1)
               if(model0){
-              #   popViewport()
-              #   pushViewport(viewport(layout.pos.row = 6, layout.pos.col = 2, 
-              #                         xscale = c(0, 2), yscale = c(0,1.5*y.max_anova),
-              #                         width = 2, height = 1.5*y.max))
-              #   grid.rect(x = unit(1, "native"), y = unit(0.75*y.max_anova, "native"),
-              #             width = unit(1.5, "native"), height = unit(1.5*y.max_anova, "native"),
-              #             just = "centre", hjust = NULL, vjust = NULL,
-              #             default.units = "native", name = NULL,
-              #             gp=gpar(), draw = TRUE, vp = NULL)
-              #   grid.xaxis(at=1,label="Anova.coxph")
-              #   grid.yaxis()
-              #   grid.text("-log(pvalue)", x = unit(-2.75, "lines"),
-              #             gp = gpar(fontsize = 14), rot = 90)
-              #   grid.segments(0.25, lcut, 
-              #                 1.75, lcut, 
-              #                 default.units = "native", gp = gpar(col = "red"))
-              #   grid.rect(x = 1, y = boxplot_stats_anova[2, 1], 
-              #             height = boxplot_stats_anova[4,1] - boxplot_stats_anova[2, 1], 
-              #             width = 1 * box_width,
-              #             just = "bottom", default.units = "native", gp = gpar(col = cor[1]))
-              #   grid.segments(1 - 0.25 * box_width, boxplot_stats_anova[5,1], 
-              #                 1 + 0.25 * box_width, boxplot_stats_anova[5,1], 
-              #                 default.units = "native", gp = gpar(fill = "#CCCCCC"))
-              #   grid.segments(1, boxplot_stats_anova[5, 1], 1, boxplot_stats_anova[4,1], 
-              #                 default.units = "native", gp = gpar(fill = "#CCCCCC"))
-              #   grid.segments(1, boxplot_stats_anova[1, 1], 1, boxplot_stats_anova[2,1], 
-              #                 default.units = "native", gp = gpar(fill = "#CCCCCC"))
-              #   grid.segments(1 - 0.25 * box_width, boxplot_stats_anova[1,1], 
-              #                 1 + 0.25 * box_width, boxplot_stats_anova[1,1], 
-              #                 default.units = "native", gp = gpar(fill = "#CCCCCC"))
-              #   grid.segments(1 - 0.5 * box_width, boxplot_stats_anova[3,1], 
-              #                 1 + 0.5 * box_width, boxplot_stats_anova[3,1], 
-              #                 default.units = "native", gp = gpar(fill = "#CCCCCC"))
-              #   outliers<-bplt_anova$out
-              #   if(length(outliers)>0){
-              #     grid.points(x = rep(1, length(outliers)), y = outliers, 
-              #                 default.units = "native", pch=45)
-              #   }
                 md<-data.frame(Sig=rep("Anova",r),
                                Pvalues=as.vector(LpvalAnova))
                 ms = group_by(md, Sig) %>% summarize(q1=min(Pvalues),
@@ -1001,8 +843,11 @@ setMethod("ExposureSurvModel",signature(Exposures="SignExp",surv="ANY",
                                                      q3=median(Pvalues),
                                                      q4=quantile(Pvalues,p=0.75),
                                                      q5=max(Pvalues))
-                segments<-data.frame(Sig=signature_names,x_bgn=0.6,x_end=1.4,
-                                     y_bgn=Lp_quant_Anova,y_end=Lp_quant_Anova,q1=0,q2=0,q3=0,q4=0,q5=0)
+                sig_order<-order(signature_names)
+                segments<-data.frame(Sig=signature_names[sig_order],x_bgn=0.6,x_end=1.4,
+                                     y_bgn=Lp_quant_Anova[sig_order],
+                                     y_end=Lp_quant_Anova[sig_order],
+                                     q1=0,q2=0,q3=0,q4=0,q5=0)
                 g2<-ggplot(ms, aes(x=Sig,ymin=q1,lower=q2,middle=q3,upper=q4,ymax=q5)) + 
                   geom_boxplot(stat='identity',show.legend = FALSE,col='black') +
                   geom_hline(yintercept=lcut,col=col2) +
@@ -1016,7 +861,6 @@ setMethod("ExposureSurvModel",signature(Exposures="SignExp",surv="ANY",
                 final_figure <- ggarrange(g1,forestplot,ncol = 1)
               } 
               plot(final_figure)
-              # popViewport(2)
               ####### Plotting end
               if(plot_to_file){
                   dev.off()
@@ -1116,13 +960,63 @@ setMethod("FuzzyClustExp",signature(signexp_obj="SignExp", Med_exp="ANY",
         }else{
             clr=rev(colorRampPalette(brewer.pal(name="Greys",n=9))(100)) 
         }
+        # Heatmap
         MF<-Cm$Meanfuzzy
+        colnames(MF) = paste("Cl",1:NCOL(MF),sep="")
         rownames(MF)<-signexp_obj@samples
-        srn<- j<30
-        pheatmap(MF,border_color=NA, color=clr, 
+        show_samples<- j<30
+        ph<-pheatmap(t(MF),border_color=NA, color=clr, 
                  clustering_method='ward.D2',
-                 clustering_distance_rows='canberra',
-                 cluster_cols = FALSE,show_rownames=srn)
+                 clustering_distance_cols='canberra',
+                 cluster_rows = FALSE,
+                 show_colnames=show_samples,
+                 show_rownames=TRUE,
+                 angle_col=90,
+                 silent=TRUE)
+        gt<-ph[[4]]
+        ####################### ggplot2 boxplot
+        AllF = Cm$AllFuzzy[ph[[2]]$order,,]
+        rownames(AllF) = signexp_obj@samples[ph[[2]]$order]
+        colnames(AllF) = paste("Cl",1:NCOL(MF),sep="")
+        m = reshape2::melt(AllF)
+        colnames(m)<-c("Sample","Cluster","r","value")
+        m$Cluster<-as.factor(m$Cluster)
+        ms = group_by(m, Sample, Cluster) %>% summarize(q1=min(value),
+                                                           q2=quantile(value,p=0.25),
+                                                           q3=median(value),
+                                                           q4=quantile(value,p=0.75),
+                                                           q5=max(value))
+        ms_ord<-c()
+        for(sp in rownames(AllF)){
+          for(cl in colnames(AllF)){
+              ms_ord<-c(ms_ord,which(ms$Sample==sp & ms$Cluster==cl))
+          }
+        }
+        ms<-ms[ms_ord,]
+        # rownames(m)<-paste(m$Sample,m$Cluster,sep="_")
+        # comb_rownames<-paste(rep(rownames(AllF),each=NCOL(AllF)),rep(colnames(AllF),NROW(AllF)),sep="_")
+        # m<-m[comb_rownames,]
+        if(show_samples){
+          g<-ggplot(ms, aes(x=Sample,ymin=q1,lower=q2,middle=q3,upper=q4,ymax=q5)) + 
+            geom_boxplot(stat='identity') + 
+            facet_grid(Cluster~.,scales="free") + 
+            theme_cowplot() +
+            theme(axis.text.x=element_text(size=6,vjust=.5,hjust=0,face="bold")) +
+            scale_y_log10()+
+            labs(x="")
+        }else{
+          g<-ggplot(ms, aes(x=Sample,ymin=q1,lower=q2,middle=q3,upper=q4,ymax=q5)) + 
+            geom_boxplot(stat='identity') + 
+            facet_grid(Cluster~.,scales="free") + 
+            theme_cowplot() +
+            theme(axis.text.x=element_blank(), axis.ticks.x = element_blank()) +
+            scale_y_log10()+
+            labs(x="")
+        }
+        #plotting 
+        final_figure <- ggarrange(gt,g,ncol = 1)
+        plot(final_figure)
+        #######################
         if(plot_to_file){
             dev.off()
         }
@@ -1377,7 +1271,11 @@ Exp.hclust <- function(signexp_obj, object.hclust, method.dist, use.cor,
         Exposure <- Es[,,'r'=k]
         if(n==1) Exposure <- matrix(as.vector(Exposure),n,j)
         if(relative){ Exposure<-t(t(Exposure)/colSums(Exposure)) }
-        colnames(Exposure)<-signexp_obj@samples
+        if(j<=30){
+          colnames(Exposure)<-signexp_obj@samples
+        }else{
+          colnames(Exposure)<-NULL
+        }
         if(is.function(method.dist)) {
             suppressWarnings(distance  <- method.dist(Exposure))
         } else {

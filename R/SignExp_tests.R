@@ -149,8 +149,11 @@ setMethod("DiffExp",signature(signexp_obj="SignExp", labels="character",
                                              q3=median(Pvalues),
                                              q4=quantile(Pvalues,p=0.75),
                                              q5=max(Pvalues))
-        segments<-data.frame("Sig"=signexp_obj@signames,"x_bgn"=c(1:n)-0.4,"x_end"=c(1:n)+0.4,
-                             "y_bgn"=Lpmed,"y_end"=Lpmed,"q1"=0,"q2"=0,"q3"=0,"q4"=0,"q5"=0)
+        sig_order<-order(signexp_obj@signames)
+        segments<-data.frame("Sig"=signexp_obj@signames[sig_order],"x_bgn"=c(1:n)-0.4,"x_end"=c(1:n)+0.4,
+                             "y_bgn"=Lpmed[sig_order],
+                             "y_end"=Lpmed[sig_order],
+                             "q1"=0,"q2"=0,"q3"=0,"q4"=0,"q5"=0)
         g1<-ggplot(ms, aes(x=Sig,ymin=q1,lower=q2,middle=q3,upper=q4,ymax=q5)) + 
             geom_boxplot(stat='identity',show.legend = FALSE) +
             geom_hline(yintercept=lcut,col=col2) +
@@ -186,6 +189,14 @@ setMethod("DiffExp",signature(signexp_obj="SignExp", labels="character",
                                                  q4=quantile(exp,p=0.75),
                                                  q5=max(exp),
                                                  "fc"=classdiffs[1])
+            ms_ord<-c()
+            for(s in signexp_obj@signames){
+              for (c in 1:nclasses){
+                cl<-classes[c]
+                ms_ord<-c(ms_ord,which(ms$Sig==s & ms$class==cl))
+              }
+            }
+            ms<-ms[ms_ord,]
             ymean<-mean(ms$q3)
             g2<-ggplot(ms, aes(x=class,lower=q2, upper=q4, middle=q3, 
                               ymin=q1, ymax=q5)) + 
@@ -403,8 +414,11 @@ setMethod("ExposureCorrelation",signature(Exposures="matrix",feature="numeric",
                                                    q3=median(Pvalues),
                                                    q4=quantile(Pvalues,p=0.75),
                                                    q5=max(Pvalues))
-              segments<-data.frame(Sig=signature_names,x_bgn=c(1:n)-0.4,x_end=c(1:n)+0.4,
-                                   y_bgn=Lpmed,y_end=Lpmed,q1=0,q2=0,q3=0,q4=0,q5=0)
+              sig_order<-order(signature_names)
+              segments<-data.frame(Sig=signature_names[sig_order],x_bgn=c(1:n)-0.4,x_end=c(1:n)+0.4,
+                                   y_bgn=Lpmed[sig_order],
+                                   y_end=Lpmed[sig_order],
+                                   q1=0,q2=0,q3=0,q4=0,q5=0)
               g1<-ggplot(ms, aes(x=Sig,ymin=q1,lower=q2,middle=q3,upper=q4,ymax=q5)) + 
                   geom_boxplot(stat='identity',show.legend = FALSE) +
                   geom_hline(yintercept=lcut,col=col2) +
@@ -499,8 +513,11 @@ setMethod("ExposureCorrelation",signature(Exposures="SignExp",feature="numeric",
                                                    q3=median(Pvalues),
                                                    q4=quantile(Pvalues,p=0.75),
                                                    q5=max(Pvalues))
-              segments<-data.frame(Sig=Exposures@signames,x_bgn=c(1:n)-0.4,x_end=c(1:n)+0.4,
-                                   y_bgn=Lpmed,y_end=Lpmed,q1=0,q2=0,q3=0,q4=0,q5=0)
+              sig_order<-order(Exposures@signames)
+              segments<-data.frame(Sig=Exposures@signames[sig_order],x_bgn=c(1:n)-0.4,x_end=c(1:n)+0.4,
+                                   y_bgn=Lpmed[sig_order],
+                                   y_end=Lpmed[sig_order],
+                                   q1=0,q2=0,q3=0,q4=0,q5=0)
               g1<-ggplot(ms, aes(x=Sig,ymin=q1,lower=q2,middle=q3,upper=q4,ymax=q5)) + 
                   geom_boxplot(stat='identity',show.legend = FALSE) +
                   geom_hline(yintercept=lcut,col=col2) +
@@ -674,8 +691,11 @@ setMethod("ExposureSurvival",signature(Exposures="matrix",surv="ANY",
                                                    q3=median(Pvalues),
                                                    q4=quantile(Pvalues,p=0.75),
                                                    q5=max(Pvalues))
-              segments<-data.frame(Sig=signature_names,x_bgn=c(1:n)-0.4,x_end=c(1:n)+0.4,
-                                   y_bgn=Lpval,y_end=Lpval,q1=0,q2=0,q3=0,q4=0,q5=0)
+              sig_order<-order(signature_names)
+              segments<-data.frame(Sig=signature_names[sig_order],x_bgn=c(1:n)-0.4,x_end=c(1:n)+0.4,
+                                   y_bgn=Lpval[sig_order],
+                                   y_end=Lpval[sig_order],
+                                   q1=0,q2=0,q3=0,q4=0,q5=0)
               g1<-ggplot(ms, aes(x=Sig,ymin=q1,lower=q2,middle=q3,upper=q4,ymax=q5)) + 
                   geom_boxplot(stat='identity',show.legend = FALSE,col=cor) +
                   geom_hline(yintercept=lcut,col=col2) +
@@ -859,8 +879,11 @@ setMethod("ExposureSurvival",signature(Exposures="SignExp",surv="ANY",
                                                    q3=median(Pvalues),
                                                    q4=quantile(Pvalues,p=0.75),
                                                    q5=max(Pvalues))
-              segments<-data.frame(Sig=signature_names,x_bgn=c(1:n)-0.4,x_end=c(1:n)+0.4,
-                                   y_bgn=Lpmed,y_end=Lpmed,q1=0,q2=0,q3=0,q4=0,q5=0)
+              sig_order<-order(signature_names)
+              segments<-data.frame(Sig=signature_names[sig_order],x_bgn=c(1:n)-0.4,x_end=c(1:n)+0.4,
+                                   y_bgn=Lpval[sig_order],
+                                   y_end=Lpval[sig_order],
+                                   q1=0,q2=0,q3=0,q4=0,q5=0)
               g1<-ggplot(ms, aes(x=Sig,ymin=q1,lower=q2,middle=q3,upper=q4,ymax=q5)) + 
                   geom_boxplot(stat='identity',show.legend = FALSE,col=cor) +
                   geom_hline(yintercept=lcut,col=col2) +

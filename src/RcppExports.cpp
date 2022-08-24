@@ -11,6 +11,21 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
+// FuzzyClusterCpp
+Rcpp::List FuzzyClusterCpp(arma::cube Exp, arma::mat Medx, int C, int m, double thresh);
+RcppExport SEXP _signeR_FuzzyClusterCpp(SEXP ExpSEXP, SEXP MedxSEXP, SEXP CSEXP, SEXP mSEXP, SEXP threshSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::cube >::type Exp(ExpSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type Medx(MedxSEXP);
+    Rcpp::traits::input_parameter< int >::type C(CSEXP);
+    Rcpp::traits::input_parameter< int >::type m(mSEXP);
+    Rcpp::traits::input_parameter< double >::type thresh(threshSEXP);
+    rcpp_result_gen = Rcpp::wrap(FuzzyClusterCpp(Exp, Medx, C, m, thresh));
+    return rcpp_result_gen;
+END_RCPP
+}
 // GibbsSamplerCpp
 Rcpp::List GibbsSamplerCpp(arma::mat M, arma::mat W, arma::cube Z, arma::mat P, arma::mat E, arma::mat Ap, arma::mat Bp, arma::mat Ae, arma::mat Be, double ap, double bp, double ae, double be, double lp, double le, double var_ap, double var_ae, int burn, int eval, bool Pfixed, bool Zfixed, bool Thetafixed, bool Afixed, bool keep_par);
 RcppExport SEXP _signeR_GibbsSamplerCpp(SEXP MSEXP, SEXP WSEXP, SEXP ZSEXP, SEXP PSEXP, SEXP ESEXP, SEXP ApSEXP, SEXP BpSEXP, SEXP AeSEXP, SEXP BeSEXP, SEXP apSEXP, SEXP bpSEXP, SEXP aeSEXP, SEXP beSEXP, SEXP lpSEXP, SEXP leSEXP, SEXP var_apSEXP, SEXP var_aeSEXP, SEXP burnSEXP, SEXP evalSEXP, SEXP PfixedSEXP, SEXP ZfixedSEXP, SEXP ThetafixedSEXP, SEXP AfixedSEXP, SEXP keep_parSEXP) {
