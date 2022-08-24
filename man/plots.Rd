@@ -51,13 +51,13 @@ BICboxplot(signeRout, plot_to_file=FALSE, file="Model_selection_BICs.pdf")
     file="Signature_heatmap.pdf", nbins=20, pal="roh", ...)
 \S4method{ExposureBarplot}{SignExp}(signexp_obj, plot_to_file=FALSE,
     file="Exposure_barplot.pdf", col='tan2', threshold=0, relative=FALSE,
-    title="", show_samples=NA, ...)
+    title="", show_samples=TRUE, ...)
 \S4method{ExposureBoxplot}{SignExp}(signexp_obj, plot_to_file=FALSE,
     file="Exposure_boxplot.pdf", col='tan2', threshold=0, show_samples=NA,
     plots_per_page=4, reord=NA, ...)
 \S4method{ExposureHeat}{SignExp}(signexp_obj, plot_to_file=FALSE,
     file="Exposure_heatmap.pdf", nbins=20, pal="roh", distmethod="euclidean",
-        clustermethod="complete", show_samples=NA, ...)
+        clustermethod="complete", ...)
 }
 
 \arguments{
@@ -91,7 +91,9 @@ BICboxplot(signeRout, plot_to_file=FALSE, file="Model_selection_BICs.pdf")
     contributions to mutation counts will be displayed.}
     \item{title}{Main title added to the plot. Default is no title.}
     \item{show_samples}{Whether sample names will be shown in the plot.
-    by default sample names are not shown if there are more than 50 samples.}
+    Default is NA, which leads to sample names being displayed only when there 
+    are less than 30 samples. However, even if show_samples=TRUE, due to display 
+    limitations sample names are not shown if there are more then 50 samples.}
     \item{...}{.}
 }
 

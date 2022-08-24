@@ -178,7 +178,7 @@ posteriori sample classification.</p>
 <p>Although signeR is intended for the estimation of mutational signatures, it
 actually provides a full Bayesian treatment to the non-negative matrix
 factorisation (NMF) model. Further details about the method can be found in
-Rosales & Drummond <i>et al.</i>, 2016 (see <a href="#toc6.1">section 6.1</a>
+Rosales & Drummond <i>et al.</i>, 2016 (see <a href="#toc9.1">section 9.1</a>
 below).</p>
 <p>This vignette briefly explains the use of <b>signeR</b> through examples.</p>
 
@@ -605,7 +605,7 @@ end.rcode-->
 <p class='legend'>P-values boxplot and scatterplots showing the correlations of exposures and 
 the provided feature.</p>
 
-<p>The output <code>SignatureCorr</code> will contain a list with two vectors: the estimated correlations of the signatures to the feature and their estimated pvalues.</p>
+<p>The output <code>ExpCorr</code> will contain a list with two vectors: the estimated correlations of the signatures to the feature and their estimated pvalues.</p>
 
 <h3 id="toc7.4">7.4: Linear Regression</h3>
 
@@ -675,7 +675,7 @@ end.rcode-->
 <p><b>signeR</b> can also perform a Fuzzy clustering of the samples according to their exposures to mutational signatures. The function <code>FuzzyClustExp</code> applies a clustering algorithm (hard or fuzzy) on each sampled exposure matrix and averages the fuzzy memberships degrees of samples to clusters. The number of cluster can be defined by the user (Clim parameter), otherwise different numbers of clusters are tested and the one that maximizes the PBMF index is used (the search algorithm used is similar to the one applied to estimate the number of signatures present in a dataset):</p> 
 
 <!--begin.rcode eval=TRUE
-FCE <- FuzzyClustExp(signatures$SignExposures, Clim=5)
+FCE <- FuzzyClustExp(signatures$SignExposures, Clim=c(3,7))
 end.rcode-->
 
 <p class='legend'>Heatmap showing the mean fuzzy memberships degrees of 

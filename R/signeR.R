@@ -193,6 +193,11 @@ signeR<-function(M, Mheader=TRUE, samples = "rows", Opport=NA,
         Test_BICs<-NA
         HH<-NA
     }
+    if(fixedP & !is.null(colnames(P)[1])){
+        signames<-colnames(P)
+    }else{
+        signames<-paste("S",1:nopt,sep="")
+    }
     #cat(paste("Running Gibbs sampler for ",nopt," signatures.\n",sep=""))
     Final_run<-eBayesNMF(M,W,n=nopt,ap,bp,ae,be,lp,le,
         var.ap,var.ae,P,fixP=fixedP,
@@ -202,6 +207,7 @@ signeR<-function(M, Mheader=TRUE, samples = "rows", Opport=NA,
     SE<-Final_run[[4]]
     SE<-setSamples(SE,samplenames)
     SE<-setMutations(SE,mutnames)
+    SE<-setSignames(SE,signames)
     result<-list(Nsign=nopt,
         tested_n=Ops[[2]],
         Test_BICs=Test_BICs,

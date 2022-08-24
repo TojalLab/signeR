@@ -4,6 +4,7 @@ setClass("SignExp",
         Exp="array",
         samples="character",
         mutations="character",
+        signames="character",
         sigSums="matrix",
         normalized="logical",
         Psummary="array",
@@ -13,6 +14,7 @@ setClass("SignExp",
                      Exp=array(NA,dim=c('n'=1,'j'=1,'k'=1)),
         samples=NA_character_,
         mutations=NA_character_,
+        signames=NA_character_,
         sigSums=matrix(NA_real_,1,1),
         normalized=FALSE,
         Psummary=array(NA,dim=c('i'=1,'n'=1,'q'=6)),
@@ -20,7 +22,7 @@ setClass("SignExp",
         Eoutliers=list())
 )
 
-SignExpConstructor<-function(Ps=NA,Es=NA,samplenames=NA,mutnames=NA){
+SignExpConstructor<-function(Ps=NA,Es=NA,samplenames=NA,mutnames=NA,signames=NA){
     if(!(is.na(Ps[1]) | is.na(Es[1]))){
         if(!(is.array(Ps) & is.array(Es))){
             stop("Signatures and exposures must be arrays.")
@@ -42,7 +44,11 @@ SignExpConstructor<-function(Ps=NA,Es=NA,samplenames=NA,mutnames=NA){
                 c(rep(bases[-2],each=16),rep(bases[-4],each=16)),
                 sep="")
         }
-        SE<-new("SignExp",Sign=Ps,Exp=Es,samples=samplenames,mutations=mutnames,
+        if(all(is.na(signames))){
+            signames<-paste("S",1:dp[[2]],sep="")
+        }
+        SE<-new("SignExp",Sign=Ps,Exp=Es,samples=samplenames,
+            mutations=mutnames,signames=signames,
             sigSums=sSums,normalized=FALSE,
             Psummary=array(NA,dim=c('i'=1,'n'=1,'q'=6)),
             Esummary=array(NA,dim=c('n'=1,'j'=1,'q'=6)),
@@ -61,7 +67,7 @@ setGeneric("setSamples",
 )
 setMethod("setSamples",signature(signexp_obj="SignExp",names="ANY"),
     function(signexp_obj,names){
-        signexp_obj@samples<-names
+        attr(signexp_obj,"samples")<-names
         return(signexp_obj)
     }
 )
@@ -73,7 +79,20 @@ setGeneric("setMutations",
 )
 setMethod("setMutations",signature(signexp_obj="SignExp",mutations="ANY"),
     function(signexp_obj,mutations){
-        signexp_obj@mutations<-mutations
+        attr(signexp_obj,"mutations")<-mutations
+        return(signexp_obj)
+    }
+)
+
+
+setGeneric("setSignames",
+    def=function(signexp_obj,signames){
+        standardGeneric("setSignames")
+    }
+)
+setMethod("setSignames",signature(signexp_obj="SignExp",signames="ANY"),
+    function(signexp_obj,signames){
+        attr(signexp_obj,"signames")<-signames
         return(signexp_obj)
     }
 )
@@ -219,6 +238,8 @@ setMethod("Average_sign",signature(signexp_obj="SignExp",normalize="ANY"),
         }
         Ps<-signexp_obj@Sign #[i,n,r]
         Phat<-apply(Ps,c(1,2),mean)
+        rownames(Phat)<-signexp_obj@mutations
+        colnames(Phat)<-signexp_obj@signames
         return(Phat)
     }
 )
@@ -237,6 +258,8 @@ setMethod("Median_sign",signature(signexp_obj="SignExp",normalize="ANY"),
         i<-dp[[1]]; n<-dp[[2]]; r<-dp[[3]]
         Phat<-signexp_obj@Psummary[,,3,drop=TRUE]
         if(n==1) Phat<-matrix(as.vector(Phat),i,n)
+        rownames(Phat)<-signexp_obj@mutations
+        colnames(Phat)<-signexp_obj@signames
         return(Phat)
     }
 )
@@ -253,6 +276,8 @@ setMethod("Average_exp",signature(signexp_obj="SignExp",normalize="ANY"),
         }
         Es<-signexp_obj@Exp #[n,j,r]
         Ehat<-apply(Es,c(1,2),mean)
+        rownames(Ehat)<-signexp_obj@signames
+        colnames(Ehat)<-signexp_obj@samples
         return(Ehat)
     }
 )
@@ -271,6 +296,8 @@ setMethod("Median_exp",signature(signexp_obj="SignExp",normalize="ANY"),
         n<-de[[1]]; j<-de[[2]]; r<-de[[3]]
         Ehat<-signexp_obj@Esummary[,,3,drop=TRUE]
         if(n==1 | j==1) Ehat<-matrix(as.vector(Ehat),n,j)
+        rownames(Ehat)<-signexp_obj@signames
+        colnames(Ehat)<-signexp_obj@samples
         return(Ehat)
     }
 )
