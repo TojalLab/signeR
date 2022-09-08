@@ -70,7 +70,7 @@ explorepage <- function() {
             width = 12,
             p(
               "Select a module to explore exposure data through
-              interactive visualizations. You can analyze you own mutation
+              interactive visualizations. You can analyze your own mutation
               data or explore the TCGA dataset."
             )
           ),
@@ -100,7 +100,7 @@ explorepage <- function() {
             messageBox(
               width = 12,
               p(
-                "In case you want to analyze you own data, please click on
+                "In case you want to analyze your own data, please click on
                 signeR Analysis. Then you can infer signatures from your data (",
                 span(em("de novo")), 
                 ") or fit your data to known signatures (fitting).", br(),
