@@ -36,7 +36,7 @@ importFrom("shinydashboard", "dashboardPage", "tabBox", "box",
     "infoBox")
 importFrom("shinycssloaders", "withSpinner")
 importFrom("shinyWidgets", "useSweetAlert", "radioGroupButtons",
-    "pickerInput", "tooltipOptions", "dropdownButton")
+    "pickerInput", "tooltipOptions", "dropdownButton", "prettyRadioButtons")
 importFrom("bsplus", "use_bs_tooltip", "bs_embed_tooltip",
     "shinyInput_label_embed")
 importFrom("BiocFileCache", "BiocFileCache", "bfcrpath",

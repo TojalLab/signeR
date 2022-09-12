@@ -49,12 +49,19 @@ fitting_UI <- function(id) {
                     icon = icon("info-circle")
                   ),
                 hr(),
+                prettyRadioButtons(
+                  inputId = ns("genbuild_fit"), label = "Genome build :", 
+                  choiceNames = c("hg19/GRCh37", "hg38/GRCh38"),
+                  choiceValues = c("hg19", "hg38"),
+                  inline = TRUE, status = "primary", selected = "hg19",
+                  fill=TRUE, 
+                ),
                 fileInput(ns("mutfile_fit"),
-                  "SNV matrix*",
+                  "VCF file or SNV matrix*",
                   multiple = FALSE,
                   accept = c(
-                    "text/csv", "text/comma-separated-values",
-                    "text/plain", ".csv"
+                    ".vcf",".vcf.gz","text/csv", "text/plain",
+                    "text/comma-separated-values",".csv"
                   )
                 )
               ),
@@ -250,16 +257,34 @@ fitting <- function(input,
       ))
       return(NULL)
     }
-    df <- read.table(input$mutfile_fit$datapath, header=T,sep="\t",row.names=1,check.names=F)
-    if (!validate_cnv(df)) {
-      showModal(modalDialog(
-        title = "Oh no!",
-        paste0("You must upload a valid SNV matrix file."),
-        easyClose = TRUE,
-        footer = NULL
-      ))
-      return(NULL)
+    ext <- tools::file_ext(input$mutfile_fit$datapath)
+    if (ext == "vcf") {
+      build <- input$genbuild_fit
+      if (build == "hg19"){
+        if (!require("BSgenome.Hsapiens.UCSC.hg19")) BiocManager::install("BSgenome.Hsapiens.UCSC.hg19")
+        mygenome <- BSgenome.Hsapiens.UCSC.hg19
+      } else {
+        if (!require("BSgenome.Hsapiens.UCSC.hg38")) BiocManager::install("BSgenome.Hsapiens.UCSC.hg38")
+        mygenome <- BSgenome.Hsapiens.UCSC.hg38
+      }
+
+      vcfobj <- VariantAnnotation::readVcf(input$mutfile_fit$datapath, build)
+
+      df <- genCountMatrixFromVcf(mygenome, vcfobj)
+      
+    } else {
+      df <- read.table(input$mutfile_fit$datapath, header=T,sep="\t",row.names=1,check.names=F)
+      if (!validate_cnv(df)) {
+        showModal(modalDialog(
+          title = "Oh no!",
+          paste0("You must upload a valid SNV matrix file."),
+          easyClose = TRUE,
+          footer = NULL
+        ))
+        return(NULL)
+      }
     }
+
     return(df)
   })
 

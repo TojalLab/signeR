@@ -32,6 +32,6 @@ biocViews: GenomicVariation, SomaticMutation, StatisticalMethod,
         Visualization
 Suggests: knitr, rtracklayer, BSgenome.Hsapiens.UCSC.hg19, rmarkdown
 VignetteBuilder: knitr
-RoxygenNote: 7.2.0
+RoxygenNote: 7.2.1
 Encoding: UTF-8
 Packaged: 2022-07-07 19:37:44 UTC; alexandre
