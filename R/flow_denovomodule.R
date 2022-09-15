@@ -70,12 +70,13 @@ denovo_UI <- function(id) {
                   icon = icon("info-circle")
                 ),
                 hr(),
+                uiOutput(ns("uigenopp")),
                 fileInput(ns("oppfile"),
-                  "Opportunities",
+                  "Opportunities or Target file (BED)",
                   multiple = FALSE,
                   accept = c(
                     "text/csv", "text/comma-separated-values",
-                    "text/plain", ".csv"
+                    "text/plain", ".csv", "*.bed"
                   )
                 )
               )
@@ -591,6 +592,23 @@ denovo <- function(input,
       return(NULL)
     }
     downloadButton(ns("btdwdenovo"), "Download Rdata")
+  })
+
+  output$uigenopp <- renderUI({
+    req(input$genbuild)
+    build = "hg19"
+    if (input$genbuild == "hg38") {
+      build = "hg38"
+    }
+    
+    prettyRadioButtons(
+      inputId = ns("genopp"), label = paste0("Use genome opportunity (",build,")?"), 
+      choiceNames = c("Yes", "No"),
+      choiceValues = c("yes", "no"),
+      inline = TRUE, status = "primary", selected = "no",
+      fill=TRUE, 
+    )
+
   })
 
   output$btdwdenovo <- downloadHandler(
