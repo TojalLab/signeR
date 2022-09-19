@@ -76,7 +76,7 @@ denovo_UI <- function(id) {
                   multiple = FALSE,
                   accept = c(
                     "text/csv", "text/comma-separated-values",
-                    "text/plain", ".csv", "*.bed"
+                    "text/plain", ".csv", ".bed"
                   )
                 )
               )
@@ -307,10 +307,80 @@ denovo <- function(input,
   opp <- reactive({
     # isso torno o input obrigatorio
     # req(input$oppfile)
-    if (is.null(input$oppfile)) {
+
+    if (input$genopp == "yes" && is.null(input$oppfile)) {
+
+      mutation <- mut()
+
+      nsamples = 1
+      if (!is.null(mutation)){
+        nsamples = nrow(mutation)
+      }
+
+      withProgress(
+        message = "Download genome opportunity...",
+        detail = "This operation may take a while...",
+        value = 0,
+        {
+            data <- download_opp_file(input$genbuild)
+        }
+      )
+
+      opp <- as.matrix(read.table(data))
+      opp <- opp[rep(1:nrow(opp), times=nsamples),]
+      rownames(opp) <- rep(1:nrow(opp))
+
+      return(opp)
+    } else if(is.null(input$oppfile)) {
+
       return(NULL)
+    } else {
+      # read.table(input$oppfile$datapath)
+
+      if(input$genopp == "yes") {
+        showModal(modalDialog(
+          title = "Opportunity conflict",
+          paste0(
+            "You have selected to use genome opportunity and uploaded a file.
+            signeRFlow will use the uploaded file and ignore genome opportunity."
+          ),
+          easyClose = TRUE,
+          footer = NULL
+        ))
+      }
+
+      ext <- tools::file_ext(input$oppfile$datapath)
+      if (ext == "bed") {
+        build <- input$genbuild
+        mutation <- mut()
+        if (build == "hg19"){
+          if (!require("BSgenome.Hsapiens.UCSC.hg19")) BiocManager::install("BSgenome.Hsapiens.UCSC.hg19")
+          mygenome <- BSgenome.Hsapiens.UCSC.hg19
+        } else {
+          if (!require("BSgenome.Hsapiens.UCSC.hg38")) BiocManager::install("BSgenome.Hsapiens.UCSC.hg38")
+          mygenome <- BSgenome.Hsapiens.UCSC.hg38
+        }
+
+        target_regions = rtracklayer::import(
+          input$oppfile$datapath, format="bed"
+        )
+
+        nsamples = 1
+        if (!is.null(mutation)){
+          nsamples = nrow(mutation)
+        }
+
+        opp <- genOpportunityFromGenome(
+          mygenome,target_regions, nsamples=nsamples
+        )
+
+        return(opp)
+      } else {
+        opp <- read.table(input$oppfile$datapath)
+
+        return(opp)
+      }
     }
-    read.table(input$oppfile$datapath)
   })
 
   observeEvent(input$iterationhelp, {
