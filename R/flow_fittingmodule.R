@@ -12,10 +12,13 @@ fitting_UI <- function(id) {
             width = 12,
             p(
               "Please ", strong("Upload your data"),
-              " below. The counts of mutations are required, and should be
+              " below. The counts of mutations are required, as a VCF file or a 
+              counts matrix. The counts of mutations should be
               organized in a matrix with 96 columns (corresponding to mutations
-              types) and one line for each genome sample. Opptionally, a matrix
-              with matching opportunities can be uploaded (",
+              types) and one line for each genome sample. 
+              Opptionally, a matrix with matching opportunities can be
+              uploaded, build with a BED file or you can use a already built genome opportunity matrix 
+              (",
               a(
                 "see signeR documentation for details",
                 href = "https://bioconductor.org/packages/release/bioc/vignettes/signeR/inst/doc/signeR-vignette.html"
@@ -35,10 +38,11 @@ fitting_UI <- function(id) {
             collapsible = T, status = "primary",
             messageBox(
               width = 12,
-              "Upload a SNV matrix file with your own samples
+              "Upload a VCF file or a SNV matrix file with your own samples
               to use in signeR fitting module and previous known signatures
               (mandatories files).
-              You can upload an opportunity file as well."
+              You can upload an opportunity file as well or use a already built genome opportunity.
+              Also, you can upload a BED file to build an opportunity matrix."
             ),
             fluidRow(
               box(
@@ -75,11 +79,11 @@ fitting_UI <- function(id) {
                 hr(),
                 uiOutput(ns("uigenopp_fit")),
                 fileInput(ns("oppfile_fit"),
-                  "Opportunities",
+                  "Opportunities or Target file (BED)",
                   multiple = FALSE,
                   accept = c(
                     "text/csv", "text/comma-separated-values",
-                    "text/plain", ".csv"
+                    "text/plain", ".csv", ".bed"
                   )
                 )
               ),
@@ -259,7 +263,7 @@ fitting <- function(input,
       return(NULL)
     }
     ext <- tools::file_ext(input$mutfile_fit$datapath)
-    if (ext == "vcf") {
+    if (ext == "vcf" || ext == "vcf.gz") {
       build <- input$genbuild_fit
       if (build == "hg19"){
         if (!require("BSgenome.Hsapiens.UCSC.hg19")) BiocManager::install("BSgenome.Hsapiens.UCSC.hg19")
@@ -371,9 +375,32 @@ fitting <- function(input,
           mygenome <- BSgenome.Hsapiens.UCSC.hg38
         }
 
-        target_regions = rtracklayer::import(
-          input$oppfile_fit$datapath, format="bed"
+        target_regions <- tryCatch(
+          {
+            rtracklayer::import(
+              con=input$oppfile_fit$datapath, format="bed", genome=build
+            )
+          },
+          error=function(cond){
+            print(cond)
+          },
+          warning=function(cond){
+            print(cond)
+          }
         )
+
+        if (class(target_regions)[[1]] != "GRanges") {
+          showModal(modalDialog(
+            title = "BED error",
+            paste0(
+              "signerflow couldn't process your BED file.","\n",
+              "Error message: ", target_regions
+            ),
+            easyClose = TRUE,
+            footer = NULL
+          ))
+          return(NULL)
+        }
 
         nsamples = 1
         if (!is.null(mutation)){
@@ -381,7 +408,7 @@ fitting <- function(input,
         }
 
         opp <- genOpportunityFromGenome(
-          mygenome,target_regions, nsamples=nsamples
+          mygenome, target_regions, nsamples=nsamples
         )
 
         return(opp)
@@ -615,7 +642,7 @@ fitting <- function(input,
     }
     
     prettyRadioButtons(
-      inputId = ns("genopp_fit"), label = paste0("Use genome opportunity (",build,")?"), 
+      inputId = ns("genopp_fit"), label = paste0("Use already built genome opportunity (",build,")?"), 
       choiceNames = c("Yes", "No"),
       choiceValues = c("yes", "no"),
       inline = TRUE, status = "primary", selected = "no",

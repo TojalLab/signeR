@@ -12,11 +12,13 @@ denovo_UI <- function(id) {
             width = 12,
             p(
               "Please ", strong("upload your data"),
-              " below. The counts of mutations are required, and should be
+              " below. The counts of mutations are required, as a VCF file or a 
+              counts matrix. The counts of mutations should be
               organized in a matrix with 96 columns
-              (corresponding to mutations types) and one line for each genome
-              sample. Opptionally, a matrix with matching opportunities can be
-              uploaded (",
+              (corresponding to mutations types) and one line for each genome sample. 
+              Opptionally, a matrix with matching opportunities can be
+              uploaded, build with a BED file or you can use a already built genome opportunity matrix 
+              (",
               a(
                 "see signeR documentation for details",
                 href = "https://bioconductor.org/packages/release/bioc/vignettes/signeR/inst/doc/signeR-vignette.html"
@@ -33,9 +35,10 @@ denovo_UI <- function(id) {
             collapsible = T, status = "primary",
             messageBox(
               width = 12,
-              "Upload a SNV matrix file (mandatory) with your own samples
+              "Upload a VCF file or a SNV matrix file (mandatory) with your own samples
               to use in signeR de novo module.
-              You can upload an opportunity file as well."
+              You can upload an opportunity file as well or use a already built genome opportunity.
+              Also, you can upload a BED file to build an opportunity matrix."
             ),
             fluidRow(
               box(
@@ -274,7 +277,7 @@ denovo <- function(input,
     
     #df <- read.table(input$mutfile$datapath, header=T,sep="\t",row.names=1,check.names=F)
     ext <- tools::file_ext(input$mutfile$datapath)
-    if (ext == "vcf") {
+    if (ext == "vcf" || ext == "vcf.gz") {
       build <- input$genbuild
       if (build == "hg19"){
         if (!require("BSgenome.Hsapiens.UCSC.hg19")) BiocManager::install("BSgenome.Hsapiens.UCSC.hg19")
@@ -361,9 +364,32 @@ denovo <- function(input,
           mygenome <- BSgenome.Hsapiens.UCSC.hg38
         }
 
-        target_regions = rtracklayer::import(
-          input$oppfile$datapath, format="bed"
+        target_regions <- tryCatch(
+          {
+            rtracklayer::import(
+              con=input$oppfile$datapath, format="bed", genome=build
+            )
+          },
+          error=function(cond){
+            print(cond)
+          },
+          warning=function(cond){
+            print(cond)
+          }
         )
+
+        if (class(target_regions)[[1]] != "GRanges") {
+          showModal(modalDialog(
+            title = "BED error",
+            paste0(
+              "signerflow couldn't process your BED file.","\n",
+              "Error message: ", target_regions
+            ),
+            easyClose = TRUE,
+            footer = NULL
+          ))
+          return(NULL)
+        }
 
         nsamples = 1
         if (!is.null(mutation)){
@@ -672,7 +698,7 @@ denovo <- function(input,
     }
     
     prettyRadioButtons(
-      inputId = ns("genopp"), label = paste0("Use genome opportunity (",build,")?"), 
+      inputId = ns("genopp"), label = paste0("Use already built genome opportunity (",build,")?"), 
       choiceNames = c("Yes", "No"),
       choiceValues = c("yes", "no"),
       inline = TRUE, status = "primary", selected = "no",
