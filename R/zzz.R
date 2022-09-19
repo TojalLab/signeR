@@ -39,3 +39,26 @@ download_data_file <- function(type, tumor, verbose = FALSE) {
     data <- bfcrpath(bfc, rids = rid)
     return(data)
 }
+
+download_opp_file <- function(build, verbose = FALSE) {
+    rootURL <- "https://gitlab.com/lbcb/signer-data/-/raw/main/"
+
+    url <- paste0(
+      rootURL, "/", build, "/opp.refgene.",build,".txt"
+    )
+
+    bfc <- .get_cache()
+    rid <- bfcquery(bfc, build, "rname")$rid
+    if (!length(rid)) {
+     if (verbose)
+         message("Downloading genome opportunity data")
+     rid <- names(bfcadd(
+        bfc, build, url
+       ))
+    }
+    if (!isFALSE(bfcneedsupdate(bfc, rid)))
+    bfcdownload(bfc, rid, ask = FALSE)
+
+    data <- bfcrpath(bfc, rids = rid)
+    return(data)
+}

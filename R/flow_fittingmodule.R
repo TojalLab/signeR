@@ -12,10 +12,13 @@ fitting_UI <- function(id) {
             width = 12,
             p(
               "Please ", strong("Upload your data"),
-              " below. The counts of mutations are required, and should be
+              " below. The counts of mutations are required, as a VCF file or a 
+              counts matrix. The counts of mutations should be
               organized in a matrix with 96 columns (corresponding to mutations
-              types) and one line for each genome sample. Opptionally, a matrix
-              with matching opportunities can be uploaded (",
+              types) and one line for each genome sample. 
+              Opptionally, a matrix with matching opportunities can be
+              uploaded, build with a BED file or you can use a already built genome opportunity matrix 
+              (",
               a(
                 "see signeR documentation for details",
                 href = "https://bioconductor.org/packages/release/bioc/vignettes/signeR/inst/doc/signeR-vignette.html"
@@ -35,10 +38,11 @@ fitting_UI <- function(id) {
             collapsible = T, status = "primary",
             messageBox(
               width = 12,
-              "Upload a SNV matrix file with your own samples
+              "Upload a VCF file or a SNV matrix file with your own samples
               to use in signeR fitting module and previous known signatures
               (mandatories files).
-              You can upload an opportunity file as well."
+              You can upload an opportunity file as well or use a already built genome opportunity.
+              Also, you can upload a BED file to build an opportunity matrix."
             ),
             fluidRow(
               box(
@@ -49,12 +53,19 @@ fitting_UI <- function(id) {
                     icon = icon("info-circle")
                   ),
                 hr(),
+                prettyRadioButtons(
+                  inputId = ns("genbuild_fit"), label = "Genome build :", 
+                  choiceNames = c("hg19/GRCh37", "hg38/GRCh38"),
+                  choiceValues = c("hg19", "hg38"),
+                  inline = TRUE, status = "primary", selected = "hg19",
+                  fill=TRUE, 
+                ),
                 fileInput(ns("mutfile_fit"),
-                  "SNV matrix*",
+                  "VCF file or SNV matrix*",
                   multiple = FALSE,
                   accept = c(
-                    "text/csv", "text/comma-separated-values",
-                    "text/plain", ".csv"
+                    ".vcf",".vcf.gz","text/csv", "text/plain",
+                    "text/comma-separated-values",".csv"
                   )
                 )
               ),
@@ -66,12 +77,13 @@ fitting_UI <- function(id) {
                   icon = icon("info-circle")
                 ),
                 hr(),
+                uiOutput(ns("uigenopp_fit")),
                 fileInput(ns("oppfile_fit"),
-                  "Opportunities",
+                  "Opportunities or Target file (BED)",
                   multiple = FALSE,
                   accept = c(
                     "text/csv", "text/comma-separated-values",
-                    "text/plain", ".csv"
+                    "text/plain", ".csv", ".bed"
                   )
                 )
               ),
@@ -250,16 +262,34 @@ fitting <- function(input,
       ))
       return(NULL)
     }
-    df <- read.table(input$mutfile_fit$datapath, header=T,sep="\t",row.names=1,check.names=F)
-    if (!validate_cnv(df)) {
-      showModal(modalDialog(
-        title = "Oh no!",
-        paste0("You must upload a valid SNV matrix file."),
-        easyClose = TRUE,
-        footer = NULL
-      ))
-      return(NULL)
+    ext <- tools::file_ext(input$mutfile_fit$datapath)
+    if (ext == "vcf" || ext == "vcf.gz") {
+      build <- input$genbuild_fit
+      if (build == "hg19"){
+        if (!requireNamespace("BSgenome.Hsapiens.UCSC.hg19")) BiocManager::install("BSgenome.Hsapiens.UCSC.hg19")
+        mygenome <- BSgenome.Hsapiens.UCSC.hg19
+      } else {
+        if (!requireNamespace("BSgenome.Hsapiens.UCSC.hg38")) BiocManager::install("BSgenome.Hsapiens.UCSC.hg38")
+        mygenome <- BSgenome.Hsapiens.UCSC.hg38
+      }
+
+      vcfobj <- VariantAnnotation::readVcf(input$mutfile_fit$datapath, build)
+
+      df <- genCountMatrixFromVcf(mygenome, vcfobj)
+      
+    } else {
+      df <- read.table(input$mutfile_fit$datapath, header=T,sep="\t",row.names=1,check.names=F)
+      if (!validate_cnv(df)) {
+        showModal(modalDialog(
+          title = "Oh no!",
+          paste0("You must upload a valid SNV matrix file."),
+          easyClose = TRUE,
+          footer = NULL
+        ))
+        return(NULL)
+      }
     }
+
     return(df)
   })
 
@@ -291,10 +321,103 @@ fitting <- function(input,
   opp_fit <- reactive({
     # isso torno o input obrigatorio
     # req(input$oppfile_fit)
-    if (is.null(input$oppfile_fit)) {
+
+    if (input$genopp_fit == "yes" && is.null(input$oppfile_fit)) {
+
+      mutation <- mut_fit()
+
+      nsamples = 1
+      if (!is.null(mutation)){
+        nsamples = nrow(mutation)
+      }
+
+      withProgress(
+        message = "Download genome opportunity...",
+        detail = "This operation may take a while...",
+        value = 0,
+        {
+            data <- download_opp_file(input$genbuild_fit)
+        }
+      )
+
+      opp <- as.matrix(read.table(data))
+      opp <- opp[rep(1:nrow(opp), times=nsamples),]
+      rownames(opp) <- rep(1:nrow(opp))
+
+      return(opp)
+    } else if(is.null(input$oppfile_fit)) {
+
       return(NULL)
+    } else {
+      # read.table(input$oppfile$datapath)
+
+      if(input$genopp_fit == "yes") {
+        showModal(modalDialog(
+          title = "Opportunity conflict",
+          paste0(
+            "You have selected to use genome opportunity and uploaded a file.
+            signeRFlow will use the uploaded file and ignore genome opportunity."
+          ),
+          easyClose = TRUE,
+          footer = NULL
+        ))
+      }
+
+      ext <- tools::file_ext(input$oppfile_fit$datapath)
+      if (ext == "bed") {
+        build <- input$genbuild_fit
+        mutation <- mut_fit()
+        if (build == "hg19"){
+          if (!require("BSgenome.Hsapiens.UCSC.hg19")) BiocManager::install("BSgenome.Hsapiens.UCSC.hg19")
+          mygenome <- BSgenome.Hsapiens.UCSC.hg19
+        } else {
+          if (!require("BSgenome.Hsapiens.UCSC.hg38")) BiocManager::install("BSgenome.Hsapiens.UCSC.hg38")
+          mygenome <- BSgenome.Hsapiens.UCSC.hg38
+        }
+
+        target_regions <- tryCatch(
+          {
+            rtracklayer::import(
+              con=input$oppfile_fit$datapath, format="bed", genome=build
+            )
+          },
+          error=function(cond){
+            print(cond)
+          },
+          warning=function(cond){
+            print(cond)
+          }
+        )
+
+        if (class(target_regions)[[1]] != "GRanges") {
+          showModal(modalDialog(
+            title = "BED error",
+            paste0(
+              "signerflow couldn't process your BED file.","\n",
+              "Error message: ", target_regions
+            ),
+            easyClose = TRUE,
+            footer = NULL
+          ))
+          return(NULL)
+        }
+
+        nsamples = 1
+        if (!is.null(mutation)){
+          nsamples = nrow(mutation)
+        }
+
+        opp <- genOpportunityFromGenome(
+          mygenome, target_regions, nsamples=nsamples
+        )
+
+        return(opp)
+      } else {
+        opp <- read.table(input$oppfile_fit$datapath)
+
+        return(opp)
+      }
     }
-    read.table(input$oppfile_fit$datapath)
   })
 
   observeEvent(input$iterationhelp_fit, {
@@ -509,6 +632,23 @@ fitting <- function(input,
       return(NULL)
     }
     downloadButton(ns("btdwfitting"), "Download Rdata")
+  })
+
+  output$uigenopp_fit <- renderUI({
+    req(input$genbuild_fit)
+    build = "hg19"
+    if (input$genbuild_fit == "hg38") {
+      build = "hg38"
+    }
+    
+    prettyRadioButtons(
+      inputId = ns("genopp_fit"), label = paste0("Use already built genome opportunity (",build,")?"), 
+      choiceNames = c("Yes", "No"),
+      choiceValues = c("yes", "no"),
+      inline = TRUE, status = "primary", selected = "no",
+      fill=TRUE, 
+    )
+
   })
 
   output$btdwfitting <- downloadHandler(
