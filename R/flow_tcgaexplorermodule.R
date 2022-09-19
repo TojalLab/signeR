@@ -712,6 +712,11 @@ tcgaexplorer <- function(input,
     return(input$sclassif_method)
   })
 
+  sclassif_kfold <- reactive({
+    req(input$sclassif_kfold)
+    return(input$sclassif_kfold)
+  })
+
   survival_method <- reactive({
     req(input$survival_method)
     return(input$survival_method)
@@ -758,6 +763,7 @@ tcgaexplorer <- function(input,
         col <- names(data[feature_row + 1])
         labels <- data[[col]]
         sclas_method <- sclassif_method()
+        kfold <- sclassif_kfold()
         if (class(labels) == "character") {
           sigs <- sigs_obj()
           if (is.null(sigs)) {
@@ -929,6 +935,13 @@ tcgaexplorer <- function(input,
         ) %>% shinyInput_label_embed(
           shiny::icon("info-circle", verify_fa=FALSE) %>%
             bs_embed_tooltip(title = "Method")
+        ),
+        numericInput(
+          ns("sclassif_kfold"), "K Fold", 1,
+          min = 1, step = 1
+        ) %>% shinyInput_label_embed(
+          shiny::icon("info-circle", verify_fa=FALSE) %>%
+            bs_embed_tooltip(title = "threshold")
         ),
         circle = TRUE, status = "danger",
         icon = icon("gear", verify_fa=FALSE), width = "200px",
