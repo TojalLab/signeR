@@ -73,6 +73,7 @@ fitting_UI <- function(id) {
                   icon = icon("info-circle")
                 ),
                 hr(),
+                uiOutput(ns("uigenopp_fit")),
                 fileInput(ns("oppfile_fit"),
                   "Opportunities",
                   multiple = FALSE,
@@ -316,10 +317,80 @@ fitting <- function(input,
   opp_fit <- reactive({
     # isso torno o input obrigatorio
     # req(input$oppfile_fit)
-    if (is.null(input$oppfile_fit)) {
+
+    if (input$genopp_fit == "yes" && is.null(input$oppfile_fit)) {
+
+      mutation <- mut_fit()
+
+      nsamples = 1
+      if (!is.null(mutation)){
+        nsamples = nrow(mutation)
+      }
+
+      withProgress(
+        message = "Download genome opportunity...",
+        detail = "This operation may take a while...",
+        value = 0,
+        {
+            data <- download_opp_file(input$genbuild_fit)
+        }
+      )
+
+      opp <- as.matrix(read.table(data))
+      opp <- opp[rep(1:nrow(opp), times=nsamples),]
+      rownames(opp) <- rep(1:nrow(opp))
+
+      return(opp)
+    } else if(is.null(input$oppfile_fit)) {
+
       return(NULL)
+    } else {
+      # read.table(input$oppfile$datapath)
+
+      if(input$genopp_fit == "yes") {
+        showModal(modalDialog(
+          title = "Opportunity conflict",
+          paste0(
+            "You have selected to use genome opportunity and uploaded a file.
+            signeRFlow will use the uploaded file and ignore genome opportunity."
+          ),
+          easyClose = TRUE,
+          footer = NULL
+        ))
+      }
+
+      ext <- tools::file_ext(input$oppfile_fit$datapath)
+      if (ext == "bed") {
+        build <- input$genbuild_fit
+        mutation <- mut_fit()
+        if (build == "hg19"){
+          if (!require("BSgenome.Hsapiens.UCSC.hg19")) BiocManager::install("BSgenome.Hsapiens.UCSC.hg19")
+          mygenome <- BSgenome.Hsapiens.UCSC.hg19
+        } else {
+          if (!require("BSgenome.Hsapiens.UCSC.hg38")) BiocManager::install("BSgenome.Hsapiens.UCSC.hg38")
+          mygenome <- BSgenome.Hsapiens.UCSC.hg38
+        }
+
+        target_regions = rtracklayer::import(
+          input$oppfile_fit$datapath, format="bed"
+        )
+
+        nsamples = 1
+        if (!is.null(mutation)){
+          nsamples = nrow(mutation)
+        }
+
+        opp <- genOpportunityFromGenome(
+          mygenome,target_regions, nsamples=nsamples
+        )
+
+        return(opp)
+      } else {
+        opp <- read.table(input$oppfile_fit$datapath)
+
+        return(opp)
+      }
     }
-    read.table(input$oppfile_fit$datapath)
   })
 
   observeEvent(input$iterationhelp_fit, {
@@ -534,6 +605,23 @@ fitting <- function(input,
       return(NULL)
     }
     downloadButton(ns("btdwfitting"), "Download Rdata")
+  })
+
+  output$uigenopp_fit <- renderUI({
+    req(input$genbuild_fit)
+    build = "hg19"
+    if (input$genbuild_fit == "hg38") {
+      build = "hg38"
+    }
+    
+    prettyRadioButtons(
+      inputId = ns("genopp_fit"), label = paste0("Use genome opportunity (",build,")?"), 
+      choiceNames = c("Yes", "No"),
+      choiceValues = c("yes", "no"),
+      inline = TRUE, status = "primary", selected = "no",
+      fill=TRUE, 
+    )
+
   })
 
   output$btdwfitting <- downloadHandler(
