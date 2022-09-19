@@ -773,7 +773,8 @@ tcgaexplorer <- function(input,
             ExposureClassify(
               sigs$SignExposures,
               labels = labels,
-              method = sclas_method
+              method = sclas_method#,
+              #kfold=kfold
             )
           }
         }

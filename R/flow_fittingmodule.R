@@ -266,10 +266,10 @@ fitting <- function(input,
     if (ext == "vcf" || ext == "vcf.gz") {
       build <- input$genbuild_fit
       if (build == "hg19"){
-        if (!require("BSgenome.Hsapiens.UCSC.hg19")) BiocManager::install("BSgenome.Hsapiens.UCSC.hg19")
+        if (!requireNamespace("BSgenome.Hsapiens.UCSC.hg19")) BiocManager::install("BSgenome.Hsapiens.UCSC.hg19")
         mygenome <- BSgenome.Hsapiens.UCSC.hg19
       } else {
-        if (!require("BSgenome.Hsapiens.UCSC.hg38")) BiocManager::install("BSgenome.Hsapiens.UCSC.hg38")
+        if (!requireNamespace("BSgenome.Hsapiens.UCSC.hg38")) BiocManager::install("BSgenome.Hsapiens.UCSC.hg38")
         mygenome <- BSgenome.Hsapiens.UCSC.hg38
       }
 
