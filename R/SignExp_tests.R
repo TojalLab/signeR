@@ -528,13 +528,13 @@ setMethod("ExposureCorrelation",signature(Exposures="SignExp",feature="numeric",
                   labs(x="",y="-log(pvalue)")
               #######################
               #Correlation plots
-              md<-data.frame(Sig=rep(Exposures@signames,times=j),
-                             exposure=as.vector(Em),
-                             Feature=rep(feature,each=n))
+              md<-data.frame(Sig=rep(Exposures@signames[signif_signatures],times=j),
+                             exposure=as.vector(Em[signif_signatures,]),
+                             Feature=rep(feature,each=sum(signif_signatures)))
               g2<-ggplot(md, aes(x=Feature,y=exposure)) + 
                   geom_point(size=1, shape=19, show.legend = FALSE) +
                   stat_smooth(method="lm", se=FALSE,col="red") +
-                  facet_wrap(vars(Sig),nrow = ceiling(n/2)) +
+                  facet_wrap(vars(Sig),nrow = ceiling(sum(signif_signatures)/2),scales="free") +
                   theme_bw()+
                   theme(axis.text.x=element_text(angle=0,vjust=.5,hjust=0,face="bold")) + 
                   labs(x="Feature",y="Exposure")
@@ -916,7 +916,7 @@ setMethod("ExposureSurvival",signature(Exposures="SignExp",surv="ANY",
                       pval_diff<-round(1-pchisq(Test$chisq,1),3)
                       cutround<-signif(cutvals[m],digits=4)
                       ###############ggplot
-                      maintitle=paste("Cohorts by exposure to Sig ",m,sep="")
+                      maintitle=paste("Cohorts by exposure to ",signature_names[m],sep="")
                       legenlabs<-c(paste("exposure <= ",cutround,sep=""),
                                    paste("exposure > ",cutround,sep=""))
                       g2<-ggsurvplot(sf,data=data.frame(as.matrix(surv),thisgroup),
