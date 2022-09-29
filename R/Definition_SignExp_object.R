@@ -304,142 +304,143 @@ setMethod("Median_exp",signature(signexp_obj="SignExp",normalize="ANY"),
 
 #Update signatures and expositions
 setGeneric("AddSamples",
-    def=function(Signatures, originalCounts,originalOpp, NewCounts, NewOpp, 
-        updateSigs, updateSigNum, BICsignificance, critical_p, ap, bp, ae, be,
-        lp, le, var.ap, var.ae, burn_it, eval_it, main_burn, main_eval, estimate_hyper, 
-        EMit_lim, EM_eval, parallel, ncore, samplerGap, min_samples_per_core){
-        standardGeneric("AddSamples")
-    }
+           def=function(Signatures, originalCounts,originalOpp, NewCounts, 
+                        NewOpp, updateSigs, updateSigNum, BICsignificance, 
+                        critical_p, ap, bp, ae, be, lp, le, var.ap, var.ae, 
+                        burn_it, eval_it, main_burn, main_eval, estimate_hyper, 
+                        EMit_lim, EM_eval, parallel, ncore, samplerGap, 
+                        min_samples_per_core){
+             standardGeneric("AddSamples")
+           }
 )
-    
+
 setMethod("AddSamples",signature(Signatures="ANY", originalCounts="ANY", 
-    originalOpp="ANY", NewCounts="matrix", NewOpp="ANY", updateSigs="logical",
-    updateSigNum="logical", BICsignificance="logical", critical_p = "numeric", 
-    ap="ANY", bp="ANY", ae="ANY", be="ANY", lp="ANY", le="ANY", 
-    var.ap="ANY",var.ae="ANY", 
-    burn_it="numeric", eval_it="numeric", 
-    main_burn="numeric", main_eval="numeric",
-    estimate_hyper="logical", EMit_lim="numeric", EM_eval="numeric",  
-    parallel="logical",ncore="ANY", samplerGap="numeric", 
-    min_samples_per_core="numeric"),
-    function(Signatures, originalCounts,originalOpp, NewCounts, NewOpp, 
-        updateSigs=FALSE, updateSigNum=FALSE, BICsignificance=FALSE, 
-        critical_p = 0.05, ap=NA,bp=NA,ae=NA,be=NA,lp=NA,le=NA,var.ap=10,
-        var.ae=10, burn_it=1000, eval_it=1000, main_burn=10000, main_eval=2000,
-        estimate_hyper=FALSE,EMit_lim=100, EM_eval=100, parallel=TRUE,ncore=NA,
-        samplerGap=10, min_samples_per_core=200){
-        if(is.list(Signatures)){
-            Nsign<-Signatures@Nsign
-            tested_n<-Signatures@tested_n
-            HH<-Signatures@Hyper_paths
-            Signatures<-Signatures@SignExposures
-            BestHH<-HH[[which(tested_n==Nsign)]]
-            best_hyperparam<-BestHH[NROW(BestHH),]
-            if(is.na(ap)) ap<-best_hyperparam$ap
-            if(is.na(bp)) bp<-best_hyperparam$bp
-            if(is.na(ae)) ae<-best_hyperparam$ae
-            if(is.na(be)) be<-best_hyperparam$be
-            if(is.na(lp)) lp<-best_hyperparam$lp
-            if(is.na(le)) le<-best_hyperparam$le
-            eh<-estimate_hyper
-        }else if(class(Signatures)=="SignExp"){
-            if(is.na(ap)) ap<-1
-            if(is.na(bp)) bp<-1
-            if(is.na(ae)) ae<-1
-            if(is.na(be)) be<-1
-            if(is.na(lp)) lp<-1
-            if(is.na(le)) le<-1
-            eh<-TRUE
-        }else{ 
-            stop("Signatures must be a full signeR output or a SignExp object.\n")
-        }
-        if(!Signatures@normalized) Signatures<-Normalize(Signatures)
-        dp <- dim(Signatures@Sign) #[i,n,r]
-        de <- dim(Signatures@Exp) #[n,j,r]
-        i<-dp[[1]]; n<-dp[[2]]; j<-de[[2]]; r<-de[[3]]
-        Ps <- Signatures@Sign
-        Es <- Signatures@Exp
-        P<-Ps[,,r]
-        E<-Es[,,r]
-        dn<-dim(NewCounts)
-        newsamp<-dn[[2]]
-        fixP<-!updateSigs
-        keep_param<-TRUE ############# FALSE would make no difference
-        #Estimate new expositions based on P
-        NewExp<-matrix(0,n,newsamp)
-        for(k in 1:newsamp){
-            found<-NewCounts[,k]
-            opp<-NewOpp[,k]
-            RSS0<-function(vet){
+                                 originalOpp="ANY", NewCounts="matrix", 
+                                 NewOpp="ANY", updateSigs="logical",
+                                 updateSigNum="logical", 
+                                 BICsignificance="logical", 
+                                 critical_p = "numeric", 
+                                 ap="ANY", bp="ANY", ae="ANY", be="ANY", 
+                                 lp="ANY", le="ANY", 
+                                 var.ap="ANY",var.ae="ANY", 
+                                 burn_it="numeric", eval_it="numeric", 
+                                 main_burn="numeric", main_eval="numeric",
+                                 estimate_hyper="logical", EMit_lim="numeric", 
+                                 EM_eval="numeric", parallel="logical",
+                                 ncore="ANY", samplerGap="numeric", 
+                                 min_samples_per_core="numeric"),
+          function(Signatures, originalCounts,originalOpp, NewCounts, NewOpp, 
+                   updateSigs=FALSE, updateSigNum=FALSE, BICsignificance=FALSE, 
+                   critical_p = 0.05, ap=NA,bp=NA,ae=NA,be=NA,lp=NA,le=NA,
+                   var.ap=10, var.ae=10, burn_it=1000, eval_it=1000, 
+                   main_burn=10000, main_eval=2000, estimate_hyper=FALSE,
+                   EMit_lim=100, EM_eval=100, parallel=TRUE,ncore=NA,
+                   samplerGap=10, min_samples_per_core=200){
+            if(is.list(Signatures)){
+              Nsign<-Signatures@Nsign
+              tested_n<-Signatures@tested_n
+              HH<-Signatures@Hyper_paths
+              Signatures<-Signatures@SignExposures
+              BestHH<-HH[[which(tested_n==Nsign)]]
+              best_hyperparam<-BestHH[NROW(BestHH),]
+              if(is.na(ap)) ap<-best_hyperparam$ap
+              if(is.na(bp)) bp<-best_hyperparam$bp
+              if(is.na(ae)) ae<-best_hyperparam$ae
+              if(is.na(be)) be<-best_hyperparam$be
+              if(is.na(lp)) lp<-best_hyperparam$lp
+              if(is.na(le)) le<-best_hyperparam$le
+              eh<-estimate_hyper
+            }else if(class(Signatures)=="SignExp"){
+              if(is.na(ap)) ap<-1
+              if(is.na(bp)) bp<-1
+              if(is.na(ae)) ae<-1
+              if(is.na(be)) be<-1
+              if(is.na(lp)) lp<-1
+              if(is.na(le)) le<-1
+              eh<-TRUE
+            }else{ 
+              stop("Signatures must be a signeR output or a SignExp object.\n")
+            }
+            if(!Signatures@normalized) Signatures<-Normalize(Signatures)
+            dp <- dim(Signatures@Sign) #[i,n,r]
+            de <- dim(Signatures@Exp) #[n,j,r]
+            i<-dp[[1]]; n<-dp[[2]]; j<-de[[2]]; r<-de[[3]]
+            Ps <- Signatures@Sign
+            Es <- Signatures@Exp
+            P<-Ps[,,r]
+            E<-Es[,,r]
+            dn<-dim(NewCounts)
+            newsamp<-dn[[2]]
+            fixP<-!updateSigs
+            keep_param<-TRUE ############# FALSE would make no difference
+            #Estimate new expositions based on P
+            NewExp<-matrix(0,n,newsamp)
+            for(k in 1:newsamp){
+              found<-NewCounts[,k]
+              opp<-NewOpp[,k]
+              RSS0<-function(vet){
                 expected<-Ps%*%matrix(vet,n,1) * opp
                 return( sum( expected+lgamma(found+1)-found*log(expected) ) )
                 
+              }
+              Fit0 <- nloptr(x0=rep(1,n), eval_f = RSS0, lb=rep(0,n), 
+                             opts = list(algorithm = "NLOPT_LN_SBPLX", 
+                                         xtol_rel=1e-200, xtol_abs=1e-200, 
+                                         maxeval = 1e10))
+              NewExp[,k]<-as.vector(Fit0$solution)
             }
-            Fit0 <- nloptr(x0=rep(1,n), eval_f = RSS0, lb=rep(0,n), 
-                opts = list(algorithm = "NLOPT_LN_SBPLX", xtol_rel=1e-200, 
-                    xtol_abs=1e-200, maxeval = 1e10))
-            NewExp[,k]<-as.vector(Fit0$solution)
-        }
-        #proceed with sampler, keeping or changing P according to updateSigs
-        if(!is.na(originalCounts[1])){
-            M<-cbind(originalCounts,NewCounts)
-            E<-cbind(E,NewExp)
-        }else{
-            M<-NewCounts
-            E<-NewExp
-        }            
-        if(!is.na(originalOpp[1])){
-            W<-cbind(originalOpp,NewOpp)
-        }else{
-            W<-NewOpp
-        }
-        #Initial guess for Z
-        Z  <- array(0,dim=c('i'=i,'j'=j,'n'=n))
-        PE <- P %*% E
-        Fi <- array(0,dim=c('i'=i,'j'=j,'n'=n))
-        for (m in 1:n){
-            Fi[,,'n'=m] <- (P[,m,drop=FALSE] %*% E[m,,drop=FALSE])/PE
-        }
-        for (s in 1:i){
-            Z['i'=s,,] <- t(sapply(1:j,function(g){
+            #proceed with sampler, keeping or changing P according to updateSigs
+            if(!is.na(originalCounts[1])){
+              M<-cbind(originalCounts,NewCounts)
+              E<-cbind(E,NewExp)
+            }else{
+              M<-NewCounts
+              E<-NewExp
+            }            
+            if(!is.na(originalOpp[1])){
+              W<-cbind(originalOpp,NewOpp)
+            }else{
+              W<-NewOpp
+            }
+            #Initial guess for Z
+            Z  <- array(0,dim=c('i'=i,'j'=j,'n'=n))
+            PE <- P %*% E
+            Fi <- array(0,dim=c('i'=i,'j'=j,'n'=n))
+            for (m in 1:n){
+              Fi[,,'n'=m] <- (P[,m,drop=FALSE] %*% E[m,,drop=FALSE])/PE
+            }
+            for (s in 1:i){
+              Z['i'=s,,] <- t(sapply(1:j,function(g){
                 rmultinom(1, size = M[s,g], prob = as.vector(Fi['i'=s,'j'=g,]))
-            }))
-        }
-        rm(PE,Fi)
-        if (fixP){ 
-            n<-NCOL(P)
-            Ap <- matrix(0,i,n)
-            Bp <- matrix(0,i,n) 
-            apvet<-NA; bpvet<-NA; lpvet<-NA 
-        }else{
-            Ap <- matrix(rexp(i*n,rate=lp),i,n)
-            Bp <- matrix(rgamma(i*n,shape=ap,rate=bp),i,n)
-            apvet<-ap; bpvet<-bp; lpvet<-lp 
-        }
-        Ae <- matrix(rexp(n*j,rate=le),n,j)
-        Be <- matrix(rgamma(n*j,shape=ae,rate=be),n,j)
-        aevet<-ae; bevet<-be; levet<-le
-        if(estimate_hyper){#Hyperparameter optimization
-            burn_HO<-burn_it
-            upgrade<-100
-            it<-0
-            cat("EM algorithm:\n")
-            progbar <- txtProgressBar(style=3)
-            while(upgrade>0.05 & it < EMit_lim){
-                if(parallel){
-                    SamplesHO <-GibbsSamplerParallel(M,W,Z,P,E,Ap,Bp,Ae,Be,
-                        ap,bp,ae,be,lp,le,
-                        var.ap,var.ae,burn=burn_HO,eval=EM_eval,
-                        Pfixed=fixP,Zfixed=FALSE,Thetafixed=FALSE,
-                        Afixed=FALSE,keep_par=TRUE,n_cor=ncore,
-                        sGap=samplerGap, min_samples_c=min_samples_per_core)
-                }else{
-                    SamplesHO <-GibbsSamplerCpp(M,W,Z,P,E,Ap,Bp,Ae,Be,
-                        ap,bp,ae,be,lp,le,
-                        var.ap,var.ae,burn=burn_HO,eval=EM_eval,
-                        Pfixed=fixP,Zfixed=FALSE,Thetafixed=FALSE,
-                        Afixed=FALSE,keep_par=TRUE)
-                }
+              }))
+            }
+            rm(PE,Fi)
+            if (fixP){ 
+              n<-NCOL(P)
+              Ap <- matrix(0,i,n)
+              Bp <- matrix(0,i,n) 
+              apvet<-NA; bpvet<-NA; lpvet<-NA 
+            }else{
+              Ap <- matrix(rexp(i*n,rate=lp),i,n)
+              Bp <- matrix(rgamma(i*n,shape=ap,rate=bp),i,n)
+              apvet<-ap; bpvet<-bp; lpvet<-lp 
+            }
+            Ae <- matrix(rexp(n*j,rate=le),n,j)
+            Be <- matrix(rgamma(n*j,shape=ae,rate=be),n,j)
+            aevet<-ae; bevet<-be; levet<-le
+            if(estimate_hyper){#Hyperparameter optimization
+              burn_HO<-burn_it
+              upgrade<-100
+              it<-0
+              cat("EM algorithm:\n")
+              progbar <- txtProgressBar(style=3)
+              while(upgrade>0.05 & it < EMit_lim){
+                SamplesHO <-GibbsSamplerCpp(M,W,Z,P,E,Ap,Bp,Ae,Be,
+                                            ap,bp,ae,be,lp,le,
+                                            var.ap,var.ae,burn=burn_HO,
+                                            eval=EM_eval, Pfixed=fixP,
+                                            Zfixed=FALSE,Thetafixed=FALSE,
+                                            Afixed=FALSE,keep_par=TRUE)
                 Zs <- SamplesHO[[1]]
                 Ps <- SamplesHO[[3]]
                 Es <- SamplesHO[[4]]
@@ -464,86 +465,78 @@ setMethod("AddSamples",signature(Signatures="ANY", originalCounts="ANY",
                 bevet<-c(bevet,be)
                 levet<-c(levet,le)
                 if(fixP){
-                    upgrade<-max(abs(c(ae-aeold,be-beold,le-leold)))
+                  upgrade<-max(abs(c(ae-aeold,be-beold,le-leold)))
                 }else{
-                    P <- Ps[,,as.numeric(dim(Ps)[3])]
-                    dim(P)<-dim(Ps)[1:2]
-                    Ap <- Aps[,,as.numeric(dim(Aps)[3])]
-                    dim(Ap)<-dim(Aps)[1:2]
-                    Bp <- Bps[,,as.numeric(dim(Bps)[3])]
-                    dim(Bp)<-dim(Bps)[1:2]
-                    apold <- ap; bpold <- bp; lpold <- lp 
-                    New_param<-EstimateParameters(Aps,Bps,apold,bpold)
-                    ap<-New_param[[1]]
-                    bp<-New_param[[2]]
-                    lp<-New_param[[3]]
-                    apvet<-c(apvet,ap)
-                    bpvet<-c(bpvet,bp)
-                    lpvet<-c(lpvet,lp)
-                    upgrade<-max(abs(c(ap-apold,bp-bpold,ae-aeold,
-                        be-beold,lp-lpold,le-leold)))
+                  P <- Ps[,,as.numeric(dim(Ps)[3])]
+                  dim(P)<-dim(Ps)[1:2]
+                  Ap <- Aps[,,as.numeric(dim(Aps)[3])]
+                  dim(Ap)<-dim(Aps)[1:2]
+                  Bp <- Bps[,,as.numeric(dim(Bps)[3])]
+                  dim(Bp)<-dim(Bps)[1:2]
+                  apold <- ap; bpold <- bp; lpold <- lp 
+                  New_param<-EstimateParameters(Aps,Bps,apold,bpold)
+                  ap<-New_param[[1]]
+                  bp<-New_param[[2]]
+                  lp<-New_param[[3]]
+                  apvet<-c(apvet,ap)
+                  bpvet<-c(bpvet,bp)
+                  lpvet<-c(lpvet,lp)
+                  upgrade<-max(abs(c(ap-apold,bp-bpold,ae-aeold,
+                                     be-beold,lp-lpold,le-leold)))
                 }                
                 it <- it+1
                 burn_HO<-200
                 setTxtProgressBar(progbar, it/EMit_lim)
+              }
+              setTxtProgressBar(progbar, 1)
+              cat("\n")
             }
-            setTxtProgressBar(progbar, 1)
-            cat("\n")
-        }
-        testedn<-c(n)
-        HH<-list(data.frame('ap'=apvet,'bp'=bpvet,'ae'=aevet,
-            'be'=bevet,'lp'=lpvet,'le'=levet))
-        #if updateSigNum, test sampler with one more signature (or one less?).
-        if(updateSigs & updateSigNum){
-            #Sampler with original sigs
-            if(n==1){
+            testedn<-c(n)
+            HH<-list(data.frame('ap'=apvet,'bp'=bpvet,'ae'=aevet,
+                                'be'=bevet,'lp'=lpvet,'le'=levet))
+            #if updateSigNum, test sampler with one more signature or one less?.
+            if(updateSigs & updateSigNum){
+              #Sampler with original sigs
+              if(n==1){
                 cat("Running  Gibbs sampler for 1 signature...")
-            }else{
+              }else{
                 cat(paste0("Running  Gibbs sampler for ",n," signatures...",
-                    collapse=""))
-            }
-            if(parallel){
-                Samples <- GibbsSamplerParallel(M,W,Z,P,E,Ap,Bp,Ae,Be,
-                    ap,bp,ae,be,lp,le,
-                    var.ap,var.ae,burn=burn_it,eval=eval_it,
-                    Pfixed=fixP,Zfixed=FALSE,Thetafixed=FALSE,Afixed=FALSE,
-                    keep_par=keep_param, n_cor=ncore, sGap=samplerGap, 
-                    min_samples_c=min_samples_per_core)
-            }else{
-                Samples <- GibbsSamplerCpp(M,W,Z,P,E,Ap,Bp,Ae,Be,
-                    ap,bp,ae,be,lp,le,
-                    var.ap,var.ae,burn=burn_it,eval=eval_it,
-                    Pfixed=fixP,Zfixed=FALSE,Thetafixed=FALSE,Afixed=FALSE,
-                    keep_par=keep_param)
-            }
-            if(keep_param){
+                           collapse=""))
+              }
+              Samples <- GibbsSamplerCpp(M,W,Z,P,E,Ap,Bp,Ae,Be,
+                                         ap,bp,ae,be,lp,le,
+                                         var.ap,var.ae,burn=burn_it,
+                                         eval=eval_it, Pfixed=fixP,
+                                         Zfixed=FALSE,Thetafixed=FALSE,
+                                         Afixed=FALSE, keep_par=keep_param)
+              if(keep_param){
                 Zs <- Samples[[1]] 
                 if (!fixP){
-                    Aps <- Samples[[5]] 
-                    Bps <- Samples[[6]] 
+                  Aps <- Samples[[5]] 
+                  Bps <- Samples[[6]] 
                 }
                 Aes <- Samples[[7]]
                 Bes <- Samples[[8]]
-            }
-            Ps <- Samples[[3]]
-            Es <- Samples[[4]]
-            rm(Samples)
-            # BICs #
-            lgM<-lgamma(M+1)
-            loglikes<-sapply(1:eval_it,function(r){
+              }
+              Ps <- Samples[[3]]
+              Es <- Samples[[4]]
+              rm(Samples)
+              # BICs #
+              lgM<-lgamma(M+1)
+              loglikes<-sapply(1:eval_it,function(r){
                 PE <- (matrix(as.vector(Ps[,,'r'=r]),i,n) %*% 
-                        matrix(as.vector(Es[,,'r'=r]),n,j))*W
+                         matrix(as.vector(Es[,,'r'=r]),n,j))*W
                 return(sum(M*log(PE)-lgM-PE))
-            }) #loglike is the sum of log-densities of Poisson distributions
-            Bics <- 2*loglikes -n*(i+j)*log(j)
-            testBics<-list(Bics)
-            update<-TRUE
-            while(update){
+              }) #loglike is the sum of log-densities of Poisson distributions
+              Bics <- 2*loglikes -n*(i+j)*log(j)
+              testBics<-list(Bics)
+              update<-TRUE
+              while(update){
                 Expect<-Phat%*%Ehat
                 Mres<-apply(M-Expect,c(1,2),function(x){max(x,0)})
                 Extra_run<-eBayesNMF(Mres,W,n=1,ap,bp,ae,be,lp,le,
-                    var.ap,var.ae,burn_it=burn_it,eval_it=eval_it,
-                    estimate_hyper=FALSE)
+                                     var.ap,var.ae,burn_it=burn_it,
+                                     eval_it=eval_it, estimate_hyper=FALSE)
                 ExtraP<-Extra_run[[1]]
                 ExtraE<-Extra_run[[2]]
                 P2<-cbind(Phat,ExtraP)
@@ -554,12 +547,12 @@ setMethod("AddSamples",signature(Signatures="ANY", originalCounts="ANY",
                 PE <- P2 %*% E2
                 Fi <- array(0,dim=c('i'=i,'j'=j,'n'=n2))
                 for (m in 1:n2){
-                    Fi[,,'n'=m] <- (P2[,m,drop=FALSE] %*% E2[m,,drop=FALSE])/PE
+                  Fi[,,'n'=m] <- (P2[,m,drop=FALSE] %*% E2[m,,drop=FALSE])/PE
                 }
                 for (s in 1:i){
-                    Z['i'=s,,] <- t(sapply(1:j,function(g){
-                        rmultinom(1,size=M[s,g],prob=as.vector(Fi['i'=s,'j'=g,]))
-                    }))
+                  Z['i'=s,,] <- t(sapply(1:j,function(g){
+                    rmultinom(1,size=M[s,g],prob=as.vector(Fi['i'=s,'j'=g,]))
+                  }))
                 }
                 rm(PE,Fi)
                 Ap2 <- matrix(rexp(i*n2,rate=lp),i,n2)
@@ -569,202 +562,178 @@ setMethod("AddSamples",signature(Signatures="ANY", originalCounts="ANY",
                 Be2 <- matrix(rgamma(n2*j,shape=ae,rate=be),n2,j)
                 aevet<-ae; bevet<-be; levet<-le
                 if(estimate_hyper){#Hyperparameter optimization
-                    burn_HO<-burn_it
-                    upgrade<-100
-                    it<-0
-                    cat("EM algorithm:\n")
-                    progbar <- txtProgressBar(style=3)
-                    while(upgrade>0.05 & it < EMit_lim){
-                        if(parallel){
-                            SamplesHO <-GibbsSamplerParallel(M,W,Z,P,E,Ap,Bp,Ae,Be,
-                                ap,bp,ae,be,lp,le,
-                                var.ap,var.ae,burn=burn_HO,eval=EM_eval,
-                                Pfixed=fixP,Zfixed=FALSE,Thetafixed=FALSE,
-                                Afixed=FALSE,keep_par=TRUE,n_cor=ncore,
-                                sGap=samplerGap, min_samples_c=min_samples_per_core)
-                        }else{
-                            SamplesHO <-GibbsSamplerCpp(M,W,Z,P,E,Ap,Bp,Ae,Be,
-                                ap,bp,ae,be,lp,le,
-                                var.ap,var.ae,burn=burn_HO,eval=EM_eval,
-                                Pfixed=fixP,Zfixed=FALSE,Thetafixed=FALSE,
-                                Afixed=FALSE,keep_par=TRUE)
-                        }
-                        Zs <- SamplesHO[[1]]
-                        Ps <- SamplesHO[[3]]
-                        Es <- SamplesHO[[4]]
-                        Aps <- SamplesHO[[5]]
-                        Bps <- SamplesHO[[6]]
-                        Aes <- SamplesHO[[7]]
-                        Bes <- SamplesHO[[8]]
-                        Z <- Zs[,,,as.numeric(dim(Zs)[4])]
-                        dim(Z)<-dim(Zs)[1:3]
-                        E <- Es[,,as.numeric(dim(Es)[3])]
-                        dim(E)<-dim(Es)[1:2]
-                        Ae <- Aes[,,as.numeric(dim(Aes)[3])]
-                        dim(Ae)<-dim(Aes)[1:2]
-                        Be <- Bes[,,as.numeric(dim(Bes)[3])]
-                        dim(Be)<-dim(Bes)[1:2]
-                        aeold <- ae; beold <- be; leold <- le
-                        New_param<-EstimateParameters(Aes,Bes,aeold,beold)
-                        ae<-New_param[[1]]
-                        be<-New_param[[2]]
-                        le<-New_param[[3]]
-                        aevet<-c(aevet,ae)
-                        bevet<-c(bevet,be)
-                        levet<-c(levet,le)
-                        if(fixP){
-                            upgrade<-max(abs(c(ae-aeold,be-beold,le-leold)))
-                        }else{
-                            P <- Ps[,,as.numeric(dim(Ps)[3])]
-                            dim(P)<-dim(Ps)[1:2]
-                            Ap <- Aps[,,as.numeric(dim(Aps)[3])]
-                            dim(Ap)<-dim(Aps)[1:2]
-                            Bp <- Bps[,,as.numeric(dim(Bps)[3])]
-                            dim(Bp)<-dim(Bps)[1:2]
-                            apold <- ap; bpold <- bp; lpold <- lp 
-                            New_param<-EstimateParameters(Aps,Bps,apold,bpold)
-                            ap<-New_param[[1]]
-                            bp<-New_param[[2]]
-                            lp<-New_param[[3]]
-                            apvet<-c(apvet,ap)
-                            bpvet<-c(bpvet,bp)
-                            lpvet<-c(lpvet,lp)
-                            upgrade<-max(abs(c(ap-apold,bp-bpold,ae-aeold,
-                                be-beold,lp-lpold,le-leold)))
-                        }                
-                        it <- it+1
-                        burn_HO<-200
-                        setTxtProgressBar(progbar, it/EMit_lim)
-                    }
-                    setTxtProgressBar(progbar, 1)
-                    cat("\n")
+                  burn_HO<-burn_it
+                  upgrade<-100
+                  it<-0
+                  cat("EM algorithm:\n")
+                  progbar <- txtProgressBar(style=3)
+                  while(upgrade>0.05 & it < EMit_lim){
+                    SamplesHO <-GibbsSamplerCpp(M,W,Z,P,E,Ap,Bp,Ae,Be,
+                                                ap,bp,ae,be,lp,le,
+                                                var.ap,var.ae,burn=burn_HO,
+                                                eval=EM_eval, Pfixed=fixP,
+                                                Zfixed=FALSE,Thetafixed=FALSE,
+                                                Afixed=FALSE,keep_par=TRUE)
+                    Zs <- SamplesHO[[1]]
+                    Ps <- SamplesHO[[3]]
+                    Es <- SamplesHO[[4]]
+                    Aps <- SamplesHO[[5]]
+                    Bps <- SamplesHO[[6]]
+                    Aes <- SamplesHO[[7]]
+                    Bes <- SamplesHO[[8]]
+                    Z <- Zs[,,,as.numeric(dim(Zs)[4])]
+                    dim(Z)<-dim(Zs)[1:3]
+                    E <- Es[,,as.numeric(dim(Es)[3])]
+                    dim(E)<-dim(Es)[1:2]
+                    Ae <- Aes[,,as.numeric(dim(Aes)[3])]
+                    dim(Ae)<-dim(Aes)[1:2]
+                    Be <- Bes[,,as.numeric(dim(Bes)[3])]
+                    dim(Be)<-dim(Bes)[1:2]
+                    aeold <- ae; beold <- be; leold <- le
+                    New_param<-EstimateParameters(Aes,Bes,aeold,beold)
+                    ae<-New_param[[1]]
+                    be<-New_param[[2]]
+                    le<-New_param[[3]]
+                    aevet<-c(aevet,ae)
+                    bevet<-c(bevet,be)
+                    levet<-c(levet,le)
+                    if(fixP){
+                      upgrade<-max(abs(c(ae-aeold,be-beold,le-leold)))
+                    }else{
+                      P <- Ps[,,as.numeric(dim(Ps)[3])]
+                      dim(P)<-dim(Ps)[1:2]
+                      Ap <- Aps[,,as.numeric(dim(Aps)[3])]
+                      dim(Ap)<-dim(Aps)[1:2]
+                      Bp <- Bps[,,as.numeric(dim(Bps)[3])]
+                      dim(Bp)<-dim(Bps)[1:2]
+                      apold <- ap; bpold <- bp; lpold <- lp 
+                      New_param<-EstimateParameters(Aps,Bps,apold,bpold)
+                      ap<-New_param[[1]]
+                      bp<-New_param[[2]]
+                      lp<-New_param[[3]]
+                      apvet<-c(apvet,ap)
+                      bpvet<-c(bpvet,bp)
+                      lpvet<-c(lpvet,lp)
+                      upgrade<-max(abs(c(ap-apold,bp-bpold,ae-aeold,
+                                         be-beold,lp-lpold,le-leold)))
+                    }                
+                    it <- it+1
+                    burn_HO<-200
+                    setTxtProgressBar(progbar, it/EMit_lim)
+                  }
+                  setTxtProgressBar(progbar, 1)
+                  cat("\n")
                 }
                 if(n2==1){
-                    cat("Running  Gibbs sampler for 1 signature...")
+                  cat("Running  Gibbs sampler for 1 signature...")
                 }else{
-                    cat(paste0("Running  Gibbs sampler for ",n2," signatures...",
-                        collapse=""))
+                  cat(paste0("Running  Gibbs sampler for ",n2," signatures...",
+                             collapse=""))
                 }
-                if(parallel){
-                    Samples <- GibbsSamplerParallel(M,W,Z,P2,E2,Ap2,Bp2,Ae2,Be2,
-                        ap,bp,ae,be,lp,le,
-                        var.ap,var.ae,burn=burn_it,eval=eval_it,
-                        Pfixed=FALSE,Zfixed=FALSE,Thetafixed=FALSE,Afixed=FALSE,
-                        keep_par=keep_param, n_cor=ncore, sGap=samplerGap, 
-                        min_samples_c=min_samples_per_core)
-                }else{
-                    Samples <- GibbsSamplerCpp(M,W,Z,P2,E2,Ap2,Bp2,Ae2,Be2,
-                        ap,bp,ae,be,lp,le,
-                        var.ap,var.ae,burn=burn_it,eval=eval_it,
-                        Pfixed=FALSE,Zfixed=FALSE,Thetafixed=FALSE,Afixed=FALSE,
-                        keep_par=keep_param)
-                }
+                Samples <- GibbsSamplerCpp(M,W,Z,P2,E2,Ap2,Bp2,Ae2,Be2,
+                                           ap,bp,ae,be,lp,le,
+                                           var.ap,var.ae,burn=burn_it,
+                                           eval=eval_it, Pfixed=FALSE,
+                                           Zfixed=FALSE,Thetafixed=FALSE,
+                                           Afixed=FALSE, keep_par=keep_param)
                 Ps2 <- Samples[[3]]
                 Es2 <- Samples[[4]]
                 rm(Samples)
                 # BICs #
                 lgM<-lgamma(M+1)
                 loglikes<-sapply(1:eval_it,function(r){
-                    PE <- (matrix(as.vector(Ps2[,,'r'=r]),i,n2) %*% 
-                            matrix(as.vector(Es2[,,'r'=r]),n2,j))*W
-                    return(sum(M*log(PE)-lgM-PE))
+                  PE <- (matrix(as.vector(Ps2[,,'r'=r]),i,n2) %*% 
+                           matrix(as.vector(Es2[,,'r'=r]),n2,j))*W
+                  return(sum(M*log(PE)-lgM-PE))
                 }) #loglike is the sum of log-densities of Poisson distributions
                 Bics2 <- 2*loglikes -n2*(i+j)*log(j)
                 testedn<-c(testedn,n2)
                 HH<-c(HH,list(data.frame('ap'=apvet,'bp'=bpvet,'ae'=aevet,
-                    'be'=bevet,'lp'=lpvet,'le'=levet)))
+                                         'be'=bevet,'lp'=lpvet,'le'=levet)))
                 testBics<-c(testBics,list(Bics2))
                 if(BICsignificance){ #Compare Bics
-                    kt<-kruskal.test(list(Bics,Bics2))
-                    sig<-kt$p.value>=critical_p
+                  kt<-kruskal.test(list(Bics,Bics2))
+                  sig<-kt$p.value>=critical_p
                 }else{
-                    sig<-TRUE
+                  sig<-TRUE
                 }
                 update <- sig & median(Bics2)>median(Bics) 
                 if(update){
-                    n<-n2
-                    P<-P2
-                    E<-E2
-                    Ap<-Ap2
-                    Ae<-Ae2
-                    Bp<-Bp2
-                    Be<-Be2
-                    #ap,bp,ae,be,le,lp are updated already.
-                    SE<-SignExpConstructor(Ps,Es)
-                    Phat<-Median_sign(SE)
-                    Ehat<-Median_exp(SE)
+                  n<-n2
+                  P<-P2
+                  E<-E2
+                  Ap<-Ap2
+                  Ae<-Ae2
+                  Bp<-Bp2
+                  Be<-Be2
+                  #ap,bp,ae,be,le,lp are updated already.
+                  SE<-SignExpConstructor(Ps,Es)
+                  Phat<-Median_sign(SE)
+                  Ehat<-Median_exp(SE)
                 }
+              }
             }
-        }
-        ################# Final run #################
-        if(n==1){
-            cat("Running  Gibbs sampler for 1 signature...")
-        }else{
-            cat(paste0("Running  Gibbs sampler for ",n," signatures...",
-                collapse=""))
-        }
-        if(parallel){
-            Samples <- GibbsSamplerParallel(M,W,Z,P,E,Ap,Bp,Ae,Be,
-                ap,bp,ae,be,lp,le,
-                var.ap,var.ae,burn=main_burn,eval=main_eval,
-                Pfixed=fixP,Zfixed=FALSE,Thetafixed=FALSE,Afixed=FALSE,
-                keep_par=keep_param, n_cor=ncore, sGap=samplerGap, 
-                min_samples_c=min_samples_per_core)
-        }else{
+            ################# Final run #################
+            if(n==1){
+              cat("Running  Gibbs sampler for 1 signature...")
+            }else{
+              cat(paste0("Running  Gibbs sampler for ",n," signatures...",
+                         collapse=""))
+            }
             Samples <- GibbsSamplerCpp(M,W,Z,P,E,Ap,Bp,Ae,Be,
-                ap,bp,ae,be,lp,le,
-                var.ap,var.ae,burn=main_burn,eval=main_eval,
-                Pfixed=fixP,Zfixed=FALSE,Thetafixed=FALSE,Afixed=FALSE,
-                keep_par=keep_param)
-        }
-        if(keep_param){
-            Zs <- Samples[[1]] 
-            if (!fixP){
+                                       ap,bp,ae,be,lp,le,
+                                       var.ap,var.ae,burn=main_burn,
+                                       eval=main_eval, Pfixed=fixP,
+                                       Zfixed=FALSE,Thetafixed=FALSE,
+                                       Afixed=FALSE, keep_par=keep_param)
+            if(keep_param){
+              Zs <- Samples[[1]] 
+              if (!fixP){
                 Aps <- Samples[[5]] 
                 Bps <- Samples[[6]] 
+              }
+              Aes <- Samples[[7]]
+              Bes <- Samples[[8]]
             }
-            Aes <- Samples[[7]]
-            Bes <- Samples[[8]]
-        }
-        Ps <- Samples[[3]]
-        Es <- Samples[[4]]
-        rm(Samples)
-        # BICs #
-        lgM<-lgamma(M+1)
-        loglikes<-sapply(1:eval_it,function(r){
-            PE <- (matrix(as.vector(Ps[,,'r'=r]),i,n) %*% 
-                    matrix(as.vector(Es[,,'r'=r]),n,j))*W
-            return(sum(M*log(PE)-lgM-PE))
-        }) #loglike is the sum of log-densities of Poisson distributions
-        Bics <- 2*loglikes -n*(i+j)*log(j)
-        SE<-SignExpConstructor(Ps,Es)
-        Phat<-Median_sign(SE)
-        Ehat<-Median_exp(SE)
-        if(!fixP){ #Ordering by total exposure.
-            totalexp<-rowSums(Ehat)*colSums(Phat) 
-            ord<-order(totalexp,decreasing=TRUE)
-            Ps<-Ps[,ord,,drop=FALSE]
-            Es<-Es[ord,,,drop=FALSE]
+            Ps <- Samples[[3]]
+            Es <- Samples[[4]]
+            rm(Samples)
+            # BICs #
+            lgM<-lgamma(M+1)
+            loglikes<-sapply(1:eval_it,function(r){
+              PE <- (matrix(as.vector(Ps[,,'r'=r]),i,n) %*% 
+                       matrix(as.vector(Es[,,'r'=r]),n,j))*W
+              return(sum(M*log(PE)-lgM-PE))
+            }) #loglike is the sum of log-densities of Poisson distributions
+            Bics <- 2*loglikes -n*(i+j)*log(j)
             SE<-SignExpConstructor(Ps,Es)
             Phat<-Median_sign(SE)
             Ehat<-Median_exp(SE)
-        }
-        if(!(updateSigs & updateSigNum)){
-            testBics<-list(Bics)
-        }
-        # Output #
-        if(is.list(Signatures)){
-            result<-list(Nsign=n,
-                tested_n=testedn,
-                Test_BICs=testBics,
-                Phat=Phat,
-                Ehat=Ehat,
-                SignExposures=SE,
-                BICs=Bics,
-                Hyper_paths=HH)
-        }else{
-            result<-SE
-        }
-        return(result)
-    }
+            if(!fixP){ #Ordering by total exposure.
+              totalexp<-rowSums(Ehat)*colSums(Phat) 
+              ord<-order(totalexp,decreasing=TRUE)
+              Ps<-Ps[,ord,,drop=FALSE]
+              Es<-Es[ord,,,drop=FALSE]
+              SE<-SignExpConstructor(Ps,Es)
+              Phat<-Median_sign(SE)
+              Ehat<-Median_exp(SE)
+            }
+            if(!(updateSigs & updateSigNum)){
+              testBics<-list(Bics)
+            }
+            # Output #
+            if(is.list(Signatures)){
+              result<-list(Nsign=n,
+                           tested_n=testedn,
+                           Test_BICs=testBics,
+                           Phat=Phat,
+                           Ehat=Ehat,
+                           SignExposures=SE,
+                           BICs=Bics,
+                           Hyper_paths=HH)
+            }else{
+              result<-SE
+            }
+            return(result)
+          }
 )

@@ -348,7 +348,8 @@ setMethod("SignLRT",signature(Signatures="SignExp",
 #Exposure correlation analysis
 #######################################
 setGeneric("ExposureCorrelation",
-           def=function(Exposures,feature,method="spearman",cutoff_pvalue=0.05,quant=0.5,
+           def=function(Exposures,feature,method="spearman",cutoff_pvalue=0.05,
+                        quant=0.5,
                         plot_to_file=FALSE, 
                         file=NA_character_,
                         colors=NA_character_,...){
@@ -528,17 +529,21 @@ setMethod("ExposureCorrelation",signature(Exposures="SignExp",feature="numeric",
                   labs(x="",y="-log(pvalue)")
               #######################
               #Correlation plots
-              md<-data.frame(Sig=rep(Exposures@signames[signif_signatures],times=j),
-                             exposure=as.vector(Em[signif_signatures,]),
-                             Feature=rep(feature,each=sum(signif_signatures)))
-              g2<-ggplot(md, aes(x=Feature,y=exposure)) + 
+              if(any(signif_signatures)){
+                md<-data.frame(Sig=rep(Exposures@signames[signif_signatures],times=j),
+                               exposure=as.vector(Em[signif_signatures,]),
+                               Feature=rep(feature,each=sum(signif_signatures)))
+                g2<-ggplot(md, aes(x=Feature,y=exposure)) + 
                   geom_point(size=1, shape=19, show.legend = FALSE) +
                   stat_smooth(method="lm", se=FALSE,col="red") +
                   facet_wrap(vars(Sig),nrow = ceiling(sum(signif_signatures)/2),scales="free") +
                   theme_bw()+
                   theme(axis.text.x=element_text(angle=0,vjust=.5,hjust=0,face="bold")) + 
                   labs(x="Feature",y="Exposure")
-              figure <- ggarrange(g1,g2, ncol = 1, nrow = 2)
+                figure <- ggarrange(g1,g2, ncol = 1, nrow = 2)
+              }else{
+                figure <- g1
+              }
               if(plot_to_file){
                   if(length(grep("\\.pdf$",file))==0){file<-paste(file,"pdf",sep=".")}
                   pdf(file,width=7,height=7)

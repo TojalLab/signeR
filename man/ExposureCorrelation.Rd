@@ -64,7 +64,7 @@ signature.}
     main_eval=10, main_burn=10)
 }
 # feature vector, with one value for each sample
-my_feature <- rnorm(30,100,20)
+my_feature <- rnorm(30,100,20)+signatures$SignExposures@Exp[1,,1]
 
 Exp_corr <- ExposureCorrelation(signatures$SignExposures,feature=my_feature)
 
