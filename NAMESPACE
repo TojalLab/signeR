@@ -6,9 +6,11 @@ exportMethods(setSamples, setMutations, Normalize,
     Average_sign, Median_sign, Average_exp, Median_exp,
     Paths, SignPlot, SignHeat, ExposureBoxplot,
     ExposureBarplot, ExposureHeat,
-    DiffExp, SignLRT, ExposureSurvival, ExposureSurvModel,
+    DiffExp, SignLRT, 
+    ExposureClassify, ExposureClassifyCV,
     ExposureCorrelation, ExposureGLM,
-    ExposureClassify, FuzzyClustExp, HClustExp)
+    ExposureSurvival, ExposureSurvModel,
+    FuzzyClustExp, HClustExp)
 export(genOpportunityFromGenome, genCountMatrixFromVcf, signeR,
     BICboxplot, eBayesNMF, GibbsSamplerCpp, FuzzyClusterCpp,
     Optimal_sigs,CmeansExp,PBMFindex)
@@ -73,3 +75,4 @@ importFrom("ppclust", "fcm", "pcm", "fpcm")
 importFrom("clue", "solve_LSAP")
 importFrom("ggpubr","ggarrange")
 importFrom("rtracklayer", "import")
+

@@ -52,7 +52,7 @@ A list with the following items:
     main_eval=10, main_burn=10)
 }
 
-my_feature <- rnorm(30,100,20)
+my_feature <- rnorm(30,100,20)+signatures$SignExposures@Exp[1,,1]
 EGlm <- ExposureGLM(signatures$SignExposures, feature=my_feature)
 
 # see also

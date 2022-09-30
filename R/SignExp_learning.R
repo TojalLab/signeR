@@ -221,7 +221,7 @@ setMethod("ExposureClassify",signature(signexp_obj="ANY",labels="character",
                   }
                   result_final<-result
                   result_final[winner_freq < min_agree] <- "undefined"
-                  colnames(Freqs)<-paste(testsamples,result_final,sep="\n")
+                  colnames(Freqs)<-paste(testsamples,result_final,sep="-")
                   names(result_final)<-testsamples
                   names(winner_freq)<-testsamples
                   #Plots:
@@ -246,12 +246,13 @@ setMethod("ExposureClassify",signature(signexp_obj="ANY",labels="character",
                           dev.new(width=max(5,2*ntest), height=7)
                       }
                   }
+                  Mfreqs<-Mymelt(Freqs) #occurrence counts
+                  colnames(Mfreqs)[3]<-"Frequency"
                   ####### Plotting - ggplot2
-                  g<-ggplot(Mymelt(Freqs), aes(x=Col,y=value,fill=Row)) + 
+                  g<-ggplot(Mfreqs, aes(x=Col,y=Frequency,fill=Row)) + 
                       geom_col(position='stack') +  
-                      theme(axis.text.x=element_text(angle=0,vjust=.5)) + 
+                      theme(axis.text.x=element_text(angle=90,vjust=.5)) + 
                       coord_cartesian(expand=0) + 
-                      scale_y_continuous(labels=percent_format()) + 
                       labs(x="",fill="Class")
                   plot(g)
                   if(plot_to_file){
@@ -261,10 +262,106 @@ setMethod("ExposureClassify",signature(signexp_obj="ANY",labels="character",
                                         "on the current directory.",sep=" ")
                       cat(outmessage,"\n")
                   }
-                  colnames(Freqs)<-paste(testsamples,result_final,sep="-")
-                  return(list(class=result_final,freq=winner_freq,allfreqs=Freqs,
-                              probs=FinalProbs))
+                  colnames(Freqs)<-testsamples
+                  return(list(class=result_final,freq=winner_freq,
+                              allfreqs=Freqs,probs=t(FinalProbs)))
               }
+          }
+)
+
+#Cross validation
+setGeneric("ExposureClassifyCV",
+           def=function(signexp_obj=NA, labels, addata=NA, method="knn", k=3, 
+                        weights=NA, plot_to_file=FALSE, 
+                        file="Classification_CV_barplot.pdf",
+                        colors=NA_character_, min_agree=0.75,
+                        fold=8,...){
+             standardGeneric("ExposureClassifyCV")
+           }
+)
+setMethod("ExposureClassifyCV",signature(signexp_obj="ANY",labels="character",
+                                    addata="ANY",method="ANY", k="ANY", 
+                                    weights="ANY", plot_to_file="ANY",
+                                    file="ANY", colors="ANY", min_agree="ANY",
+                                    fold="ANY"),
+          function(signexp_obj, labels, addata, method, k, weights, 
+                   plot_to_file, file, colors, min_agree,fold,...){
+            cond_NA<-is.na(labels)
+            if(any(cond_NA)){
+              labels<-labels[!cond_NA]
+              signexp<-Reorder_samples(signexp,which(!cond_NA))
+            }
+            classes<-levels(as.factor(labels))
+            counts<-sapply(classes,function(cl){sum(labels==cl)})
+            ntest<-length(labels)
+            sample_group<-rep(0,ntest)
+            #split samples in fold subgroups.
+            for(cl in 1:length(classes)){
+              cond_class<-!is.na(labels) & labels==classes[cl]
+              n_class<-sum(cond_class)
+              thisgroups<-rep(1:fold,ceiling(n_class/fold))[1:n_class]
+              #Random permutation
+              thisgroups<-thisgroups[sample(c(1:n_class),n_class,replace=F)]
+              sample_group[cond_class]<-thisgroups
+            }
+            Classifications<-future_lapply(as.list(1:fold),function(kk){
+              thislabels<-labels
+              thislabels[sample_group==kk]<-NA
+              This_result<-ExposureClassify(signexp_obj, thislabels, addata, 
+                                            method, k, weights, 
+                                            plot_to_file=TRUE, file="tmp.pdf", 
+                                            colors, min_agree,...)
+              return(This_result)              
+            })
+            found_class<-rep(NA,ntest)
+            found_freqs<-rep(0,ntest)
+            Allfound_freqs<-matrix(0,length(classes),ntest)
+            colnames(Allfound_freqs)<-signexp_obj@samples
+            Allfound_probs<-matrix(0,length(classes),ntest)
+            colnames(Allfound_probs)<-signexp_obj@samples
+            for(kk in 1:fold){
+              thiscond<-sample_group==kk
+              This_result<-Classifications[[kk]]
+              found_class[thiscond]<-This_result$class
+              found_freqs[thiscond]<-This_result$freq
+              Allfound_freqs[,thiscond]<-This_result$allfreqs
+              Allfound_probs[,thiscond]<-This_result$probs
+            }
+            rownames(Allfound_freqs)<-rownames(This_result$allfreqs)
+            rownames(Allfound_probs)<-rownames(This_result$probs)
+            Confusion<-data.frame(Truth=labels,Found=found_class)
+            Tb<-table(Confusion)
+            Mfreqs<-Mymelt(Allfound_freqs) #counts
+            colnames(Mfreqs)[3]<-"Frequency"
+            if(plot_to_file){
+              if(length(grep("\\.pdf$",file))==0){
+                file<-paste(file,"pdf",sep=".")
+              }
+              pdf(file,width=max(5,2*ntest),height=7)
+            }else{
+              if(!grepl("pdf|postscript|cairo_|png|tiff|jpeg|bmp",
+                        names(dev.cur()),perl=TRUE)){
+                dev.new(width=max(5,2*ntest), height=7)
+              }
+            }
+            g<-ggplot(Mfreqs, aes(x=Col,y=Frequency,fill=Row)) + 
+              geom_col(position='stack') +  
+              theme(axis.text.x=element_blank(), axis.ticks.x = element_blank()) + 
+              coord_cartesian(expand=0) + 
+              labs(x="Samples",fill="Class")
+            plot(g)
+            if(plot_to_file){
+              dev.off()
+              outmessage<-paste("Crossvalidation results were",
+                                "plotted to the file", file,
+                                "on the current directory.",sep=" ")
+              cat(outmessage,"\n")
+            }
+            return(list(confusion_matrix=Tb,
+                        class=found_class,
+                        freq=found_freqs, #winner frequency
+                        allfreqs=Allfound_freqs,#all frequencies
+                        probs=Allfound_probs))  #all probs found in classifiers
           }
 )
 
@@ -878,8 +975,7 @@ setMethod("ExposureSurvModel",signature(Exposures="SignExp",surv="ANY",
 # Fuzzy Clustering:
 ################################################################################
 setGeneric("FuzzyClustExp",
-    def=function(signexp_obj, Med_exp=NA, 
-                 Clim=NA_integer_,
+    def=function(signexp_obj, Clim=NA_integer_, Med_exp=NA,
                  method.dist="euclidean", method.clust="fcm", relative=FALSE, 
                  m=2, plot_to_file=FALSE, file="FuzzyClustExp.pdf",colored=TRUE,
                  iseed=NA_integer_, try_all=FALSE,fast=TRUE,
@@ -887,12 +983,12 @@ setGeneric("FuzzyClustExp",
         standardGeneric("FuzzyClustExp")
     }
 )
-setMethod("FuzzyClustExp",signature(signexp_obj="SignExp", Med_exp="ANY", 
-    Clim="ANY", method.dist="ANY", method.clust="ANY", 
+setMethod("FuzzyClustExp",signature(signexp_obj="SignExp", Clim="ANY", 
+    Med_exp="ANY", method.dist="ANY", method.clust="ANY", 
     relative="ANY", m="ANY", plot_to_file="ANY",
     file="ANY",colored="ANY",iseed="ANY",try_all="ANY",
     fast="ANY",parplan="ANY"),
-    function(signexp_obj, Med_exp, Clim, method.dist, method.clust,
+    function(signexp_obj, Clim, Med_exp, method.dist, method.clust,
         relative=FALSE, m, plot_to_file, file, colored=TRUE, iseed=NA, 
         try_all=FALSE,fast=TRUE,parplan){
         if(!is.na(iseed)) set.seed(seed = iseed)
@@ -974,7 +1070,7 @@ setMethod("FuzzyClustExp",signature(signexp_obj="SignExp", Med_exp="ANY",
                  angle_col=90,
                  silent=TRUE)
         gt<-ph[[4]]
-        ####################### ggplot2 boxplot
+        ## ggplot2 boxplot
         AllF = Cm$AllFuzzy[ph[[2]]$order,,]
         rownames(AllF) = signexp_obj@samples[ph[[2]]$order]
         colnames(AllF) = paste("Cl",1:NCOL(MF),sep="")
@@ -993,9 +1089,6 @@ setMethod("FuzzyClustExp",signature(signexp_obj="SignExp", Med_exp="ANY",
           }
         }
         ms<-ms[ms_ord,]
-        # rownames(m)<-paste(m$Sample,m$Cluster,sep="_")
-        # comb_rownames<-paste(rep(rownames(AllF),each=NCOL(AllF)),rep(colnames(AllF),NROW(AllF)),sep="_")
-        # m<-m[comb_rownames,]
         if(show_samples){
           g<-ggplot(ms, aes(x=Sample,ymin=q1,lower=q2,middle=q3,upper=q4,ymax=q5)) + 
             geom_boxplot(stat='identity') + 
@@ -1016,11 +1109,10 @@ setMethod("FuzzyClustExp",signature(signexp_obj="SignExp", Med_exp="ANY",
         #plotting 
         final_figure <- ggarrange(gt,g,ncol = 1)
         plot(final_figure)
-        #######################
         if(plot_to_file){
             dev.off()
         }
-        return(Cm)
+        return(Cm[1:3])
     }
 )
 
@@ -1113,62 +1205,6 @@ setMethod("CmeansExp",signature(signexp_obj="SignExp", Med_exp="ANY", C="ANY",
               }else stop("method.clust should be 'km' or 'fcm'!\n")
             }
             Fuzzy<-FuzzyClusterCpp(Es,Med_exp,C,m,0.01)
-            
-            
-            #        if(method.clust=="km"){
-            #            baseclust<-kmeans(t(Med_exp),centers=C)
-            #            basefuzzy<-t(sapply(baseclust$cluster,function(n){
-            #                as.numeric(c(1:C)==n)
-            #            }))
-            #        }else{ 
-            #            if(method.clust=="fcm"){
-            #                baseclust<-ppclust::fcm(t(Med_exp),centers=C)
-            #            }else if (method.clust=="pcm"){
-            #                baseclust<-ppclust::pcm(t(Med_exp),centers=C)
-            #            }else if (method.clust=="fpcm"){
-            #                baseclust<-ppclust::fpcm(t(Med_exp),centers=C)
-            #            }else stop("method.clust should be 'fcm', 'pcm' or 'fpcm'!\n")
-            #            basefuzzy<-baseclust$u
-            #        }
-            #        avail.cores<-as.numeric(availableCores()-1)
-            #        future::plan(parplan,workers=avail.cores)
-            #        Fuzzy2<-apply(Es,3,function(Exposure){
-            #            if(n==1) Exposure <- matrix(as.vector(Exposure),n,j)
-            #            if(relative){ Exposure<-t(t(Exposure)/colSums(Exposure)) }
-            #            colnames(Exposure)<-signexp_obj@samples
-            #            if(method.clust=="km"){
-            #                thisclust<-kmeans(t(Exposure),centers=C)
-            #                thisfuzzy<-t(sapply(thisclust$cluster,function(n){
-            #                    as.numeric(c(1:C)==n)
-            #                rm(thisclust)
-            #                }))
-            #            }else{ 
-            #                if(method.clust=="fcm"){
-            #                    thisclust<-ppclust::fcm(t(Exposure),centers=C)
-            #                }else if (method.clust=="pcm"){
-            #                    thisclust<-ppclust::pcm(t(Exposure),centers=C)
-            #                }else if (method.clust=="fpcm"){
-            #                    thisclust<-ppclust::fpcm(t(Exposure),centers=C)
-            #                }else stop("method.clust should be 'fcm', 'pcm' or 'fpcm'!\n")
-            #                thisfuzzy<-thisclust$u
-            #                rm(thisclust)
-            #            }
-            #            rm(Exposure)
-            #            #hungarian algorithm to assign clusters
-            #            D<-as.matrix(dist(rbind(t(basefuzzy),t(thisfuzzy)),"manhattan")) #L1 distance among clusters
-            #            D<-D[1:C,(1:C)+C]#rows contain basefuzzy clusters, cols thisfuzzy.
-            #            assignment <- clue::solve_LSAP(D)
-            #            rm(D)
-            #            thisfuzzy <- thisfuzzy[,as.vector(assignment)]
-            #            rm(assignment)
-            #            colnames(thisfuzzy)<-colnames(basefuzzy)
-            #            return(thisfuzzy)
-            #        })
-            #        Fuzzy<-array(as.vector(Fuzzy2),dim=c('j'=j, 'c'=C, 'r'=r))
-            #        rownames(Fuzzy)<-rownames(basefuzzy)
-            #        colnames(Fuzzy)<-colnames(basefuzzy)
-            
-            
             Meanfuzzy<-apply(Fuzzy[[1]],c(1,2),mean)
             return(list(Meanfuzzy=Meanfuzzy,
                         AllFuzzy=Fuzzy[[1]],

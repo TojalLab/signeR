@@ -51,13 +51,13 @@ BICboxplot(signeRout, plot_to_file=FALSE, file="Model_selection_BICs.pdf")
     file="Signature_heatmap.pdf", nbins=20, pal="roh", ...)
 \S4method{ExposureBarplot}{SignExp}(signexp_obj, plot_to_file=FALSE,
     file="Exposure_barplot.pdf", col='tan2', threshold=0, relative=FALSE,
-    title="", show_samples=TRUE, ...)
+    title="", show_samples=NA, ...)
 \S4method{ExposureBoxplot}{SignExp}(signexp_obj, plot_to_file=FALSE,
     file="Exposure_boxplot.pdf", col='tan2', threshold=0, show_samples=NA,
     plots_per_page=4, reord=NA, ...)
 \S4method{ExposureHeat}{SignExp}(signexp_obj, plot_to_file=FALSE,
     file="Exposure_heatmap.pdf", nbins=20, pal="roh", distmethod="euclidean",
-        clustermethod="complete", ...)
+        clustermethod="complete", show_samples=NA, ...)
 }
 
 \arguments{
@@ -86,9 +86,9 @@ BICboxplot(signeRout, plot_to_file=FALSE, file="Model_selection_BICs.pdf")
     is "complete", see the documentation of the hclust function for other
     options.}
     \item{relative}{Whether to normalize exposures of each sample so that they
-    sum up to one. Default is TRUE, thus generating a barplot of relative
-    contributions of the signatures to mutation counts. Otherwise, absolute
-    contributions to mutation counts will be displayed.}
+    sum up to one. Default is FALSE, thus generating a plots of absolute
+    contributions of signatures to mutation counts. Otherwise, relative
+    contributions will be displayed.}
     \item{title}{Main title added to the plot. Default is no title.}
     \item{show_samples}{Whether sample names will be shown in the plot.
     Default is NA, which leads to sample names being displayed only when there 
