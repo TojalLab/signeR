@@ -770,12 +770,20 @@ tcgaexplorer <- function(input,
             return(NULL)
           }
           if (!is.null(sigs)) {
-            ExposureClassify(
-              sigs$SignExposures,
-              labels = labels,
-              method = sclas_method#,
-              #kfold=kfold
-            )
+            if (kfold > 1) {
+              ExposureClassifyCV(
+                sigs$SignExposures,
+                labels = labels,
+                method = sclas_method,
+                fold = kfold
+              )
+            } else {
+              ExposureClassify(
+                sigs$SignExposures,
+                labels = labels,
+                method = sclas_method
+              )
+            }
           }
         }
       }
