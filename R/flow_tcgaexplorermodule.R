@@ -178,6 +178,7 @@ tcgaexplorer <- function(input,
                          session,
                          analysis_type,
                          tcga_tumor,
+                         clinical,
                          signatures) {
   ns <- session$ns
 
@@ -197,9 +198,7 @@ tcgaexplorer <- function(input,
     filter_value <- input$filter_value
     feature_row <- input$tcga_clinical_data_rows_selected
 
-    data <- tcga_clinical %>% filter(
-      project == tcga_tumor()
-    )
+    data <- clinical()
 
     if (!is.null(feature) & !is.null(feature_row)) {
       print(paste0("filter data pela feature ", feature))
@@ -207,9 +206,9 @@ tcgaexplorer <- function(input,
       col <- names(data[feature_row + 1])
       feature <- as.list(feature)
 
-      data <- tcga_clinical %>%
+      data <- clinical()
+      data <- data %>%
         filter(
-          project == tcga_tumor(),
           !!as.symbol(col) %in% feature
         )
 
@@ -221,9 +220,9 @@ tcgaexplorer <- function(input,
           "filter data pela feature ", col, " ", filter_op, " ", filter_value
         )
       )
-      data <- tcga_clinical %>%
+      data <- clinical()
+      data <- data %>%
         filter(
-          project == tcga_tumor(),
           get(filter_op)(!!as.symbol(col), filter_value)
         )
     }
@@ -246,16 +245,14 @@ tcgaexplorer <- function(input,
     feature_row <- input$tcga_clinical_data_rows_selected
     if (!is.null(feature) & !is.null(feature_row)) {
       print(paste0("filter sig pela feature ", feature))
-      data <- tcga_clinical %>% filter(
-        project == tcga_tumor()
-      )
+      data <- clinical()
 
       col <- names(data[feature_row + 1])
       feature <- as.list(feature)
 
-      data <- tcga_clinical %>%
+      data <- clinical()
+      data <- data %>%
         filter(
-          project == tcga_tumor(),
           !!as.symbol(col) %in% feature
         )
 
@@ -292,9 +289,7 @@ tcgaexplorer <- function(input,
 
   tcga_clinical_data <- reactive({
     req(tcga_tumor())
-    result <- tcga_clinical %>% filter(
-      project == tcga_tumor()
-    )
+    result <- clinical()
     if (is.data.frame(result)) {
       ff <- rownames(t(result))[-1]
       df <- data.frame()
@@ -367,9 +362,7 @@ tcgaexplorer <- function(input,
   })
 
   feature_class <- reactive({
-    data <- tcga_clinical %>% filter(
-      project == tcga_tumor()
-    )
+    data <- clinical()
     feature_row <- input$tcga_clinical_data_rows_selected
 
     if (!is.null(feature_row)) {
@@ -510,9 +503,8 @@ tcgaexplorer <- function(input,
   )
 
   output$feature_op <- renderUI({
-    data <- tcga_clinical %>% filter(
-      project == tcga_tumor()
-    )
+    data <- clinical()
+    
     feature_row <- input$tcga_clinical_data_rows_selected
     if (!is.null(feature_row)) {
       col <- names(data[feature_row + 1])
