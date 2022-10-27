@@ -2,6 +2,7 @@
 \docType{methods}
 \alias{ExposureCorrelation}
 \alias{ExposureCorrelation,SignExp,numeric-method}
+\alias{ExposureCorrelation,matrix,numeric-method}
 
 \title{Exposure correlation analysis (given a known sample feature)}
 
@@ -12,9 +13,9 @@
 
 \usage{
 \S4method{ExposureCorrelation}{SignExp,numeric}(Exposures, feature,
-    method=spearman, cutoff_pvalue=0.05, quant=0.5,
+    method="spearman", max_instances=200, cutoff_pvalue=0.05, quant=0.5,
     plot_to_file=FALSE, file="ExposureCorrelation_plot.pdf",
-    colors=TRUE)
+    colors=TRUE,...)
 }
 
 \arguments{
@@ -25,11 +26,14 @@
     \item{method}{a character string indicating which correlation 
     coefficient should be used for the test. Options are "pearson", 
     "kendall", or "spearman" (default).}
+    \item{max_instances}{Maximum number of the exposure matrix instances to be 
+    analyzed. If the number of available E instances is bigger then this 
+    parameter, a subset of those will be randomly selected for analysis.}
+    \item{cutoff_pvalue}{threshold for p-values quantile for signatures to be
+    considered as showing significant correlation.}
     \item{quant}{the p-values quantile which, after log-transform, will 
     be used for selecting significantly correlated signatures. Deafult 
     is 0.5, which means the median p-value will be considered.}
-    \item{cutoff_pvalue}{threshold for p-values quantile for signatures to be
-    considered as showing significant correlation.}
     \item{plot_to_file}{Whether to save the plot to the file parameter.
     Default is FALSE.}
     \item{file}{Output file to export p-values boxplot and scatterplots 
@@ -39,6 +43,8 @@
     cutoff line will be colored in red and line segments showing the 
     transformed p-value quantile used for significance evaluation will be 
     colored in blue. Otherwise the plot will be black & white.}
+    \item{...}{additional parameters for test algorithm defined by the method
+parameter.}
 }
 
 \value{

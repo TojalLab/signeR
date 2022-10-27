@@ -2,18 +2,21 @@
 # Classification:
 ################################################################################
 setGeneric("ExposureClassify",
-           def=function(signexp_obj=NA, labels, addata=NA, method="knn", k=3, weights=NA,
+           def=function(signexp_obj=NA, labels, addata=NA, method="knn",
+                        max_instances=200, k=3, weights=NA,
                         plot_to_file=FALSE, file="Classification_barplot.pdf",
-                        colors=NA_character_, min_agree=0.75,...){
+                        colors=TRUE, min_agree=0.75,...){
                standardGeneric("ExposureClassify")
            }
 )
 setMethod("ExposureClassify",signature(signexp_obj="ANY",labels="character",
-                                       addata="ANY",
-                                       method="ANY", k="ANY", weights="ANY", plot_to_file="ANY",
-                                       file="ANY", colors="ANY", min_agree="ANY"),
-          function(signexp_obj, labels, addata, method, k, plot_to_file, file, colors,
-                   min_agree,...){
+                                       addata="ANY", method="ANY", 
+                                       max_instances="ANY", k="ANY", 
+                                       weights="ANY", plot_to_file="ANY",
+                                       file="ANY", colors="ANY", 
+                                       min_agree="ANY"),
+          function(signexp_obj, labels, addata, method, max_instances, k, 
+                   weights, plot_to_file, file, colors, min_agree,...){
               SEinput<-FALSE
               Addinput<-FALSE
               if(class(signexp_obj)=="SignExp"){
@@ -21,6 +24,12 @@ setMethod("ExposureClassify",signature(signexp_obj="ANY",labels="character",
                   dp <- dim(signexp_obj@Sign) #[i,n,r]
                   de <- dim(signexp_obj@Exp) #[n,j,r]
                   i<-dp[[1]]; n<-dp[[2]]; j<-de[[2]]; r<-de[[3]]
+                  if(r > max_instances){
+                    select_instances<-sort(sample(1:r,max_instances,replace=FALSE))
+                    signexp_obj@Exp <-signexp_obj@Exp[,,select_instances]
+                    signexp_obj@Sign<-signexp_obj@Sign[,,select_instances]
+                    r<-max_instances
+                  }
                   SEinput<-TRUE
                   Exposures<-signexp_obj@Exp
               }else if(class(signexp_obj) %in% c("matrix","data.frame")){
@@ -271,25 +280,36 @@ setMethod("ExposureClassify",signature(signexp_obj="ANY",labels="character",
 
 #Cross validation
 setGeneric("ExposureClassifyCV",
-           def=function(signexp_obj=NA, labels, addata=NA, method="knn", k=3, 
+           def=function(signexp_obj=NA, labels, addata=NA, method="knn", 
+                        max_instances=200, k=3, 
                         weights=NA, plot_to_file=FALSE, 
                         file="Classification_CV_barplot.pdf",
-                        colors=NA_character_, min_agree=0.75,
+                        colors=TRUE, min_agree=0.75,
                         fold=8,...){
              standardGeneric("ExposureClassifyCV")
            }
 )
 setMethod("ExposureClassifyCV",signature(signexp_obj="ANY",labels="character",
-                                    addata="ANY",method="ANY", k="ANY", 
+                                    addata="ANY",method="ANY", 
+                                    max_instances="ANY", k="ANY", 
                                     weights="ANY", plot_to_file="ANY",
                                     file="ANY", colors="ANY", min_agree="ANY",
                                     fold="ANY"),
-          function(signexp_obj, labels, addata, method, k, weights, 
-                   plot_to_file, file, colors, min_agree,fold,...){
+          function(signexp_obj, labels, addata, method, max_instances, k, 
+                   weights, plot_to_file, file, colors, min_agree,fold,...){
             cond_NA<-is.na(labels)
             if(any(cond_NA)){
               labels<-labels[!cond_NA]
-              signexp<-Reorder_samples(signexp,which(!cond_NA))
+              signexp_obj<-Reorder_samples(signexp_obj,which(!cond_NA))
+            }
+            dp <- dim(signexp_obj@Sign) #[i,n,r]
+            de <- dim(signexp_obj@Exp) #[n,j,r]
+            i<-dp[[1]]; n<-dp[[2]]; j<-de[[2]]; r<-de[[3]]
+            if(r > max_instances){
+              select_instances<-sort(sample(1:r,max_instances,replace=FALSE))
+              signexp_obj@Exp <-signexp_obj@Exp[,,select_instances]
+              signexp_obj@Sign<-signexp_obj@Sign[,,select_instances]
+              r<-max_instances
             }
             classes<-levels(as.factor(labels))
             counts<-sapply(classes,function(cl){sum(labels==cl)})
@@ -308,7 +328,7 @@ setMethod("ExposureClassifyCV",signature(signexp_obj="ANY",labels="character",
               thislabels<-labels
               thislabels[sample_group==kk]<-NA
               This_result<-ExposureClassify(signexp_obj, thislabels, addata, 
-                                            method, k, weights, 
+                                            method, max_instances, k, weights, 
                                             plot_to_file=TRUE, file="tmp.pdf", 
                                             colors, min_agree,...)
               return(This_result)              
@@ -385,19 +405,20 @@ Mymelt<-function(M){
 # Exposure GLM multiv.:
 ################################################################################
 setGeneric("ExposureGLM",
-           def=function(Exposures,feature,cutoff_pvalue=0.05,quant=0.5,
+           def=function(Exposures, feature, max_instances=200,
+                        cutoff_pvalue=0.05, quant=0.5,
                         plot_to_file=FALSE, 
-                        file=NA_character_,
-                        colors=NA_character_,...){
+                        file="ExposureGLM_plot.pdf",
+                        colors=TRUE,...){
                standardGeneric("ExposureGLM")
            }
 )
 
 setMethod("ExposureGLM",signature(Exposures="matrix",feature="numeric",
-                                  cutoff_pvalue="ANY",plot_to_file="ANY", 
-                                  file="ANY",colors="ANY"),
-          function(Exposures,feature,cutoff_pvalue=0.05, plot_to_file=FALSE,
-                   file="ExposureGLM_plot.pdf",colors=TRUE,...){
+                                  max_instances="ANY", cutoff_pvalue="ANY",
+                                  plot_to_file="ANY", file="ANY",colors="ANY"),
+          function(Exposures, feature, max_instances, cutoff_pvalue, 
+                   plot_to_file, file, colors,...){
               de <- dim(Exposures) #[n,j]
               n<-de[[1]]; j<-de[[2]]
               Es <- data.frame(t(Exposures),target=feature)
@@ -414,7 +435,7 @@ setMethod("ExposureGLM",signature(Exposures="matrix",feature="numeric",
                   }
                   par(mfrow=c(1,1),mar=c(4.2,5.2,2,2))
               }
-              gl<-glm("target~.", data=Es)
+              gl<-glm("target~.", data=Es,...)
               thisTable<-summary(gl)$coefficients
               Pvalues<-thisTable[-1,4]
               #p-values boxplots
@@ -461,14 +482,21 @@ setMethod("ExposureGLM",signature(Exposures="matrix",feature="numeric",
 )
 
 setMethod("ExposureGLM",signature(Exposures="SignExp",feature="numeric",
-                                  cutoff_pvalue="ANY",quant="ANY",
-                                  plot_to_file="ANY", file="ANY",colors="ANY"),
-          function(Exposures,feature,cutoff_pvalue=0.05,quant=0.5, plot_to_file=FALSE,
-                   file="ExposureGLM_plot.pdf",colors=TRUE){
+                                  max_instances="ANY", cutoff_pvalue="ANY",
+                                  quant="ANY", plot_to_file="ANY", 
+                                  file="ANY",colors="ANY"),
+          function(Exposures, feature, max_instances, cutoff_pvalue, quant, 
+                   plot_to_file, file, colors,...){
               if(!Exposures@normalized) Exposures<-Normalize(Exposures)
               dp <- dim(Exposures@Sign) #[i,n,r]
               de <- dim(Exposures@Exp) #[n,j,r]
               i<-dp[[1]]; n<-dp[[2]]; j<-de[[2]]; r<-de[[3]]
+              if(r > max_instances){
+                select_instances<-sort(sample(1:r,max_instances,replace=FALSE))
+                Exposures@Exp <-Exposures@Exp[,,select_instances]
+                Exposures@Sign<-Exposures@Sign[,,select_instances]
+                r<-max_instances
+              }
               Es <- Exposures@Exp
               if(colors){ col1<-"darkgreen"; col2<-"red"; col3<-"blue"
               }else{ col1<-"black"; col2<-"black"; col3<-"black"  }
@@ -486,7 +514,7 @@ setMethod("ExposureGLM",signature(Exposures="SignExp",feature="numeric",
               Stats<-array(as.vector(
                   future_apply(Es,3,function(D){
                       thisexposures<-data.frame(t(D),target=feature)
-                      gl<-glm("target~.", data=thisexposures)
+                      gl<-glm("target~.", data=thisexposures,...)
                       thisTable<-summary(gl)$coefficients
                       return(thisTable)
                   })
@@ -541,24 +569,25 @@ setMethod("ExposureGLM",signature(Exposures="SignExp",feature="numeric",
 setGeneric("ExposureSurvModel",
            def=function(Exposures=NA, 
                         surv, 
-                        addata=NA, 
+                        addata=NA,
+                        max_instances=200,
                         quant=0.5, #quantile of statistics used to attribute significance. Higher means stricter.  
                         cutoff_pvalue=0.05,
                         cutoff_hr=NA,
                         plot_to_file=FALSE, 
-                        file=NA_character_,
-                        colors=NA_character_,...){
+                        file="ExposureSurvModel_plot.pdf",
+                        colors=TRUE,...){
                standardGeneric("ExposureSurvModel")
            }
 )
 
 setMethod("ExposureSurvModel",signature(Exposures="matrix",surv="ANY",
-                                        addata="ANY", 
-                                        quant="ANY", 
-                                        cutoff_pvalue="ANY", cutoff_hr="ANY",
-                                        plot_to_file="ANY", file="ANY",colors="ANY"),
-          function(Exposures,surv,addata,quant=0.5,cutoff_pvalue=0.05,cutoff_hr=NA,
-                   plot_to_file=FALSE,file="ExposureSurvModel_plot.pdf",colors=TRUE){
+                                        addata="ANY", max_instances="ANY",
+                                        quant="ANY", cutoff_pvalue="ANY",
+                                        cutoff_hr="ANY", plot_to_file="ANY", 
+                                        file="ANY",colors="ANY"),
+          function(Exposures, surv, addata, max_instances, quant, cutoff_pvalue,
+                   cutoff_hr, plot_to_file, file, colors,...){
               if(is.Surv(surv)){
                   dtime <- surv[,1]
                   os <- surv[,2]
@@ -752,12 +781,12 @@ setMethod("ExposureSurvModel",signature(Exposures="matrix",surv="ANY",
 
 
 setMethod("ExposureSurvModel",signature(Exposures="SignExp",surv="ANY",
-                                        addata="ANY", 
-                                        quant="ANY", 
-                                        cutoff_pvalue="ANY", cutoff_hr="ANY",
-                                        plot_to_file="ANY", file="ANY",colors="ANY"),
-          function(Exposures,surv,addata,quant=0.5,cutoff_pvalue=0.05, cutoff_hr=NA,
-                   plot_to_file=FALSE,file="ExposureSurvModel_plot.pdf",colors=TRUE){
+                                        addata="ANY", max_instances="ANY",
+                                        quant="ANY", cutoff_pvalue="ANY", 
+                                        cutoff_hr="ANY", plot_to_file="ANY",
+                                        file="ANY", colors="ANY"),
+          function(Exposures, surv, addata, max_instances, quant, cutoff_pvalue,
+                   cutoff_hr, plot_to_file, file, colors,...){
               if(!Exposures@normalized) Exposures<-Normalize(Exposures)
               if(is.Surv(surv)){
                   dtime <- surv[,1]
@@ -772,6 +801,12 @@ setMethod("ExposureSurvModel",signature(Exposures="SignExp",surv="ANY",
               }
               de <- dim(Exposures@Exp) #[n,j,r]
               n<-de[[1]]; j<-de[[2]]; r<-de[[3]]
+              if(r > max_instances){
+                select_instances<-sort(sample(1:r,max_instances,replace=FALSE))
+                Exposures@Exp <-Exposures@Exp[,,select_instances]
+                Exposures@Sign<-Exposures@Sign[,,select_instances]
+                r<-max_instances
+              }
               invquant<-1-quant
               Ehat<-Median_exp(Exposures)
               Es<-Exposures@Exp
@@ -975,26 +1010,33 @@ setMethod("ExposureSurvModel",signature(Exposures="SignExp",surv="ANY",
 # Fuzzy Clustering:
 ################################################################################
 setGeneric("FuzzyClustExp",
-    def=function(signexp_obj, Clim=NA_integer_, Med_exp=NA,
+    def=function(signexp_obj,  max_instances=200, Clim=NA_integer_, Med_exp=NA,
                  method.dist="euclidean", method.clust="fcm", relative=FALSE, 
                  m=2, plot_to_file=FALSE, file="FuzzyClustExp.pdf",colored=TRUE,
-                 iseed=NA_integer_, try_all=FALSE,fast=TRUE,
+                 iseed=NA_integer_, try_all=FALSE, fast=TRUE,
                  parplan="multisession",...){
         standardGeneric("FuzzyClustExp")
     }
 )
-setMethod("FuzzyClustExp",signature(signexp_obj="SignExp", Clim="ANY", 
-    Med_exp="ANY", method.dist="ANY", method.clust="ANY", 
-    relative="ANY", m="ANY", plot_to_file="ANY",
-    file="ANY",colored="ANY",iseed="ANY",try_all="ANY",
-    fast="ANY",parplan="ANY"),
-    function(signexp_obj, Clim, Med_exp, method.dist, method.clust,
-        relative=FALSE, m, plot_to_file, file, colored=TRUE, iseed=NA, 
-        try_all=FALSE,fast=TRUE,parplan){
+setMethod("FuzzyClustExp",signature(signexp_obj="SignExp",  max_instances="ANY",
+                                    Clim="ANY", Med_exp="ANY",method.dist="ANY",
+                                    method.clust="ANY", relative="ANY", m="ANY",
+                                    plot_to_file="ANY", file="ANY",
+                                    colored="ANY",iseed="ANY",try_all="ANY",
+                                    fast="ANY", parplan="ANY"),
+    function(signexp_obj,  max_instances, Clim, Med_exp, method.dist, 
+             method.clust, relative, m, plot_to_file, file, colored, iseed, 
+             try_all, fast, parplan,...){
         if(!is.na(iseed)) set.seed(seed = iseed)
         dp <- dim(signexp_obj@Sign) #[i,n,r]
         de <- dim(signexp_obj@Exp) #[n,j,r]
         i<-dp[[1]]; n<-dp[[2]]; j<-de[[2]]; r<-de[[3]]
+        if(r > max_instances){
+          select_instances<-sort(sample(1:r,max_instances,replace=FALSE))
+          signexp_obj@Exp <-signexp_obj@Exp[,,select_instances]
+          signexp_obj@Sign<-signexp_obj@Sign[,,select_instances]
+          r<-max_instances
+        }
         Es<-signexp_obj@Exp
         if (is.na(Clim[1])){
             Clim <- c(2,j-1)
@@ -1129,7 +1171,7 @@ setMethod("CmeansExp",signature(signexp_obj="matrix", Med_exp="ANY", C="ANY",
                                 method.dist="ANY", method.clust="ANY", 
                                 relative="ANY", iseed="ANY",parplan="ANY"),
           function(signexp_obj, Med_exp, C, method.dist, method.clust,
-                   relative, plot_to_file, file, colored, iseed=NA, parplan){
+                   relative, iseed, parplan,...){
             # initialize random seed
             if(!is.na(iseed)) set.seed(seed = iseed)
             de <- dim(signexp_obj) #[n,j]
@@ -1176,9 +1218,10 @@ setMethod("CmeansExp",signature(signexp_obj="matrix", Med_exp="ANY", C="ANY",
           })
 #For SignExp
 setMethod("CmeansExp",signature(signexp_obj="SignExp", Med_exp="ANY", C="ANY",
-                                method.dist="ANY", method.clust="ANY", relative="ANY",iseed="ANY",parplan="ANY"),
+                                method.dist="ANY", method.clust="ANY", 
+                                relative="ANY",iseed="ANY",parplan="ANY"),
           function(signexp_obj, Med_exp, C, method.dist, method.clust,
-                   relative, iseed=NA,parplan){
+                   relative, iseed, parplan,...){
             # initialize random seed
             if(!is.na(iseed)) set.seed(seed = iseed)
             if(!signexp_obj@normalized) signexp_obj<-Normalize(signexp_obj)
@@ -1234,23 +1277,30 @@ PBMFindex<-function(U,Data,m=2){
 # Hierarquical Clustering:
 ################################################################################
 setGeneric("HClustExp",
-    def=function(signexp_obj, Med_exp=NA, method.dist="euclidean", 
-        method.hclust="average", use.cor=FALSE, relative=FALSE, 
-        plot_to_file=FALSE, file="HClustExp_dendrogram.pdf", colored=TRUE,...){
+    def=function(signexp_obj, Med_exp=NA,  max_instances=200, 
+                 method.dist="euclidean", method.hclust="average", 
+                 use.cor=FALSE, relative=FALSE, plot_to_file=FALSE, 
+                 file="HClustExp_dendrogram.pdf", colored=TRUE,...){
         standardGeneric("HClustExp")
     }
 )
-setMethod("HClustExp",signature(signexp_obj="SignExp", Med_exp="ANY",
-    method.dist="ANY", method.hclust="ANY",
-    use.cor="ANY", relative="ANY", plot_to_file="ANY",
-    file="ANY",colored="ANY"),
-    function(signexp_obj, Med_exp, method.dist, method.hclust,
-        use.cor, relative, plot_to_file,
-        file,colored,...){
+setMethod("HClustExp",signature(signexp_obj="SignExp", Med_exp="ANY",  
+                                max_instances="ANY", method.dist="ANY", 
+                                method.hclust="ANY", use.cor="ANY", 
+                                relative="ANY", plot_to_file="ANY",
+                                file="ANY",colored="ANY"),
+    function(signexp_obj, Med_exp,  max_instances, method.dist, method.hclust,
+        use.cor, relative, plot_to_file, file, colored,...){
         if(!signexp_obj@normalized) signexp_obj<-Normalize(signexp_obj)
         dp <- dim(signexp_obj@Sign) #[i,n,r]
         de <- dim(signexp_obj@Exp) #[n,j,r]
         i<-dp[[1]]; n<-dp[[2]]; j<-de[[2]]; r<-de[[3]]
+        if(r > max_instances){
+          select_instances<-sort(sample(1:r,max_instances,replace=FALSE))
+          signexp_obj@Exp <-signexp_obj@Exp[,,select_instances]
+          signexp_obj@Sign<-signexp_obj@Sign[,,select_instances]
+          r<-max_instances
+        }
         if(is.na(Med_exp[1])){
             Med_exp<-Median_exp(signexp_obj)
         }

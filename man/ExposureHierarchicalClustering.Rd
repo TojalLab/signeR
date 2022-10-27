@@ -2,6 +2,7 @@
 \docType{methods}
 \alias{HClustExp}
 \alias{HClustExp,SignExp-method}
+\alias{HClustExp,SignExp,numeric-method}
 
 \title{Hierarchical Clustering of exposure data}
 
@@ -11,15 +12,18 @@
     }
 
 \usage{
-\S4method{HClustExp}{SignExp,numeric}(signexp_obj, Med_exp=NA, 
-        method.dist="euclidean", method.hclust="average", 
-        use.cor=FALSE, relative=FALSE, 
-        plot_to_file=FALSE, file="HClustExp_dendrogram.pdf", colored=TRUE)
+\S4method{HClustExp}{SignExp,numeric}(signexp_obj, Med_exp=NA,
+        max_instances=200, method.dist="euclidean", method.hclust="average", 
+        use.cor=FALSE, relative=FALSE, plot_to_file=FALSE, 
+        file="HClustExp_dendrogram.pdf", colored=TRUE)
 }
 
 \arguments{
     \item{signexp_obj}{a SignExp object returned by signeR function.}
     \item{Med_exp}{optional matrix with (median) exposures.}
+    \item{max_instances}{Maximum number of the exposure matrix instances to be 
+    analyzed. If the number of available E instances is bigger then this 
+    parameter, a subset of those will be randomly selected for analysis.}
     \item{method.dist}{used distance metric}
     \item{method.hclust}{clustering method.}
     \item{use.cor}{used in pv.distance}

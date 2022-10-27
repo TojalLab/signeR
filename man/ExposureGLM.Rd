@@ -2,6 +2,7 @@
 \docType{methods}
 \alias{ExposureGLM}
 \alias{ExposureGLM,SignExp,numeric-method}
+\alias{ExposureGLM,matrix,numeric-method}
 
 \title{Exposure Generalized Linear Model}
 
@@ -11,15 +12,18 @@
 }
 
 \usage{
-\S4method{ExposureGLM}{SignExp,numeric}(Exposures, feature,
+\S4method{ExposureGLM}{SignExp,numeric}(Exposures, feature, max_instances=200,
      cutoff_pvalue=0.05,quant=0.5, plot_to_file=FALSE,
-     file="ExposureGLM_plot.pdf",colors=TRUE)
+     file="ExposureGLM_plot.pdf",colors=TRUE,...)
 }
 \arguments{
     \item{Exposures}{A SignExp object returned by signeR function or a matrix of 
     exposures (with signatures in rows and a column for each sample).}
     \item{feature}{numeric feature associated to each sample, such as
      age, weight or the expression of a gene.}
+    \item{max_instances}{Maximum number of the exposure matrix instances to be 
+    analyzed. If the number of available E instances is bigger then this 
+    parameter, a subset of those will be randomly selected for analysis.}
     \item{cutoff_pvalue}{threshold for p-values quantile for signatures to be
     considered as significant on the model.}
     \item{quant}{p-values quantile used to evaluate if signatures are 
@@ -33,6 +37,8 @@
     cutoff line will be colored in red and line segments showing the 
     transformed p-value quantile used for significance evaluation will be 
     colored in blue. Otherwise the plot will be black & white.}
+    \item{...}{additional parameters for test algorithm defined by the method
+parameter.}
 }
 
 \value{

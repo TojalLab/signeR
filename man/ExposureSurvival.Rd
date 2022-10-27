@@ -1,8 +1,12 @@
 \name{ExposureSurvival}
 \docType{methods}
 \alias{ExposureSurvival}
+\alias{ExposureSurvival,SignExp-method}
 \alias{ExposureSurvival,SignExp,character-method}
 \alias{ExposureSurvival,SignExp,Surv-method}
+\alias{ExposureSurvival,matrix-method}
+\alias{ExposureSurvival,matrix,character-method}
+\alias{ExposureSurvival,matrix,Surv-method}
 
 \title{Exposure survival analysis}
 
@@ -12,7 +16,7 @@
 }
 
 \usage{
-\S4method{ExposureSurvival}{SignExp,Surv}(signexp_obj, surv,
+\S4method{ExposureSurvival}{SignExp,Surv}(signexp_obj, surv, max_instances=200,
     method=logrank, quant=0.5, cutoff_pvalue=0.05, cutoff_hr=NA,
     plot_to_file=FALSE, file="ExposureSurvival_plot.pdf",
     colors=TRUE, ...)
@@ -23,6 +27,9 @@
     \item{surv}{a Surv object from package survival or a matrix with columns 
     "time" and "status" (the last indicates whether 1:an event occurred or 
     0:there was a loss of follow up).}
+    \item{max_instances}{Maximum number of the exposure matrix instances to be 
+    analyzed. If the number of available E instances is bigger then this 
+    parameter, a subset of those will be randomly selected for analysis.}
     \item{method}{a character string indicating which approach should be used 
     for the test. Options are "logrank" (default) or "cox" (fit a Cox 
     proportional hazards model to data).}

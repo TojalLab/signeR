@@ -6,14 +6,12 @@ exportMethods(setSamples, setMutations, Normalize,
     Average_sign, Median_sign, Average_exp, Median_exp,
     Paths, SignPlot, SignHeat, ExposureBoxplot,
     ExposureBarplot, ExposureHeat,
-    DiffExp, SignLRT, 
-    ExposureClassify, ExposureClassifyCV,
+    DiffExp, ExposureClassify, ExposureClassifyCV,
     ExposureCorrelation, ExposureGLM,
     ExposureSurvival, ExposureSurvModel,
     FuzzyClustExp, HClustExp)
 export(genOpportunityFromGenome, genCountMatrixFromVcf, signeR,
-    BICboxplot, eBayesNMF, GibbsSamplerCpp, FuzzyClusterCpp,
-    Optimal_sigs,CmeansExp,PBMFindex)
+    BICboxplot)
 export(signeRFlow)
 
 import(utils, methods, future, future.apply,

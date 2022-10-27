@@ -1,19 +1,27 @@
 setGeneric("DiffExp",
-    def=function(signexp_obj,labels, method="kruskal.test", contrast="all",
+    def=function(signexp_obj,labels, max_instances=200, method="kruskal.test", contrast="all",
         quant=0.5, cutoff=0.05, p.adj="BH", plot_to_file=FALSE,
         file="Diffexp_boxplot.pdf",colored=TRUE,relative=FALSE,...){
         standardGeneric("DiffExp")
     }
 )
-setMethod("DiffExp",signature(signexp_obj="SignExp", labels="character",
-    method="ANY", contrast="ANY", quant="ANY", cutoff="ANY", p.adj="ANY",
-    plot_to_file="ANY", file="ANY", colored="ANY",relative="ANY"),
+setMethod("DiffExp",signature(signexp_obj="SignExp", labels="character", 
+                              max_instances="ANY", method="ANY", contrast="ANY", 
+                              quant="ANY", cutoff="ANY", p.adj="ANY",
+                              plot_to_file="ANY", file="ANY", colored="ANY",
+                              relative="ANY"),
     function(signexp_obj, labels, method, contrast, quant, cutoff, plot_to_file,
         file, colored,relative,...){
         if(!signexp_obj@normalized) signexp_obj<-Normalize(signexp_obj)
         dp <- dim(signexp_obj@Sign) #[i,n,r]
         de <- dim(signexp_obj@Exp) #[n,j,r]
         i<-dp[[1]]; n<-dp[[2]]; j<-de[[2]]; r<-de[[3]]
+        if(r > max_instances){
+          select_instances<-sort(sample(1:r,max_instances,replace=FALSE))
+          signexp_obj@Exp <-signexp_obj@Exp[,,select_instances]
+          signexp_obj@Sign<-signexp_obj@Sign[,,select_instances]
+          r<-max_instances
+        }
         cl<-labels[!is.na(labels)]
         if(all(contrast=="all")){ classes <- as.vector(levels(as.factor(cl)))
         }else{ classes <- contrast  }
@@ -160,7 +168,7 @@ setMethod("DiffExp",signature(signexp_obj="SignExp", labels="character",
             geom_segment(aes(x = x_bgn, y = y_bgn, xend = x_end, yend = y_end), col = col3,
                          data = segments, show.legend = FALSE)+
             theme_bw()+
-            theme(axis.text.x=element_text(angle=0,vjust=.5,hjust=0,face="bold")) + 
+            theme(axis.text.x=element_text(angle=90,vjust=.5,hjust=0,face="bold")) + 
             labs(x="",y=my.ylab)
         #######################
         if(multicompare){
@@ -348,20 +356,24 @@ setMethod("SignLRT",signature(Signatures="SignExp",
 #Exposure correlation analysis
 #######################################
 setGeneric("ExposureCorrelation",
-           def=function(Exposures,feature,method="spearman",cutoff_pvalue=0.05,
+           def=function(Exposures,feature,method="spearman",  
+                        max_instances=200,
+                        cutoff_pvalue=0.05,
                         quant=0.5,
                         plot_to_file=FALSE, 
-                        file=NA_character_,
-                        colors=NA_character_,...){
+                        file="ExposureCorrelation_plot.pdf",
+                        colors=TRUE,...){
                standardGeneric("ExposureCorrelation")
            }
 )
 
 setMethod("ExposureCorrelation",signature(Exposures="matrix",feature="numeric",
-                                          method="ANY",cutoff_pvalue="ANY",
-                                          plot_to_file="ANY", file="ANY",colors="ANY"),
-          function(Exposures,feature,method="spearman",cutoff_pvalue=0.05,
-                   plot_to_file=FALSE,file="ExposureCorrelation_plot.pdf",colors=TRUE){
+                                          method="ANY", max_instances="ANY",
+                                          cutoff_pvalue="ANY",
+                                          plot_to_file="ANY", file="ANY",
+                                          colors="ANY"),
+          function(Exposures, feature, method, max_instances, cutoff_pvalue,
+                   plot_to_file, file, colors,...){
               de <- dim(Exposures) #[n,j]
               n<-de[[1]]; j<-de[[2]]
               Ehat <- Exposures
@@ -457,14 +469,22 @@ setMethod("ExposureCorrelation",signature(Exposures="matrix",feature="numeric",
 )
 
 setMethod("ExposureCorrelation",signature(Exposures="SignExp",feature="numeric",
-                                          method="ANY",cutoff_pvalue="ANY",quant="ANY",
-                                          plot_to_file="ANY", file="ANY",colors="ANY"),
-          function(Exposures,feature,method="spearman",cutoff_pvalue=0.05,quant=0.5,
-                   plot_to_file=FALSE,file="ExposureCorrelation_plot.pdf",colors=TRUE){
+                                          method="ANY",  max_instances="ANY",
+                                          cutoff_pvalue="ANY",quant="ANY",
+                                          plot_to_file="ANY", file="ANY",
+                                          colors="ANY"),
+          function(Exposures,feature, method, max_instances,cutoff_pvalue,quant,
+                   plot_to_file,file,colors,...){
               if(!Exposures@normalized) Exposures<-Normalize(Exposures)
               dp <- dim(Exposures@Sign) #[i,n,r]
               de <- dim(Exposures@Exp) #[n,j,r]
               i<-dp[[1]]; n<-dp[[2]]; j<-de[[2]]; r<-de[[3]]
+              if(r > max_instances){
+                select_instances<-sort(sample(1:r,max_instances,replace=FALSE))
+                signexp_obj@Exp <-signexp_obj@Exp[,,select_instances]
+                signexp_obj@Sign<-signexp_obj@Sign[,,select_instances]
+                r<-max_instances
+              }
               Es <- Exposures@Exp
               Em <- Median_exp(Exposures)
               if(is.null(rownames(Em))){
@@ -576,25 +596,25 @@ setMethod("ExposureCorrelation",signature(Exposures="SignExp",feature="numeric",
 setGeneric("ExposureSurvival",
            def=function(Exposures=NA, 
                         surv, 
-                        method=NA_character_, #"logrank" or "cox"
-                        #byvalue=TRUE, 
+                        max_instances=200,
+                        method="logrank", #"logrank" or "cox", #byvalue=TRUE, 
                         quant=0.5, #quantile of statistics used to attribute significance. Higher means stricter.  
                         cutoff_pvalue=0.05,
                         cutoff_hr=NA,
                         plot_to_file=FALSE, 
-                        file=NA_character_,
-                        colors=NA_character_,...){
+                        file="ExposureSurvival_plot.pdf",
+                        colors=TRUE,...){
                standardGeneric("ExposureSurvival")
            }
 )
 
 setMethod("ExposureSurvival",signature(Exposures="matrix",surv="ANY",
-                                       method="ANY",#byvalue="ANY",
-                                       quant="ANY", 
-                                       cutoff_pvalue="ANY", cutoff_hr="ANY",
-                                       plot_to_file="ANY", file="ANY",colors="ANY"),
-          function(Exposures,surv,method="logrank",quant=0.5,cutoff_pvalue=0.05, cutoff_hr=NA,
-                   plot_to_file=FALSE,file="ExposureSurvival_plot.pdf",colors=TRUE){
+                                       max_instances="ANY", method="ANY",
+                                       quant="ANY", cutoff_pvalue="ANY", 
+                                       cutoff_hr="ANY", plot_to_file="ANY", 
+                                       file="ANY",colors="ANY"),
+          function(Exposures, surv, max_instances, method, quant, cutoff_pvalue,
+                   cutoff_hr, plot_to_file, file, colors){
               if(is.Surv(surv)){
                   time <- surv[,1]
                   os <- surv[,2]
@@ -707,7 +727,7 @@ setMethod("ExposureSurvival",signature(Exposures="matrix",surv="ANY",
                   geom_segment(aes(x = x_bgn, y = y_bgn, xend = x_end, yend = y_end), col = col3,
                                data = segments, show.legend = FALSE)+
                   theme_bw()+
-                  theme(axis.text.x=element_text(angle=0,vjust=.5,hjust=0,face="bold")) + 
+                  theme(axis.text.x=element_text(angle=90,vjust=.5,hjust=0,face="bold")) + 
                   labs(x="",y="-log(pvalue)")
               #######################
               plotlist<-list(g1)
@@ -766,15 +786,22 @@ setMethod("ExposureSurvival",signature(Exposures="matrix",surv="ANY",
 
 #Exposure survival for SignExp object. 
 setMethod("ExposureSurvival",signature(Exposures="SignExp",surv="ANY",
-                                       method="ANY", #byvalue="ANY",
-                                       quant="ANY", 
-                                       cutoff_pvalue="ANY", cutoff_hr="ANY",
-                                       plot_to_file="ANY", file="ANY",colors="ANY"),
-          function(Exposures,surv,method="logrank",quant=0.5,cutoff_pvalue=0.05, cutoff_hr=NA,
-                   plot_to_file=FALSE,file="ExposureSurvival_plot.pdf",colors=TRUE){
+                                       max_instances="ANY", method="ANY",
+                                       quant="ANY", cutoff_pvalue="ANY", 
+                                       cutoff_hr="ANY", plot_to_file="ANY", 
+                                       file="ANY",colors="ANY"),
+          function(Exposures, surv, max_instances, method, quant=0.5,
+                   cutoff_pvalue=0.05, cutoff_hr=NA, plot_to_file=FALSE,
+                   file, colors=TRUE){
               if(!Exposures@normalized) Exposures<-Normalize(Exposures)
               de <- dim(Exposures@Exp) #[n,j,r]
               n<-de[[1]]; j<-de[[2]]; r<-de[[3]]
+              if(r > max_instances){
+                select_instances<-sort(sample(1:r,max_instances,replace=FALSE))
+                signexp_obj@Exp <-signexp_obj@Exp[,,select_instances]
+                signexp_obj@Sign<-signexp_obj@Sign[,,select_instances]
+                r<-max_instances
+              }
               Ehat<-Median_exp(Exposures)
               Es<-Exposures@Exp
               if(is.null(rownames(Ehat))){
@@ -895,7 +922,7 @@ setMethod("ExposureSurvival",signature(Exposures="SignExp",surv="ANY",
                   geom_segment(aes(x = x_bgn, y = y_bgn, xend = x_end, yend = y_end), col = col3,
                                data = segments, show.legend = FALSE)+
                   theme_bw()+
-                  theme(axis.text.x=element_text(angle=0,vjust=.5,hjust=0,face="bold")) + 
+                  theme(axis.text.x=element_text(angle=90,vjust=.5,hjust=0,face="bold")) + 
                   labs(x="",y="-log(pvalue)")
               #######################
               if(method=="logrank") {
