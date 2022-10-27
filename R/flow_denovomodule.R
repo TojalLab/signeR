@@ -280,10 +280,34 @@ denovo <- function(input,
     if (ext == "vcf" || ext == "vcf.gz") {
       build <- input$genbuild
       if (build == "hg19"){
-        if (!requireNamespace("BSgenome.Hsapiens.UCSC.hg19")) BiocManager::install("BSgenome.Hsapiens.UCSC.hg19")
+        if (!"BSgenome.Hsapiens.UCSC.hg19" %in% installed.genomes()) {
+          showModal(modalDialog(
+            title = "Oh no!",
+            paste0(
+              "You must install the BSgenome.Hsapiens.UCSC.hg19 genome ",
+              "using the command: ",
+              "BiocManager::install('BSgenome.Hsapiens.UCSC.hg19')."
+            ),
+            easyClose = TRUE,
+            footer = NULL
+          ))
+          return(NULL)
+        } 
         mygenome <- BSgenome.Hsapiens.UCSC.hg19
       } else {
-        if (!requireNamespace("BSgenome.Hsapiens.UCSC.hg38")) BiocManager::install("BSgenome.Hsapiens.UCSC.hg38")
+        if (!"BSgenome.Hsapiens.UCSC.hg38" %in% installed.genomes()) {
+          showModal(modalDialog(
+            title = "Oh no!",
+            paste0(
+              "You must install the BSgenome.Hsapiens.UCSC.hg38 genome ",
+              "using the command: ",
+              "BiocManager::install('BSgenome.Hsapiens.UCSC.hg38')."
+            ),
+            easyClose = TRUE,
+            footer = NULL
+          ))
+          return(NULL)
+        } 
         mygenome <- BSgenome.Hsapiens.UCSC.hg38
       }
 
@@ -357,10 +381,34 @@ denovo <- function(input,
         build <- input$genbuild
         mutation <- mut()
         if (build == "hg19"){
-          if (!require("BSgenome.Hsapiens.UCSC.hg19")) BiocManager::install("BSgenome.Hsapiens.UCSC.hg19")
+          if (!"BSgenome.Hsapiens.UCSC.hg19" %in% installed.genomes()) {
+            showModal(modalDialog(
+              title = "Oh no!",
+              paste0(
+                "You must install the BSgenome.Hsapiens.UCSC.hg19 genome ",
+                "using the command: ",
+                "BiocManager::install('BSgenome.Hsapiens.UCSC.hg19')."
+              ),
+              easyClose = TRUE,
+              footer = NULL
+            ))
+            return(NULL)
+          } 
           mygenome <- BSgenome.Hsapiens.UCSC.hg19
         } else {
-          if (!require("BSgenome.Hsapiens.UCSC.hg38")) BiocManager::install("BSgenome.Hsapiens.UCSC.hg38")
+          if (!"BSgenome.Hsapiens.UCSC.hg38" %in% installed.genomes()) {
+            showModal(modalDialog(
+              title = "Oh no!",
+              paste0(
+                "You must install the BSgenome.Hsapiens.UCSC.hg38 genome ",
+                "using the command: ",
+                "BiocManager::install('BSgenome.Hsapiens.UCSC.hg38')."
+              ),
+              easyClose = TRUE,
+              footer = NULL
+            ))
+            return(NULL)
+          } 
           mygenome <- BSgenome.Hsapiens.UCSC.hg38
         }
 

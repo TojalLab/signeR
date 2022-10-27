@@ -75,4 +75,5 @@ importFrom("ppclust", "fcm", "pcm", "fpcm")
 importFrom("clue", "solve_LSAP")
 importFrom("ggpubr","ggarrange")
 importFrom("rtracklayer", "import")
+importFrom("BSgenome", "installed.genomes")
 
