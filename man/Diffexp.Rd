@@ -11,7 +11,7 @@ among sample groups.
 }
 
 \usage{
-\S4method{DiffExp}{SignExp,character}(signexp_obj, labels,
+\S4method{DiffExp}{SignExp,character}(signexp_obj, labels, max_instances=200, 
     method=kruskal.test, contrast="all", quant=0.5, cutoff=0.05,
     p.adj= "BH",plot_to_file=FALSE, file="Diffexp_boxplot.pdf",
     colored=TRUE, relative = FALSE, ...)
@@ -20,6 +20,9 @@ among sample groups.
 \arguments{
     \item{signexp_obj}{a SignExp object returned by signeR function.}
     \item{labels}{sample labels used to define sample groups.}
+    \item{max_instances}{Maximum number of the exposure matrix instances to be 
+    analyzed. If the number of available E instances is bigger then this 
+    parameter, a subset of those will be randomly selected for analysis.}
     \item{method}{algorithm used to compare each signature exposures among
 sample groups. Default is kruskal.test, which leads to the use of
 Kruskal-Wallis Rank Sum Test.}

@@ -1,6 +1,7 @@
 \name{FuzzyClustExp}
 \docType{methods}
 \alias{FuzzyClustExp}
+\alias{FuzzyClustExp,SignExp-method}
 \alias{FuzzyClustExp,SignExp,numeric-method}
 
 \title{Fuzzy Clustering of exposure data}
@@ -12,13 +13,16 @@
 }
 
 \usage{
-\S4method{FuzzyClustExp}{SignExp,numeric}(signexp_obj, Clim,
+\S4method{FuzzyClustExp}{SignExp,numeric}(signexp_obj, max_instances=200, Clim,
                 method.dist="euclidean", method.clust="fcm", relative=FALSE, 
                 m=2, plot_to_file=FALSE, file="FuzzyClustExp.pdf",colored=TRUE)
 }
 
 \arguments{
     \item{signexp_obj}{a SignExp object returned by signeR function.}
+    \item{max_instances}{Maximum number of the exposure matrix instances to be 
+    analyzed. If the number of available E instances is bigger then this 
+    parameter, a subset of those will be randomly selected for analysis.}
     \item{Clim}{number of groups por a vector with mimum and maximum accepted 
     number of groups. The algorithm will maximize the PBMF-index whithin this 
     range.}

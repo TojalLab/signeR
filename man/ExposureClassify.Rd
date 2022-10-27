@@ -2,6 +2,7 @@
 \docType{methods}
 \alias{ExposureClassify}
 \alias{ExposureClassify,SignExp,character-method}
+\alias{ExposureClassify,ANY,character-method}
 
 \title{Classify samples by exposure levels}
 
@@ -10,9 +11,9 @@
 }
 
 \usage{
-\S4method{ExposureClassify}{SignExp,character}(signexp_obj, labels, method="knn",
-    k=3, weights=NA, plot_to_file=FALSE, file="Classification_barplot.pdf",
-    colors=NA_character_, min_agree=0.75, ...)
+\S4method{ExposureClassify}{SignExp,character}(signexp_obj, labels, 
+    method="knn", max_instances=200, k=3, weights=NA, plot_to_file=FALSE, 
+    file="Classification_barplot.pdf", colors=NA_character_, min_agree=0.75,...)
 }
 
 \arguments{
@@ -24,12 +25,13 @@ Neighbors (kNN). Any other algorithm may be used, as long as it is customized
 to satisfy the following conditions:\cr
         Input: a matrix of labeled samples, with one sample per line and one
 feature per column;
-                a matrix of unlabeled samples to classify, with the same
-structure;
-                an array of labels, with one entry for each labeled
-sample.\cr
+          a matrix of unlabeled samples to classify, with the same structure;
+          an array of labels, with one entry for each labeled sample.\cr
         Output: an array of assigned labels, one for each unlabeled sample.
 }
+    \item{max_instances}{Maximum number of the exposure matrix instances to be 
+    analyzed. If the number of available E instances is bigger then this 
+    parameter, a subset of those will be randomly selected for analysis.}
     \item{k}{Number of nearest neighbors considered for classification,
 used only if method="kNN". Default is 3.}
     \item{weights}{Vector of weights applied to the signatures when performing

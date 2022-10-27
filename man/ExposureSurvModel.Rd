@@ -1,8 +1,12 @@
 \name{ExposureSurvModel}
 \docType{methods}
 \alias{ExposureSurvModel}
+\alias{ExposureSurvModel,SignExp-method}
 \alias{ExposureSurvModel,SignExp,character-method}
 \alias{ExposureSurvModel,SignExp,Surv-method}
+\alias{ExposureSurvModel,matrix-method}
+\alias{ExposureSurvModel,matrix,character-method}
+\alias{ExposureSurvModel,matrix,Surv-method}
 
 \title{Exposure Cox model}
 
@@ -12,9 +16,9 @@
 }
 
 \usage{
-\S4method{ExposureSurvModel}{SignExp,Surv}(Exposures, surv, addata,
-    quant=0.5, cutoff_pvalue=0.05, cutoff_hr=NA, plot_to_file=FALSE, 
-    file="ExposureSurvival_plot.pdf", colors=TRUE, ...)
+\S4method{ExposureSurvModel}{SignExp,Surv}(Exposures, surv, addata, 
+    max_instances=200, quant=0.5, cutoff_pvalue=0.05, cutoff_hr=NA, 
+    plot_to_file=FALSE, file="ExposureSurvival_plot.pdf", colors=TRUE, ...)
 }
 
 \arguments{
@@ -25,6 +29,9 @@
     0:there was a loss of follow up).}
     \item{addata}{a data frame  withh additional data (one sample per row) that 
     will be used in the Cox model along with exposure data.}
+    \item{max_instances}{Maximum number of the exposure matrix instances to be 
+    analyzed. If the number of available E instances is bigger then this 
+    parameter, a subset of those will be randomly selected for analysis.}
     \item{quant}{the quantile of p-values and hazard ratios which will 
     be used for selecting survival significant signatures. Deafult 
     is 0.5, which means the median p-value and hazard ratio will be considered.}

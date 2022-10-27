@@ -220,4 +220,10 @@ signeR<-function(M, Mheader=TRUE, samples = "rows", Opport=NA,
     return(result)
 }
 
+#### Variable definition to avoid warnings ## 10-13-22 ##
+utils::globalVariables(c("rowname","fnn","Substitution.Type",
+                         "Trinucleotide","projectID","Sig","Pvalues","P.value",
+                         "q1","q2","q3","q4","q5","x_bgn","y_bgn","x_end","y_end",
+                         "HR","Lower_CI","Upper_CI","colour","HR_CI",
+                         "Sample","Cluster","triplets","medians","q25","q75"))
 
