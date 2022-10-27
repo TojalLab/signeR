@@ -62,3 +62,26 @@ download_opp_file <- function(build, verbose = FALSE) {
     data <- bfcrpath(bfc, rids = rid)
     return(data)
 }
+
+download_clinical_file <- function(tumor, verbose = FALSE) {
+    rootURL <- "https://gitlab.com/lbcb/signer-data/-/raw/main/tcga/"
+
+    url <- paste0(
+      rootURL, "clinical/", tumor, ".tsv.gz"
+    )
+
+    bfc <- .get_cache()
+    rid <- bfcquery(bfc, paste0(tumor,"-clinical"), "rname")$rid
+    if (!length(rid)) {
+     if (verbose)
+         message("Downloading TCGA clinical data")
+     rid <- names(bfcadd(
+        bfc, paste0(tumor,"-clinical"), url
+       ))
+    }
+    if (!isFALSE(bfcneedsupdate(bfc, rid)))
+    bfcdownload(bfc, rid, ask = FALSE)
+
+    data <- bfcrpath(bfc, rids = rid)
+    return(data)
+}

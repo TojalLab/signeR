@@ -106,6 +106,7 @@ signeRFlow <- function() {
             "tcgaexplorer",
             reactive(input$analysis_type),
             reactive(input$tcga_tumor),
+            reactive(loadClinical()),
             reactive(loadSig())
         )
 
@@ -120,6 +121,22 @@ signeRFlow <- function() {
             "fittingmod",
             reactive(width())
         )
+
+        loadClinical <- function() {
+            req(input$tcga_tumor)
+            req(input$analysis_type)
+
+            withProgress(
+                message = "Download genome opportunity...",
+                detail = "This operation may take a while...",
+                value = 0,
+                {
+                    data <- download_clinical_file(input$tcga_tumor)
+                }
+            )
+            clinical <- read_tsv(data)
+            return(clinical)
+        }
 
         loadSig <- function() {
             req(input$tcga_tumor)

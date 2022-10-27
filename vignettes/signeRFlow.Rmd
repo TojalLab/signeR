@@ -61,11 +61,11 @@ You can also provide a file with opportunities that are used as weights for the 
 
 ### Load data
 
-You can upload a SNV matrix file (mandatory) with your own samples to use in signeR *de novo* module. You can upload an opportunity file as well. 
+You can upload a VCF file or a SNV matrix file (mandatory) with your own samples to use in signeR **de novo** module. You can upload an opportunity file as well or use a already built genome opportunity. Also, you can upload a BED file to build an opportunity matrix.
 
-#### SNV Matrix
+#### VCF or SNV Matrix
 
-You can upload a SNV matrix file from your computer by clicking at the *Browse button*.
+You can upload a VCF file or a SNV matrix file from your computer by clicking at the *Browse button*.
 
 ![](flow_snv_upload.png)
 
@@ -128,11 +128,15 @@ SNV matrix is a text file with a (tab-delimited) matrix of SNV counts found on a
 </tbody>
 </table>
 
-You can generate a SNV matrix from VCF using the method:
+If you want to upload a VCF file, you must select the genome build used on your variant calling analysis to allow signeR to generate a SNV matrix of counts. Also, you can generate a SNV matrix from a VCF file using the method: 
 ```r
 genCountMatrixFromVcf
 ```
 from signeR package. See the [documentation](https://bioconductor.org/packages/release/bioc/vignettes/signeR/inst/doc/signeR-vignette.html#toc3) for more details. 
+
+> **`Warning`**:
+>
+> You must have installed the genomes `BSgenome.Hsapiens.UCSC.hg19` or `BSgenome.Hsapiens.UCSC.hg38` from `BSgenome` package in order to use the VCF upload.
 
 **Columns:**
 
@@ -148,7 +152,7 @@ Each row contain the sample ID and the counts for each trinucleotide contexts.
 
 #### Opportunity matrix
 
-You can upload an Opportunity matrix file from your computer by clicking at the *Browse button*. This is an optional file.
+You can upload an Opportunity matrix file or a BED file from your computer by clicking at the **Browse button**. Also, you can use a already built genome opportunity for human reference genomes. This is an optional file.
 
 ![](flow_opp_upload.png)
 
@@ -211,11 +215,15 @@ Opportunity matrix is a tab-delimited text file with a matrix of counts of trinu
 </tbody>
 </table>
 
-You can create a opportunity matrix from the reference genome using the method:
+If you want to upload a BED file, you must select the genome build used on your analysis to allow signeR to generate the opportunities for your regions file. Also, you can generate an opportunity matrix from the reference genome using the method:
 ```r
 genOpportunityFromGenome
 ```
 from signeR package. See the [documentation](https://bioconductor.org/packages/release/bioc/vignettes/signeR/inst/doc/signeR-vignette.html#toc3) for more details. 
+
+> **`Warning`**:
+>
+> You must have installed the genomes `BSgenome.Hsapiens.UCSC.hg19` or `BSgenome.Hsapiens.UCSC.hg38` from `BSgenome` package in order to use the BED upload.
 
 **Columns:**
 
@@ -264,13 +272,14 @@ A heatmap will be shown at the **COSMIC Comparison** section of *de novo* tab.
 
 ## signeR fitting
 
-In this module, you can upload a SNV matrix with counts of mutations, the same as used on *de novo* module, and a previous signatures file with known signatures to execute the signeR fitting algorithm, witch computes a Bayesian approach to the fitting of mutation counts to known mutational signatures, thus estimating exposures to mutational processes. 
+In this module, you can upload a VCF file or a SNV matrix with counts of mutations, the same as used on *de novo* module, and a previous signatures file with known signatures to execute the signeR fitting algorithm, witch computes a Bayesian approach to the fitting of mutation counts to known mutational signatures, thus estimating exposures to mutational processes. 
 
-You can also provide a file with opportunities that are used as weights for the factorization. Further analysis parameters can be set and estimated exposures can be visualized on different plots interactively.
+You can also provide a file with opportunities or use a already built genome opportunity that are used as weights for the factorization. Further analysis parameters can be set and estimated exposures can be visualized on different plots interactively.
 
 ### Load data
 
-You can upload a SNV matrix file with your own samples to use in signeR fitting module and previous known signatures (mandatories files). You can upload an opportunity file as well.
+You can upload a VCF file or a SNV matrix file with your own samples to use in signeR fitting module and previous known signatures (mandatories files). You can upload an opportunity file as well.
+SNV or VCF and opportunity matrix are the same as used on *de novo* module.
 
 #### SNV matrix
 

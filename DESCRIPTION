@@ -20,7 +20,7 @@ Imports: BiocGenerics, Biostrings, class, grDevices, GenomeInfoDb,
         RColorBrewer, listenv, reshape2, scales, survminer, dplyr, 
         ggpubr, cowplot, tibble, readr, shiny, shinydashboard,
         shinycssloaders, shinyWidgets, bsplus, DT, magrittr, tidyr,
-        BiocFileCache, proxy, rtracklayer
+        BiocFileCache, proxy, rtracklayer, BSgenome
 Depends: R (>= 3.0.2), VariantAnnotation, NMF
 LinkingTo: Rcpp, RcppArmadillo (>= 0.7.100)
 SystemRequirements: C++11
@@ -30,7 +30,7 @@ NeedsCompilation: yes
 ByteCompile: TRUE
 biocViews: GenomicVariation, SomaticMutation, StatisticalMethod,
         Visualization
-Suggests: knitr, BSgenome.Hsapiens.UCSC.hg19, rmarkdown
+Suggests: knitr, BSgenome.Hsapiens.UCSC.hg19, BSgenome.Hsapiens.UCSC.hg38, rmarkdown
 VignetteBuilder: knitr
 RoxygenNote: 7.2.1
 Encoding: UTF-8
