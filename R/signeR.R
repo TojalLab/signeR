@@ -107,6 +107,15 @@ signeR<-function(M, Mheader=TRUE, samples = "rows", Opport=NA,
         W<-t(as.matrix(Opportread))
     }else stop("Dimensions of M and Opport do not match.")
     #Initialize parameters
+    HH<-list(ap=0.8005, bp=0.043, ae=2.0506, be=1.325, lp=5.3329, le=1.436)
+    if(!estimate_hyper){
+      if(is.na(ap)) ap<-HH[["ap"]]
+      if(is.na(bp)) bp<-HH[["bp"]]
+      if(is.na(ae)) ae<-HH[["ae"]]
+      if(is.na(be)) be<-HH[["be"]]
+      if(is.na(lp)) lp<-HH[["lp"]]
+      if(is.na(le)) le<-HH[["le"]]
+    }
     if (is.na(P[1])){ fixedP <- FALSE }else{ nsig <- NCOL(P) }
     if (fixedP){
         if(sum(is.na(c(ae,be,le)))>0){
