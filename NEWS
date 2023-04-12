@@ -1,4 +1,9 @@
 
+Changes in signeR 2.1.1:
+
+    * Fixed doc issues
+    * Fixed cpp issues
+
 Changes in signeR 2.0.0:
 
     * interactive shiny interface: signeRFlow
