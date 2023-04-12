@@ -138,7 +138,7 @@ setMethod("DiffExp",signature(signexp_obj="SignExp", labels="character",
         new_plot <-FALSE
         if(plot_to_file){
             if(length(grep("\\.pdf$",file))==0){file<-paste(file,"pdf",sep=".")}
-            pdf(file,width=7,height=7)
+            pdf(file,width=6,height=7)
             par(mfrow=c(1,1),mar=c(3.1,4.2,2,2))
         }else{
             if(!grepl("pdf|postscript|cairo_|png|tiff|jpeg|bmp",
@@ -150,7 +150,11 @@ setMethod("DiffExp",signature(signexp_obj="SignExp", labels="character",
         }
         ####### Plotting
         ####################### ggplot2
-        md<-data.frame("Sig"=rep(signexp_obj@signames,each=r),
+        mysignames<-signexp_obj@signames
+        if(length(signif)>0){
+            mysignames[signif]<-paste(mysignames[signif],"(>",bigexp[signif],")",sep="")
+        }                                   
+        md<-data.frame("Sig"=rep(mysignames,each=r),
                        "Pvalues"=as.vector(t(Lpval)))
         ms = group_by(md, Sig) %>% summarise(q1=min(Pvalues),
                                              q2=quantile(Pvalues,p=0.25),
@@ -158,7 +162,7 @@ setMethod("DiffExp",signature(signexp_obj="SignExp", labels="character",
                                              q4=quantile(Pvalues,p=0.75),
                                              q5=max(Pvalues))
         sig_order<-order(signexp_obj@signames)
-        segments<-data.frame("Sig"=signexp_obj@signames[sig_order],"x_bgn"=c(1:n)-0.4,"x_end"=c(1:n)+0.4,
+        segments<-data.frame("Sig"=mysignames[sig_order],"x_bgn"=c(1:n)-0.4,"x_end"=c(1:n)+0.4,
                              "y_bgn"=Lpmed[sig_order],
                              "y_end"=Lpmed[sig_order],
                              "q1"=0,"q2"=0,"q3"=0,"q4"=0,"q5"=0)
@@ -167,8 +171,11 @@ setMethod("DiffExp",signature(signexp_obj="SignExp", labels="character",
             geom_hline(yintercept=lcut,col=col2) +
             geom_segment(aes(x = x_bgn, y = y_bgn, xend = x_end, yend = y_end), col = col3,
                          data = segments, show.legend = FALSE)+
-            theme_bw()+
-            theme(axis.text.x=element_text(angle=90,vjust=.5,hjust=0,face="bold")) + 
+            theme_classic(base_size = 15) + #theme_bw()+
+            theme(axis.text.x=element_text(angle=90,vjust=.5,hjust=0.5,face="bold")) + 
+            theme(strip.background.x=element_blank()) + #7-12-22
+            theme(strip.background.y=element_rect(fill='white',color='black')) + #7-12-22
+            theme(axis.ticks.x=element_blank())+ #7-12-22
             labs(x="",y=my.ylab)
         #######################
         if(multicompare){
@@ -186,11 +193,14 @@ setMethod("DiffExp",signature(signexp_obj="SignExp", labels="character",
                     classdiffs[Allclass==cl & fullsigs==thissig]<-paste(Allcomp[[i]][[c]],collapse=",")
                 }
             }
+            v<-as.vector(signexp_obj@Exp[signif,used,])
+            const<-min(v[v>0])/100
+            Logexpr<-log(signexp_obj@Exp[signif,used,] + const)
             md<-data.frame(Sig=fullsigs[fullsignif],
                            class=rep(as.vector(used_labels),each=n,times=r)[fullsignif],
                            classdiffs=classdiffs[fullsignif],
                            #exp=as.vector(Exp[signif,used,]))
-                           exp=as.vector(signexp_obj@Exp[signif,used,]))
+                           exp=as.vector(Logexpr))
             ms = group_by(md, Sig, class ) %>% summarize(q1=min(exp),
                                                  q2=quantile(exp,p=0.25),
                                                  q3=median(exp),
@@ -205,21 +215,24 @@ setMethod("DiffExp",signature(signexp_obj="SignExp", labels="character",
               }
             }
             ms<-ms[ms_ord,]
-            ymean<-mean(ms$q3)
+            ymean<-min(ms$q1)
             g2<-ggplot(ms, aes(x=class,lower=q2, upper=q4, middle=q3, 
                               ymin=q1, ymax=q5)) + 
                 geom_boxplot(stat='identity',show.legend = FALSE) +
-                facet_wrap(vars(Sig),nrow = n)+
-                theme_bw()+
+                facet_wrap(vars(Sig),ncol = 3)+
+                theme_classic(base_size = 8) + #theme_bw()+
                 theme(axis.text.x=element_text(angle=0,vjust=0,hjust=0,face="bold"))+
-                labs(x="",y="Exposure")+
+                labs(x="",y="log(Exposure)")+
                 geom_text(aes(x=class,y=ymean,label=fc),data=ms)
             #######################
-            figure <- ggarrange(g1, g2, ncol = 1, nrow = 2)
+            final_figure <- list(g1,g2) #ggarrange(g1, g2, ncol = 1, nrow = 2)
         }else{
-            figure<-g1
+            final_figure<-list(g1)
         }
-        plot(figure)
+        #plot(figure)
+        for(kk in 1:length(final_figure)){
+            plot(final_figure[[kk]])
+        }            
         ####### Plotting end
         if(plot_to_file){
             dev.off()
@@ -437,8 +450,8 @@ setMethod("ExposureCorrelation",signature(Exposures="matrix",feature="numeric",
                   geom_hline(yintercept=lcut,col=col2) +
                   geom_segment(aes(x = x_bgn, y = y_bgn, xend = x_end, yend = y_end), col = col3,
                                data = segments, show.legend = FALSE)+
-                  theme_bw()+
-                  theme(axis.text.x=element_text(angle=0,vjust=.5,hjust=0,face="bold")) + 
+                  theme_classic(base_size = 15) + #theme_bw()+
+                  theme(axis.text.x=element_text(angle=90,vjust=.5,hjust=0,face="bold")) + 
                   labs(x="",y="-log(pvalue)")
               #######################
               #correlation plots
@@ -449,7 +462,7 @@ setMethod("ExposureCorrelation",signature(Exposures="matrix",feature="numeric",
                   geom_point(size=1, shape=19, show.legend = FALSE) +
                   stat_smooth(method="lm", se=FALSE,col="red") +
                   facet_wrap(vars(Sig),nrow = ceiling(n/2)) +
-                  theme_bw()+
+                  theme_classic(base_size = 15) + #theme_bw()+
                   theme(axis.text.x=element_text(angle=0,vjust=.5,hjust=0,face="bold")) + 
                   labs(x="Feature",y="Exposure")
               figure <- ggarrange(g1,g2, ncol = 1, nrow = 2)
@@ -481,8 +494,8 @@ setMethod("ExposureCorrelation",signature(Exposures="SignExp",feature="numeric",
               i<-dp[[1]]; n<-dp[[2]]; j<-de[[2]]; r<-de[[3]]
               if(r > max_instances){
                 select_instances<-sort(sample(1:r,max_instances,replace=FALSE))
-                signexp_obj@Exp <-signexp_obj@Exp[,,select_instances]
-                signexp_obj@Sign<-signexp_obj@Sign[,,select_instances]
+                Exposures@Exp <-Exposures@Exp[,,select_instances]
+                Exposures@Sign<-Exposures@Sign[,,select_instances]
                 r<-max_instances
               }
               Es <- Exposures@Exp
@@ -544,8 +557,8 @@ setMethod("ExposureCorrelation",signature(Exposures="SignExp",feature="numeric",
                   geom_hline(yintercept=lcut,col=col2) +
                   geom_segment(aes(x = x_bgn, y = y_bgn, xend = x_end, yend = y_end), col = col3,
                                data = segments, show.legend = FALSE)+
-                  theme_bw()+
-                  theme(axis.text.x=element_text(angle=0,vjust=.5,hjust=0,face="bold")) + 
+                  theme_classic(base_size = 15) + #theme_bw()+
+                  theme(axis.text.x=element_text(angle=90,vjust=.5,hjust=0,face="bold")) + 
                   labs(x="",y="-log(pvalue)")
               #######################
               #Correlation plots
@@ -557,7 +570,7 @@ setMethod("ExposureCorrelation",signature(Exposures="SignExp",feature="numeric",
                   geom_point(size=1, shape=19, show.legend = FALSE) +
                   stat_smooth(method="lm", se=FALSE,col="red") +
                   facet_wrap(vars(Sig),nrow = ceiling(sum(signif_signatures)/2),scales="free") +
-                  theme_bw()+
+                  theme_classic(base_size = 15) + #theme_bw()+
                   theme(axis.text.x=element_text(angle=0,vjust=.5,hjust=0,face="bold")) + 
                   labs(x="Feature",y="Exposure")
                 figure <- ggarrange(g1,g2, ncol = 1, nrow = 2)
@@ -688,7 +701,7 @@ setMethod("ExposureSurvival",signature(Exposures="matrix",surv="ANY",
               }else{ col1<-"black"; col2<-"black"; col3<-"black"  }
               if(plot_to_file){
                   if(length(grep("\\.pdf$",file))==0){file<-paste(file,"pdf",sep=".")}
-                  pdf(file,width=7,height=7)
+                  pdf(file,width=6,height=7)
                   par(mfrow=c(ceiling((nsig+1)/2),2),mar=c(3.1,4.2,2,2))
               }else{
                   if(!grepl("pdf|postscript|cairo_|png|tiff|jpeg|bmp",
@@ -726,7 +739,7 @@ setMethod("ExposureSurvival",signature(Exposures="matrix",surv="ANY",
                   geom_hline(yintercept=lcut,col=col2) +
                   geom_segment(aes(x = x_bgn, y = y_bgn, xend = x_end, yend = y_end), col = col3,
                                data = segments, show.legend = FALSE)+
-                  theme_bw()+
+                  theme_classic(base_size = 15) + #theme_bw()+
                   theme(axis.text.x=element_text(angle=90,vjust=.5,hjust=0,face="bold")) + 
                   labs(x="",y="-log(pvalue)")
               #######################
@@ -743,31 +756,93 @@ setMethod("ExposureSurvival",signature(Exposures="matrix",surv="ANY",
                       Tbl<-summary(sf)$table
                       surv_bottom<-as.numeric(Tbl[1,5])
                       surv_top<-as.numeric(Tbl[2,5])
-                      pval_diff<-round(1-pchisq(Test$chisq,1),3)
-                      cutround<-signif(cutvalues[m],digits=4)
+                      pval_diff<-signif(Test$pvalue,digits=3)
+                      cutround<-signif(cutvalues[m],digits=3)
                       ###############ggplot
                       maintitle=paste("Data split by exposure to Signature ",m,sep="")
                       legenlabs<-c(paste("exposure <= ",cutround,sep=""),
                                    paste("exposure > ",cutround,sep=""))
                       g2<-ggsurvplot(sf,data=data.frame(as.matrix(surv),thisgroup),
-                                     pval=pval_diff,color="thisgroup",legend.labs=legenlabs)+
+                                     ggtheme = theme_classic(base_size = 8),#theme_bw(),
+                                     #font.main = c(12, "bold", "darkblue"),
+                                     #font.x = c(14, "bold.italic", "red"),
+                                     #font.y = c(14, "bold.italic", "darkred"),
+                                     pval=pval_diff, pval.size=2,
+                                     color="thisgroup",legend.labs=legenlabs)+
                           ggtitle(maintitle) +
                           labs(x="Time",y="Survival")
-                      survplotlist<-c(survplotlist,list(g2))
+                      survplotlist<-c(survplotlist,list(g2$plot))
                       #####################
                   }
                   plotlist<-c(plotlist,survplotlist)
-              }else{
-                  forestplotlist<-list()
-                  for(m in which(signif_signatures)){
-                      fp<-ggforest(univ.list[[m]],main = signature_names[m])
-                      forestplotlist<-c(forestplotlist,list(fp))
+                  nextplotlist<-list()
+                  final_figure <- list()
+                  ppage1<-4
+                  ppage2<-8
+                  if(length(plotlist)>1){
+                      if(length(plotlist)>(ppage1+1)){
+                          thisfig<-ggarrange(plotlist=plotlist[2:(ppage1+1)], ncol=2, nrow= ppage1/2 )
+                          final_figure[[1]] <- ggarrange(plotlist[[1]],thisfig,ncol=1,nrow=2)
+                          nextplotlist<-plotlist[-c(1:(ppage1+1))]
+                      }else{
+                          thisfig<-ggarrange(plotlist=plotlist[-1], ncol=2, nrow= ppage1/2 )
+                          final_figure[[1]] <- ggarrange(plotlist[[1]],thisfig,ncol=1,nrow=2)
+                      }                
+                  }else{
+                      final_figure[[1]] <-plotlist[[1]]
                   }
-                  plotlist<-c(plotlist,forestplotlist)
+                  while(length(nextplotlist)>0){
+                      if(length(nextplotlist)>(ppage2)){
+                          thisfig<-ggarrange(plotlist=nextplotlist[1:(ppage2)], ncol=2, nrow= ppage2/2 )
+                          nextplotlist<-nextplotlist[-c(1:ppage2)]
+                      }else{
+                          thisfig<-ggarrange(plotlist=nextplotlist, ncol=2, nrow= ppage2/2 )
+                          nextplotlist<-list()
+                      }
+                      final_figure<-c(final_figure,list(thisfig))     
+                  }
+              }else{
+                  univ.tests$labels<-signature_names
+                  univ.tests$colour <- rep(c("white", "gray95"), ceiling(nrow(univ.tests)/2))[1:nrow(univ.tests)]
+                  fp <- ggplot(univ.tests, aes(x = HR, y = labels, xmin = Lower_CI, xmax = Upper_CI)) +
+                      geom_hline(aes(yintercept = labels, colour = colour), size = 7) + 
+                      geom_pointrange(shape = 22, fill = "black") +
+                      geom_vline(xintercept = 1, linetype = 3) +
+                      ylab("") +
+                      xlab("Hazard Ratio with 95% CI") +
+                      theme_classic() +
+                      scale_colour_identity() +
+                      scale_y_discrete(limits = rev(univ.tests$labels)) +
+                      scale_x_log10(limits = c(0.25, 4), 
+                                    breaks = c(0.25, 0.5, 1, 2, 4), 
+                                    labels = c("0.25", "0.5", "1", "2", "4"), expand = c(0,0)) +
+                      theme(axis.text.y = element_blank(), axis.title.y = element_blank())
+
+                  univ.table<-data.frame(labels=univ.tests[,"labels"],
+                                         HR_CI=paste(round(univ.tests$HR,3)," (",
+                                                     round(univ.tests$Lower_CI,3),"-",
+                                                     round(univ.tests$Upper_CI,3),")",sep=""),
+                                         P.value=signif(univ.tests$P.value,3),
+                                         colour=univ.tests$colour)
+                  ggtable <- ggplot(data = univ.table, aes(y = labels)) +
+                      geom_hline(aes(yintercept = labels, colour = colour), size = 7) +
+                      geom_text(aes(x = 0, label = labels), hjust = 0) +
+                      geom_text(aes(x = 3, label = HR_CI)) +
+                      geom_text(aes(x = 3, y=n+0.5, label = "HR(CI)")) +
+                      geom_text(aes(x = 7, label = P.value), hjust = 1) +
+                      geom_text(aes(x = 7, y=n+0.5, label = "P.value"), hjust = 1) +
+                      scale_colour_identity() +
+                      theme_void() + 
+                      theme(plot.margin = margin(5, 0, 35, 0))
+                  
+                  figure <- ggarrange(plotlist = list(ggtable,fp),
+                                      ncol = 2, nrow = 1)
+                  final_figure <- list(ggarrange(g1,figure,ncol = 1))
+                  Sigfactors<-NA
               }
-              figure <- ggarrange(plotlist = plotlist,
-                                  ncol = 1, nrow = 1+sum(signif_signatures))
-              plot(figure)
+              for(kk in 1:length(final_figure)){
+                plot(final_figure[[kk]])
+              }
               ####### Plotting end
               if(plot_to_file){
                   dev.off()
@@ -776,6 +851,7 @@ setMethod("ExposureSurvival",signature(Exposures="matrix",surv="ANY",
                             "on the current directory.",sep=" "),"\n")
               }
               signif<-as.integer(signif_signatures)
+              #Output
               return(list("Significance"=signif,
                           "pvalues"=Pvalues_diff,
                           "pvalues_linear_model"=Pvalues_prop,
@@ -798,8 +874,8 @@ setMethod("ExposureSurvival",signature(Exposures="SignExp",surv="ANY",
               n<-de[[1]]; j<-de[[2]]; r<-de[[3]]
               if(r > max_instances){
                 select_instances<-sort(sample(1:r,max_instances,replace=FALSE))
-                signexp_obj@Exp <-signexp_obj@Exp[,,select_instances]
-                signexp_obj@Sign<-signexp_obj@Sign[,,select_instances]
+                Exposures@Exp <-Exposures@Exp[,,select_instances]
+                Exposures@Sign<-Exposures@Sign[,,select_instances]
                 r<-max_instances
               }
               Ehat<-Median_exp(Exposures)
@@ -823,66 +899,84 @@ setMethod("ExposureSurvival",signature(Exposures="SignExp",surv="ANY",
                              "with 'time' and 'status' columns.\n")
                   }
               }
-              Res.univ<-future_apply(Es,c(1,3),function(exposure){ #s
-                      thisdata<-data.frame(time,os,exp=exposure)
-                      const<-min(exposure[exposure>0])*1e-3
-                      thisdata$lexp<-log2(exposure+const)
-                      mtHL<-maxstat.test(surv~exposure, data=thisdata, smethod="LogRank",pmethod="HL",
-                                         minprop=0.1, maxprop=0.9)
-                      cut<-mtHL$estimate
-                      group<-ifelse(exposure>cut,1,0)
-                      sumup<-sum(group==1)
-                      sumdown<-sum(group==0)
-                      Test <- survdiff(surv~group)
-                      sf<-survfit(surv~group)
-                      cph<-coxph(surv~lexp, data=thisdata)
-                      coxz<-cox.zph(cph)
-                      thisTable<-summary(cph)
-                      coxdf<-cox_as_data_frame(thisTable)
-                      return(c(group,
-                                  round(1-pchisq(Test$chisq,1),3),
-                                  cut,
-                                  round(coxz$table[1,3],5),
-                                  as.vector(as.matrix(coxdf[1,4:10])))) 
-                                  #HR,Lower_CI,Upper_CI,Inv_HR,Inv_Lower_CI,Inv_Upper_CI,p
-              })
-              Sigfactors.ar<-Res.univ[c(1:j),,]#group 
-              Pvalues_diff<-Res.univ[j+1,,]
-              cutvalues<-Res.univ[j+2,,]
-              Pvalues_prop<-Res.univ[j+3,,]
-              Pvalues_cox<-Res.univ[j+10,,]
-              univ.tests.ar<-Res.univ[(j+4):(j+10),,]
-              if(method=="logrank") {
-                  Pvalues <- Pvalues_diff
-              }else{
-                  Pvalues <- Pvalues_cox
-              }
+              ### Tests 
               invquant<-1-quant
-              if(n==1){
-                  Pvalues_quant<-quantile(Pvalues,probs=quant)
-              }else{
-                  Pvalues_quant<-apply(Pvalues,1,function(v){quantile(v,probs=quant)})
+              if(method=="logrank") {
+                  Res.univ<-future_apply(Es,c(1,3),function(exposure){ #s
+                          thisdata<-data.frame(time,os,exp=exposure)
+                          const<-min(exposure[exposure>0])*1e-3
+                          thisdata$lexp<-log2(exposure+const)
+                          mtHL<-maxstat.test(surv~exposure, data=thisdata, smethod="LogRank",pmethod="HL", #Lr
+                                             minprop=0.1, maxprop=0.9) #Lr
+                          cut<-mtHL$estimate #Lr
+                          group<-ifelse(exposure>cut,1,0) #Lr
+                          sumup<-sum(group==1) #Lr
+                          sumdown<-sum(group==0) #Lr
+                          Test <- survdiff(surv~group) #Lr
+                          return(c(group,#Lr
+                                      round(Test$pvalue,3),#Lr
+                                      cut)) #Lr
+                                      #round(coxz$table[1,3],5),#Nada
+                                      #as.vector(as.matrix(coxdf[1,4:10])))) #Cx
+                                      #HR,Lower_CI,Upper_CI,Inv_HR,Inv_Lower_CI,Inv_Upper_CI,p
+                  })
+                  Sigfactors.ar<-Res.univ[c(1:j),,]#group 
+                  Pvalues<-Res.univ[j+1,,] #Pvalues_diff
+                  cutvalues<-Res.univ[j+2,,]
+                  if(n==1){
+                      Pvalues_quant<-quantile(Pvalues,probs=quant)
+                  }else{
+                      Pvalues_quant<-apply(Pvalues,1,function(v){quantile(v,probs=quant)})
+                  }
+                  #find signif signatures
+                  signif_signatures <- rep(TRUE,n)
+                  if(!is.na(cutoff_pvalue)){
+                      signif_signatures <- signif_signatures & 
+                          !is.na(Pvalues_quant) & 
+                          Pvalues_quant <= cutoff_pvalue  
+                  }
+              }else{ #Cox model
+                  Res.univ<-future_apply(Es,c(1,3),function(exposure){ #s
+                          thisdata<-data.frame(time,os,exp=exposure)
+                          const<-min(exposure[exposure>0])*1e-3
+                          thisdata$lexp<-log2(exposure+const)
+                          cph<-coxph(surv~lexp, data=thisdata) #Cx
+                          thisTable<-summary(cph) #Cx
+                          coxdf<-cox_as_data_frame(thisTable) #Cx
+                          return(as.vector(as.matrix(coxdf[1,4:10])))
+                          #HR,Lower_CI,Upper_CI,Inv_HR,Inv_Lower_CI,Inv_Upper_CI,p
+                  })
+                  univ.tests.ar<-Res.univ[1:7,, ]#[(j+4):(j+10),,]
+                  Pvalues <-Res.univ [7,, ]#[j+10,,] #Pvalues_cox
+                  HR_quantiles=apply(univ.tests.ar[1,,],1,function(v){quantile(v,probs=c(invquant,0.5,quant))})
+                  cond<-HR_quantiles[2,]>=1
+                  HR_quant<-ifelse(cond,HR_quantiles[1,],HR_quantiles[3,])#if HR>1, takes inferior quantile.
+                  if(n==1){
+                      Pvalues_quant<-quantile(Pvalues,probs=quant)
+                  }else{
+                      Pvalues_quant<-apply(Pvalues,1,function(v){quantile(v,probs=quant)})
+                  }
+                  #find signif signatures
+                  signif_signatures <- rep(TRUE,n)
+                  if(!is.na(cutoff_pvalue)){
+                      signif_signatures <- signif_signatures & 
+                          !is.na(Pvalues_quant) & 
+                          Pvalues_quant <= cutoff_pvalue  
+                  }
+                  if(!is.na(cutoff_hr)){
+                      signif_signatures <- signif_signatures & 
+                          !is.na(HR_quant) & 
+                          abs(log(HR_quant)) >= log(cutoff_hr)  
+                  }
+                  cutvalues<-NA
               }
-              HR_quantiles=apply(univ.tests.ar[1,,],1,function(v){quantile(v,probs=c(invquant,0.5,quant))})
-              cond<-HR_quantiles[2,]>=1
-              HR_quant<-ifelse(cond,HR_quantiles[1,],HR_quantiles[3,])#if HR>1, takes inferior quantile.
-              signif_signatures <- rep(TRUE,n)
-              if(!is.na(cutoff_pvalue)){
-                  signif_signatures <- signif_signatures & 
-                      !is.na(Pvalues_quant) & 
-                      Pvalues_quant <= cutoff_pvalue  
-              }
-              if(!is.na(cutoff_hr)){
-                  signif_signatures <- signif_signatures & 
-                      !is.na(HR_quant) & 
-                      abs(log(HR_quant)) >= log(cutoff_hr)  
-              }
+              #Plot prepare 
               if(colors){ col1<-"darkgreen"; col2<-"red"; col3<-"blue"
               }else{ col1<-"black"; col2<-"black"; col3<-"black"  }
               nsig<-sum(signif_signatures)
               if(plot_to_file){
                   if(length(grep("\\.pdf$",file))==0){file<-paste(file,"pdf",sep=".")}
-                  pdf(file,width=7,height=7)
+                  pdf(file,width=6,height=7)
                   par(mfrow=c(ceiling((nsig+1)/2),2),mar=c(3.1,4.2,2,2))
               }else{
                   if(!grepl("pdf|postscript|cairo_|png|tiff|jpeg|bmp",
@@ -921,7 +1015,7 @@ setMethod("ExposureSurvival",signature(Exposures="SignExp",surv="ANY",
                   geom_hline(yintercept=lcut,col=col2) +
                   geom_segment(aes(x = x_bgn, y = y_bgn, xend = x_end, yend = y_end), col = col3,
                                data = segments, show.legend = FALSE)+
-                  theme_bw()+
+                  theme_classic(base_size = 15) + #theme_bw()+
                   theme(axis.text.x=element_text(angle=90,vjust=.5,hjust=0,face="bold")) + 
                   labs(x="",y="-log(pvalue)")
               #######################
@@ -945,22 +1039,53 @@ setMethod("ExposureSurvival",signature(Exposures="SignExp",surv="ANY",
                       Tbl<-summary(sf)$table
                       surv_bottom<-as.numeric(Tbl[1,5])
                       surv_top<-as.numeric(Tbl[2,5])
-                      pval_diff<-round(1-pchisq(Test$chisq,1),3)
-                      cutround<-signif(cutvals[m],digits=4)
+                      pval_diff<-signif(Pvalues_quant[m],digits=3)
+                      this_pval<-signif(Test$pvalue,digits=3)
+                      cutround<-signif(cutvals[m],digits=3)
                       ###############ggplot
-                      maintitle=paste("Cohorts by exposure to ",signature_names[m],sep="")
-                      legenlabs<-c(paste("exposure <= ",cutround,sep=""),
+                      maintitle <- signature_names[m]
+                      legenlabs <- c(paste("exposure <= ",cutround,sep=""),
                                    paste("exposure > ",cutround,sep=""))
                       g2<-ggsurvplot(sf,data=data.frame(as.matrix(surv),thisgroup),
-                                     pval=pval_diff,color="thisgroup",legend.labs=legenlabs)+
+                                     ggtheme = theme_classic(base_size = 8),#theme_bw(),
+                                     #font.main = c(12, "bold", "darkblue"),
+                                     #font.x = c(14, "bold.italic", "red"),
+                                     #font.y = c(14, "bold.italic", "darkred"),
+                                     pval=pval_diff, pval.size=2,
+                                     color="thisgroup",legend.labs=legenlabs)+
                           ggtitle(maintitle) +
                           labs(x="Time",y="Survival")
                       survplotlist<-c(survplotlist,list(g2$plot))
                       #####################
                   }
-                  nrows<-ceiling( (1+sum(signif_signatures))/2 )
-                  final_figure <- ggarrange(plotlist=c(list(g1),survplotlist),ncol=2,nrow=nrows)
-              }else{
+                  plotlist<-c(list(g1),survplotlist)
+                  nextplotlist<-list()
+                  final_figure <- list()
+                  ppage1<-4
+                  ppage2<-8
+                  if(length(plotlist)>1){
+                      if(length(plotlist)>(ppage1+1)){
+                          thisfig<-ggarrange(plotlist=plotlist[2:(ppage1+1)], ncol=2, nrow= ppage1/2 )
+                          final_figure[[1]] <- ggarrange(plotlist[[1]],thisfig,ncol=1,nrow=2)
+                          nextplotlist<-plotlist[-c(1:(ppage1+1))]
+                      }else{
+                          thisfig<-ggarrange(plotlist=plotlist[-1], ncol=2, nrow= ppage1/2 )
+                          final_figure[[1]] <- ggarrange(plotlist[[1]],thisfig,ncol=1,nrow=2)
+                      }                
+                  }else{
+                      final_figure[[1]] <-plotlist[[1]]
+                  }
+                  while(length(nextplotlist)>0){
+                      if(length(nextplotlist)>(ppage2)){
+                          thisfig<-ggarrange(plotlist=nextplotlist[1:(ppage2)], ncol=2, nrow= ppage2/2 )
+                          nextplotlist<-nextplotlist[-c(1:ppage2)]
+                      }else{
+                          thisfig<-ggarrange(plotlist=nextplotlist, ncol=2, nrow= ppage2/2 )
+                          nextplotlist<-list()
+                      }                
+                      final_figure<-c(final_figure,list(thisfig))     
+                  }
+              }else{ #Cox model
                   HR_quantiles=apply(univ.tests.ar[1,,],1,function(v){quantile(v,probs=c(invquant,0.5,quant))})
                   cond<-HR_quantiles[2,]>=1
                   HR_quant<-ifelse(cond,HR_quantiles[1,],HR_quantiles[3,])#if HR>1, takes inferior quantile.
@@ -1016,10 +1141,12 @@ setMethod("ExposureSurvival",signature(Exposures="SignExp",surv="ANY",
                   
                   figure <- ggarrange(plotlist = list(ggtable,fp),
                                       ncol = 2, nrow = 1)
-                  final_figure <- ggarrange(g1,figure,ncol = 1)
+                  final_figure <- list(ggarrange(g1,figure,ncol = 1))
                   Sigfactors<-NA
               }
-              plot(final_figure)
+              for(kk in 1:length(final_figure)){
+                  plot(final_figure[[kk]])
+              }            
               ####### Plotting end
               if(plot_to_file){
                   dev.off()
@@ -1028,10 +1155,12 @@ setMethod("ExposureSurvival",signature(Exposures="SignExp",surv="ANY",
                             "on the current directory.",sep=" "),"\n")
               }
               signif<-as.integer(signif_signatures)
+              #Output
               return(list("Significance"=signif,
-                          "pvalues"=Pvalues_diff,
-                          "pvalues_linear_model"=Pvalues_prop,
+                          "pvalues"=Pvalues,
+                          #"pvalues_linear_model"=Pvalues_prop,
                           "limits"=cutvalues,
                           "Groups"=Sigfactors))
           }
 )
+

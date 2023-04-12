@@ -48,7 +48,7 @@ BICboxplot(signeRout, plot_to_file=FALSE, file="Model_selection_BICs.pdf")
     file="Signature_plot.pdf", pal="bcr1", threshold=0, plots_per_page=4,
     gap=1, reord=NA, ...)
 \S4method{SignHeat}{SignExp}(signexp_obj, plot_to_file=FALSE,
-    file="Signature_heatmap.pdf", nbins=20, pal="roh", ...)
+    file="Signature_heatmap.pdf", nbins=50, pal="roh", ...)
 \S4method{ExposureBarplot}{SignExp}(signexp_obj, plot_to_file=FALSE,
     file="Exposure_barplot.pdf", col='tan2', threshold=0, relative=FALSE,
     title="", show_samples=NA, ...)
@@ -56,7 +56,7 @@ BICboxplot(signeRout, plot_to_file=FALSE, file="Model_selection_BICs.pdf")
     file="Exposure_boxplot.pdf", col='tan2', threshold=0, show_samples=NA,
     plots_per_page=4, reord=NA, ...)
 \S4method{ExposureHeat}{SignExp}(signexp_obj, plot_to_file=FALSE,
-    file="Exposure_heatmap.pdf", nbins=20, pal="roh", distmethod="euclidean",
+    file="Exposure_heatmap.pdf", nbins=50, pal="roh", distmethod="euclidean",
         clustermethod="complete", show_samples=NA, ...)
 }
 
@@ -68,7 +68,7 @@ BICboxplot(signeRout, plot_to_file=FALSE, file="Model_selection_BICs.pdf")
     Default is FALSE.}
     \item{file}{Output pdf file of the plots.}
     \item{pal}{Color palette used. Options are: "brew","lba","bcr1",
-    "bcr2","bw","roh".}
+          "bcr2","bw","rdh","roh","blh" or "bph".}
     \item{threshold}{Entries below this value will be rounded to 0. Default
     is 0 (all entries are kept).}
     \item{plots_per_page}{How many plots in a single page, default is 4.}

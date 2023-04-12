@@ -104,12 +104,22 @@ setMethod("SignPlot",signature(signexp_obj="SignExp",plot_to_file="ANY",
             "#33a02c","#fb9a99","#e31a1c")
         }else if (pal =='lba'){ xcolores <- c("#29b4f4ff","#000000ff",
             "#f41d09ff","#bfc0bfff","#76d248ff","#f9b6b7ff")
-        }else if (pal == 'bw'){ xcolores <- c("#949494FF", "#4D4D4DFF",
-            "#FFFFFFFF","#B7B7B7FF","#DBDBDBFF", "#707070FF")
         }else if (pal == 'bcr1'){ xcolores <- c("#006040FF","#BF7C40FF",
             "#BF0040FF","#406000FF","#4000BFFF","#FF7C00FF")
         }else if (pal == 'bcr2'){ xcolores <- c("#006040FF","#BF7C40FF",
             "#FF0000FF","#406000FF","#0000FFFF","#FF7C00FF")
+        }else if (pal=="rdh"){
+            xcolores<-colorRampPalette(c("#fee0d2","#a50f15"))(6)
+        }else if (pal=="roh"){
+            xcolores<-c("#fee0d2","#fcbba1","#fc9272","#fb6a4a",
+                "#ef3b2c","#cb181d")
+        }else if (pal=="blh"){
+            xcolores<-colorRampPalette(c("#ece7f2","#d0d1e6","#a6bddb","#74a9cf",
+                "#3690c0","#0570b0","#045a8d","#023858"))(6)
+        }else if (pal=="bph"){
+            xcolores<-rainbow(6,start=0.5,end=0.8)
+        }else if (pal == 'bw'){ xcolores <- c("#949494FF", "#4D4D4DFF",
+            "#FFFFFFFF","#B7B7B7FF","#DBDBDBFF", "#707070FF")
         }else stop("Unknown pallete.")
         if(i==96){
             bar.col <- rep(xcolores,each=16)
@@ -138,7 +148,6 @@ setMethod("SignPlot",signature(signexp_obj="SignExp",plot_to_file="ANY",
         }
         hg<-rep(1,plots_per_page)
         hg[c(1,plots_per_page)]<-1.15
-        ########### ggplot2
         for(k in 1:n){
             #get data
             Pdata<-signexp_obj@Psummary[mutord,reord[k],1:6,drop=TRUE]
@@ -157,17 +166,22 @@ setMethod("SignPlot",signature(signexp_obj="SignExp",plot_to_file="ANY",
         colnames(Pdata_all)<-c("q05","q25","medians","q75","q95","Sig","y.max","y.width")
         Pdata_all$triplets<-rep(x.names,n)
         Pdata_all$muts<-rep(muts,n)
-        g<-ggplot(Pdata_all,aes(x=triplets,y=medians))+
-            geom_col(aes(fill=rep(bar.col,n), colour=rep(border,n)), show.legend = FALSE)+ 
-            labs(title="",
-                subtitle = "", 
-                x="SNV type", 
-                y = "")+
-            geom_errorbar(aes(ymin=q25, ymax=q75), width=.2, position=position_dodge(.9))+
-            theme_classic(base_size = 15) +
-            facet_grid(rows=vars(Sig),cols=vars(muts),scales="free")
-        plot(g+ theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1,size = 6)))
-        ###################
+        g<-ggplot(Pdata_all,aes(x=triplets,y=medians,fill=muts))+ 
+          scale_fill_manual(values=xcolores) +
+          geom_col(width=0.75) +
+          facet_grid(Sig~muts,scales="free") +
+          theme_classic(base_size = 15) +
+          theme(axis.text.x=element_text(angle=90,size=6,vjust=.5,hjust=1,face="bold")) + 
+          labs(x="SNV type",y="") +
+          theme(legend.position="none") +
+          coord_cartesian(expand=0) +
+          geom_segment( y = Inf, yend = Inf, aes(color = muts), x = -Inf, xend = Inf, size = 4) +
+          scale_color_manual(values=xcolores) +
+          geom_errorbar(aes(ymin=q25, ymax=q75), width=.2, position=position_dodge(.9))+
+          theme(strip.background.x=element_blank()) +
+          theme(strip.background.y=element_rect(fill='white',color='black')) +
+          theme(axis.ticks.x=element_blank())
+        plot(g)
         if(plot_to_file){
             dev.off()
             outmess<-paste("Signature barplots were exported to the file",
@@ -345,7 +359,7 @@ setMethod("ExposureBarplot",signature(signexp_obj="SignExp", plot_to_file="ANY",
 
 setGeneric("SignHeat",
     def=function(signexp_obj, plot_to_file=FALSE,
-        file="Signature_heatmap.pdf", nbins=20, pal="roh",...){
+        file="Signature_heatmap.pdf", nbins=50, pal="roh",...){
         standardGeneric("SignHeat")
     }
 )
@@ -366,18 +380,21 @@ setMethod("SignHeat",signature(signexp_obj="SignExp", plot_to_file="ANY",
             })
         )
         mut.names <- paste(muttypes,x.names.del,sep=":")
-        if (pal=="rdh"){
-            colors<-colorRampPalette(c("#fee0d2","#a50f15"))(nbins)
-        }else if (pal=="roh"){
-            colors<-colorRampPalette(c("#fee0d2","#fcbba1","#fc9272","#fb6a4a",
-                "#ef3b2c","#cb181d","#a50f15"))(nbins)
-        }else if (pal=="blh"){
-            colors<-colorRampPalette(c("#ece7f2","#d0d1e6","#a6bddb","#74a9cf",
-                "#3690c0","#0570b0","#045a8d","#023858"))(nbins)
-        }else if (pal=="bph"){
-            colors<-rainbow(nbins,start=0.5,end=0.8)
-        }else if (pal=="bw"){
-            colors<-colorRampPalette(c("#f0f0f0","#000000"))(nbins)
+        if (pal == 'brew'){ colors <- colorRampPalette(c("#a6cee3","#1f78b4",
+            "#b2df8a","#33a02c","#fb9a99","#e31a1c"))(nbins)
+        }else if (pal =='lba'){ colors <- colorRampPalette(c("#29b4f4ff","#000000ff",
+            "#f41d09ff","#bfc0bfff","#76d248ff","#f9b6b7ff"))(nbins)
+        }else if (pal == 'bcr1'){ colors <- colorRampPalette(c("#006040FF","#BF7C40FF",
+            "#BF0040FF","#406000FF","#4000BFFF","#FF7C00FF"))(nbins)
+        }else if (pal == 'bcr2'){ colors <- colorRampPalette(c("#006040FF","#BF7C40FF",
+            "#FF0000FF","#406000FF","#0000FFFF","#FF7C00FF"))(nbins)
+        }else if (pal =="rdh"){ colors<-colorRampPalette(c("#fee0d2","#a50f15"))(nbins)
+        }else if (pal =="roh"){ colors<-colorRampPalette(c("#fee0d2","#fcbba1",
+                "#fc9272","#fb6a4a","#ef3b2c","#cb181d","#a50f15"))(nbins)
+        }else if (pal == "blh"){ colors<-colorRampPalette(c("#ece7f2","#d0d1e6",
+                "#a6bddb","#74a9cf","#3690c0","#0570b0","#045a8d","#023858"))(nbins)
+        }else if (pal == "bph"){ colors<-rainbow(nbins,start=0.5,end=0.8)
+        }else if (pal == "bw"){ colors<-colorRampPalette(c("#f0f0f0","#000000"))(nbins)
         }else stop("Unknown pallete.")
         Phat<-Median_sign(signexp_obj,normalize=TRUE)
         minval<-min(Phat)
@@ -407,8 +424,8 @@ setMethod("SignHeat",signature(signexp_obj="SignExp", plot_to_file="ANY",
         mutannot<-data.frame(mutation=muttypes)
         rownames(mutannot)<-muttypes
         colnames(m) <- muts
-        clr=rev(colorRampPalette(brewer.pal(name="Spectral",n=11))(100))
-        pheatmap(m,border_color=NA, color=clr, 
+        #clr=rev(colorRampPalette(brewer.pal(name="Spectral",n=11))(100))
+        pheatmap(m,border_color=NA, color=colors, 
                  clustering_method='ward.D2',
                  clustering_distance_rows='canberra',
                  cluster_cols=F,annotation_col = mutannot,
@@ -426,7 +443,7 @@ setMethod("SignHeat",signature(signexp_obj="SignExp", plot_to_file="ANY",
 
 setGeneric("ExposureHeat",
     def=function(signexp_obj, plot_to_file=FALSE,
-        file="Exposure_heatmap.pdf",nbins=20,pal="roh",distmethod="euclidean",
+        file="Exposure_heatmap.pdf",nbins=50,pal="roh",distmethod="euclidean",
         clustermethod="complete",show_samples=NA_integer_,...){
         standardGeneric("ExposureHeat")
     }
@@ -439,18 +456,21 @@ setMethod("ExposureHeat",signature(signexp_obj="SignExp", plot_to_file="ANY",
         de <- dim(signexp_obj@Exp) #[n,j,r]
         n<-de[[1]]; j<-de[[2]]; r<-de[[3]]
         signat<-paste("S",1:n,sep="")
-        if (pal=="rdh"){
-            colors<-colorRampPalette(c("#fee0d2","#a50f15"))(nbins)
-        }else if (pal=="roh"){
-            colors<-colorRampPalette(c("#fee0d2","#fcbba1","#fc9272","#fb6a4a",
-                "#ef3b2c","#cb181d","#a50f15"))(nbins)
-        }else if (pal=="blh"){
-            colors<-colorRampPalette(c("#ece7f2","#d0d1e6","#a6bddb","#74a9cf",
-                "#3690c0","#0570b0","#045a8d","#023858"))(nbins)
-        }else if (pal=="bph"){
-            colors<-rainbow(nbins,start=0.5,end=0.8)
-        }else if (pal=="bw"){
-            colors<-colorRampPalette(c("#f0f0f0","#000000"))(nbins)
+        if (pal == 'brew'){ colors <- colorRampPalette(c("#a6cee3","#1f78b4",
+            "#b2df8a","#33a02c","#fb9a99","#e31a1c"))(nbins)
+        }else if (pal =='lba'){ colors <- colorRampPalette(c("#29b4f4ff","#000000ff",
+            "#f41d09ff","#bfc0bfff","#76d248ff","#f9b6b7ff"))(nbins)
+        }else if (pal == 'bcr1'){ colors <- colorRampPalette(c("#006040FF","#BF7C40FF",
+            "#BF0040FF","#406000FF","#4000BFFF","#FF7C00FF"))(nbins)
+        }else if (pal == 'bcr2'){ colors <- colorRampPalette(c("#006040FF","#BF7C40FF",
+            "#FF0000FF","#406000FF","#0000FFFF","#FF7C00FF"))(nbins)
+        }else if (pal =="rdh"){ colors<-colorRampPalette(c("#fee0d2","#a50f15"))(nbins)
+        }else if (pal =="roh"){ colors<-colorRampPalette(c("#fee0d2","#fcbba1",
+                "#fc9272","#fb6a4a","#ef3b2c","#cb181d","#a50f15"))(nbins)
+        }else if (pal == "blh"){ colors<-colorRampPalette(c("#ece7f2","#d0d1e6",
+                "#a6bddb","#74a9cf","#3690c0","#0570b0","#045a8d","#023858"))(nbins)
+        }else if (pal == "bph"){ colors<-rainbow(nbins,start=0.5,end=0.8)
+        }else if (pal == "bw"){ colors<-colorRampPalette(c("#f0f0f0","#000000"))(nbins)
         }else stop("Unknown pallete.")
         if(!signexp_obj@normalized) signexp_obj<-Normalize(signexp_obj)
         if(is.na(show_samples)){show_samples <- (j<=50)}
@@ -480,8 +500,8 @@ setMethod("ExposureHeat",signature(signexp_obj="SignExp", plot_to_file="ANY",
         m = Median_exp(signexp_obj)
         colnames(m) = signexp_obj@samples
         rownames(m) = signexp_obj@signames
-        clr=rev(colorRampPalette(brewer.pal(name="Spectral",n=11))(100))
-        pheatmap(log(m), border_color=NA, color=clr, 
+        #clr=rev(colorRampPalette(brewer.pal(name="Spectral",n=11))(100))
+        pheatmap(log(m), border_color=NA, color=colors, 
                  clustering_method='ward.D2',
                  clustering_distance_rows='canberra',
                  clustering_distance_cols='canberra',
