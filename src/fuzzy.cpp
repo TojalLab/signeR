@@ -57,7 +57,7 @@ void UpdateCluster(
             thisclust(0) = 1;
             for (size_t k = 1; k < C; k++) {
                 if(Dist(g,k)<min_dist){
-                    min_dist<-Dist(g,k);
+                    //min_dist = Dist(g,k);
                     thisclust(which_min_dist) = 0;
                     thisclust(k) = 1;
                     which_min_dist = k;

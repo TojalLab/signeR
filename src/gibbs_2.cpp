@@ -56,7 +56,7 @@ Rcpp::NumericVector create_array(Rcpp::IntegerVector dims) {
     return array;
 }
 
-// copy the cube values to a 4D array cube-slice, like: dest[,,,l] <- src
+// copy the cube values to a 4D array cube-slice, like: dest[,,,l] = src
 inline void copy_cube_to_4Darray(const arma::cube &src, const size_t l,
     Rcpp::NumericVector &dest
     ) {

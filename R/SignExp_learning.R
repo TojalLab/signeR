@@ -424,17 +424,6 @@ setMethod("ExposureGLM",signature(Exposures="matrix",feature="numeric",
               Es <- data.frame(t(Exposures),target=feature)
               if(colors){ col1<-"darkgreen"; col2<-"red"; col3<-"blue"
               }else{ col1<-"black"; col2<-"black"; col3<-"black"  }
-              if(plot_to_file){
-                  if(length(grep("\\.pdf$",file))==0){file<-paste(file,"pdf",sep=".")}
-                  pdf(file,width=7,height=7)
-                  par(mfrow=c(1,1),mar=c(3.1,4.2,2,2))
-              }else{
-                  if(!grepl("pdf|postscript|cairo_|png|tiff|jpeg|bmp",
-                            names(dev.cur()),perl=TRUE)){
-                      dev.new(width=7, height=7)
-                  }
-                  par(mfrow=c(1,1),mar=c(4.2,5.2,2,2))
-              }
               gl<-glm("target~.", data=Es,...)
               thisTable<-summary(gl)$coefficients
               Pvalues<-thisTable[-1,4]
@@ -459,6 +448,17 @@ setMethod("ExposureGLM",signature(Exposures="matrix",feature="numeric",
                   boxnames<-paste("S",1:n,sep="")
               }
               boxlines<-rep(0.5,n)
+              if(plot_to_file){
+                  if(length(grep("\\.pdf$",file))==0){file<-paste(file,"pdf",sep=".")}
+                  pdf(file,width=7,height=7)
+                  par(mfrow=c(1,1),mar=c(3.1,4.2,2,2))
+              }else{
+                  if(!grepl("pdf|postscript|cairo_|png|tiff|jpeg|bmp",
+                            names(dev.cur()),perl=TRUE)){
+                      dev.new(width=7, height=7)
+                  }
+                  par(mfrow=c(1,1),mar=c(4.2,5.2,2,2))
+              }
               ####### Plotting
               plot(1:n,rep(lcut,n),type="n",main="",xlab="",ylab="-log(pvalue)",
                    xlim=c(0.5,n+0.5),ylim=c(y.min,y.max),xaxt="n",cex.lab=1.2)
@@ -500,17 +500,6 @@ setMethod("ExposureGLM",signature(Exposures="SignExp",feature="numeric",
               Es <- Exposures@Exp
               if(colors){ col1<-"darkgreen"; col2<-"red"; col3<-"blue"
               }else{ col1<-"black"; col2<-"black"; col3<-"black"  }
-              if(plot_to_file){
-                  if(length(grep("\\.pdf$",file))==0){file<-paste(file,"pdf",sep=".")}
-                  pdf(file,width=7,height=7)
-                  par(mfrow=c(1,1),mar=c(3.1,4.2,2,2))
-              }else{
-                  if(!grepl("pdf|postscript|cairo_|png|tiff|jpeg|bmp",
-                            names(dev.cur()),perl=TRUE)){
-                      dev.new(width=7, height=7)
-                  }
-                  par(mfrow=c(1,1),mar=c(4.2,5.2,2,2))
-              }
               Stats<-array(as.vector(
                   future_apply(Es,3,function(D){
                       thisexposures<-data.frame(t(D),target=feature)
@@ -539,17 +528,52 @@ setMethod("ExposureGLM",signature(Exposures="SignExp",feature="numeric",
               cor<-rep("black",n)
               cor[signif_signatures]<-col1
               bigexp<-rep(NA,n)
-              boxnames<-Exposures@signames
-              boxlines<-rep(0.5,n)
+              #boxnames<-Exposures@signames
+              #boxlines<-rep(0.5,n)
+              if(plot_to_file){
+                  if(length(grep("\\.pdf$",file))==0){file<-paste(file,"pdf",sep=".")}
+                  pdf(file,width=7,height=7)
+                  par(mfrow=c(1,1),mar=c(3.1,4.2,2,2))
+              }else{
+                  if(!grepl("pdf|postscript|cairo_|png|tiff|jpeg|bmp",
+                            names(dev.cur()),perl=TRUE)){
+                      dev.new(width=7, height=7)
+                  }
+                  par(mfrow=c(1,1),mar=c(4.2,5.2,2,2))
+              }
               ####### Plotting
-              plot(1:n,rep(lcut,n),type="n",main="",xlab="",ylab="-log(pvalue)",
-                   xlim=c(0.5,n+0.5),ylim=c(y.min,y.max),xaxt="n",cex.lab=1.2)
-              boxplot(data.frame(t(Lpval)),at=1:n,add=TRUE,border=cor,
-                      names=rep("",n),pch=45)
-              mtext(boxnames,side=1,line=boxlines,at=1:n,cex=1,las=1)
-              lines(x=c(0,n+1),y=rep(lcut,2),col=col2)
-              for (k in 1:n){segments(k-0.39,Lp_quant[k],k+0.39,Lp_quant[k],col=col3,lwd=2)}
+              #plot(1:n,rep(lcut,n),type="n",main="",xlab="",ylab="-log(pvalue)",
+              #     xlim=c(0.5,n+0.5),ylim=c(y.min,y.max),xaxt="n",cex.lab=1.2)
+              #boxplot(data.frame(t(Lpval)),at=1:n,add=TRUE,border=cor,
+              #        names=rep("",n),pch=45)
+              #mtext(boxnames,side=1,line=boxlines,at=1:n,cex=1,las=1)
+              #lines(x=c(0,n+1),y=rep(lcut,2),col=col2)
+              #for (k in 1:n){segments(k-0.39,Lp_quant[k],k+0.39,Lp_quant[k],col=col3,lwd=2)}
               ####### Plotting end
+              ####################### ggplot2
+              signature_names<-Exposures@signames
+              sig_order<-order(signature_names)
+              md<-data.frame(Sig=rep(signature_names,each=r),
+                             Pvalues=as.vector(t(Lpval)))
+              ms = group_by(md, Sig) %>% summarize(q1=min(Pvalues),
+                                                   q2=quantile(Pvalues,p=0.25),
+                                                   q3=median(Pvalues),
+                                                   q4=quantile(Pvalues,p=0.75),
+                                                   q5=max(Pvalues))
+              segments<-data.frame(Sig=signature_names[sig_order],x_bgn=c(1:n)-0.4,x_end=c(1:n)+0.4,
+                                   y_bgn=Lp_quant[sig_order],
+                                   y_end=Lp_quant[sig_order],
+                                   q1=0,q2=0,q3=0,q4=0,q5=0)
+              g1<-ggplot(ms, aes(x=Sig,ymin=q1,lower=q2,middle=q3,upper=q4,ymax=q5)) + 
+                  geom_boxplot(stat='identity',show.legend = FALSE) +
+                  geom_hline(yintercept=lcut,col=col2) +
+                  geom_segment(aes(x = x_bgn, y = y_bgn, xend = x_end, yend = y_end), col = col3,
+                               data = segments, show.legend = FALSE)+
+                  theme_classic(base_size = 15) + #theme_bw()+
+                  theme(axis.text.x=element_text(angle=90,vjust=.5,hjust=0,face="bold")) + 
+                  labs(x="",y="-log(pvalue)")
+              plot(g1)
+
               if(plot_to_file){
                   dev.off()
                   cat(paste("Exposure GLM analysis results",
@@ -734,6 +758,7 @@ setMethod("ExposureSurvModel",signature(Exposures="matrix",surv="ANY",
                 geom_text(aes(x = 7, label = P.value), hjust = 1) +
                 geom_text(aes(x = 7, y=n+0.5, label = "P.value"), hjust = 1) +
                 scale_colour_identity() +
+                scale_y_discrete(limits = rev(multiv.tests$labels)) +
                 theme_void() + 
                 theme(plot.margin = margin(5, 0, 35, 0))
               
@@ -1086,7 +1111,7 @@ setMethod("FuzzyClustExp",signature(signexp_obj="SignExp",  max_instances="ANY",
             if(length(grep("\\.pdf$",file))==0){
                 file<-paste(file,"pdf",sep=".")
             }
-            pdf(file,width=max(5,2*j),height=7)
+            pdf(file,width=7,height=7)
         }else{
             if(!grepl("pdf|postscript|cairo_|png|tiff|jpeg|bmp",
                       names(dev.cur()),perl=TRUE)){
@@ -1094,31 +1119,31 @@ setMethod("FuzzyClustExp",signature(signexp_obj="SignExp",  max_instances="ANY",
             }
         }
         if(colored){
-            clr = rev(colorRampPalette(brewer.pal(name="Spectral",n=11))(100))
+            clr = colorRampPalette(brewer.pal(name="YlOrRd",n=9))(100)
         }else{
-            clr=rev(colorRampPalette(brewer.pal(name="Greys",n=9))(100)) 
+            clr=  colorRampPalette(brewer.pal(name="Greys",n=9))(100) 
         }
         # Heatmap
         MF<-Cm$Meanfuzzy
         colnames(MF) = paste("Cl",1:NCOL(MF),sep="")
         rownames(MF)<-signexp_obj@samples
-        show_samples<- j<30
-        ph<-pheatmap(t(MF),border_color=NA, color=clr, 
+        ph<-pheatmap(MF,border_color=NA, color=clr, 
                  clustering_method='ward.D2',
                  clustering_distance_cols='canberra',
-                 cluster_rows = FALSE,
-                 show_colnames=show_samples,
-                 show_rownames=TRUE,
-                 angle_col=90,
+                 cluster_cols = FALSE,
+                 show_rownames=FALSE,
+                 show_colnames=TRUE,
+                 angle_col="90",
                  silent=TRUE)
         gt<-ph[[4]]
-        ## ggplot2 boxplot
-        AllF = Cm$AllFuzzy[ph[[2]]$order,,]
-        rownames(AllF) = signexp_obj@samples[ph[[2]]$order]
+        sample_ord<-ph[[1]]$order
+        AllF = Cm$AllFuzzy[sample_ord,,]
+        rownames(AllF) = signexp_obj@samples[sample_ord]
         colnames(AllF) = paste("Cl",1:NCOL(MF),sep="")
         m = reshape2::melt(AllF)
         colnames(m)<-c("Sample","Cluster","r","value")
         m$Cluster<-as.factor(m$Cluster)
+        m$Sample<-as.factor(m$Sample)
         ms = group_by(m, Sample, Cluster) %>% summarize(q1=min(value),
                                                            q2=quantile(value,p=0.25),
                                                            q3=median(value),
@@ -1131,26 +1156,21 @@ setMethod("FuzzyClustExp",signature(signexp_obj="SignExp",  max_instances="ANY",
           }
         }
         ms<-ms[ms_ord,]
-        if(show_samples){
-          g<-ggplot(ms, aes(x=Sample,ymin=q1,lower=q2,middle=q3,upper=q4,ymax=q5)) + 
-            geom_boxplot(stat='identity') + 
-            facet_grid(Cluster~.,scales="free") + 
-            theme_cowplot() +
-            theme(axis.text.x=element_text(size=6,vjust=.5,hjust=0,face="bold")) +
-            scale_y_log10()+
-            labs(x="")
-        }else{
-          g<-ggplot(ms, aes(x=Sample,ymin=q1,lower=q2,middle=q3,upper=q4,ymax=q5)) + 
-            geom_boxplot(stat='identity') + 
-            facet_grid(Cluster~.,scales="free") + 
-            theme_cowplot() +
-            theme(axis.text.x=element_blank(), axis.ticks.x = element_blank()) +
-            scale_y_log10()+
-            labs(x="")
+        plot(ph[[4]])
+        samples_per_page<-6
+        ## ggplot2 boxplot
+        for(bt in 1:ceiling(j/samples_per_page)){
+            batch<-(samples_per_page*NCOL(MF)*(bt-1)+1):(samples_per_page*NCOL(MF)*bt)
+            batch<-batch[batch<=NROW(ms)]
+            g<-ggplot(ms[batch,], aes(x=Cluster,ymin=q1,lower=q2,middle=q3,upper=q4,ymax=q5)) + 
+              geom_boxplot(stat='identity') + 
+              facet_grid(Sample~.) + 
+              theme_cowplot() +
+              theme(axis.text.y=element_blank(), axis.ticks.y = element_blank()) +
+              theme(strip.text.y=element_text(size=6))+
+              labs(x="")
+            plot(g)  
         }
-        #plotting 
-        final_figure <- ggarrange(gt,g,ncol = 1)
-        plot(final_figure)
         if(plot_to_file){
             dev.off()
         }
