@@ -75,7 +75,7 @@ genCountMatrixFromVcf <- function(bsgenome, vcfobj) {
     vcfobj <- vcfobj[isSNV(vcfobj),]
 
     # convert alt() to DNAString if needed
-    # https://github.com/rvalieris/signeR/issues/17
+    # https://github.com/TojalLab/signeR/issues/17
     alt(vcfobj) <- DNAStringSetList(alt(vcfobj))
 
     # remove mutations on chrom edges

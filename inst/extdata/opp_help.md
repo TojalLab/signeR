@@ -73,4 +73,4 @@ Each row contains the count frequency of the trinucleotides in the whole analyze
 
 ## Example file
 
-[21 breast cancer](https://raw.githubusercontent.com/rvalieris/signeR/master/inst/extdata/21_breast_cancers.opportunity.txt)
+[21 breast cancer](https://raw.githubusercontent.com/TojalLab/signeR/devel/inst/extdata/21_breast_cancers.opportunity.txt)

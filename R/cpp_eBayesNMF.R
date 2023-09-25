@@ -70,8 +70,8 @@ eBayesNMF<-function(M,W,n,ap,bp,ae,be,lp,le,var.ap=10,var.ae=10,
                 
             }
             Fit <- nloptr(x0=rep(1,n), eval_f = RSS, lb=rep(0,n), 
-                opts = list(algorithm = "NLOPT_LN_SBPLX", xtol_rel=1e-200, 
-                            xtol_abs=1e-200, maxeval = 1e10))
+                opts = list(algorithm = "NLOPT_LN_SBPLX", xtol_rel=1e-100, 
+                            xtol_abs=1e-100, maxeval = 1e6))
             E[,g]<-Fit$solution
         }
     }
@@ -167,11 +167,9 @@ eBayesNMF<-function(M,W,n,ap,bp,ae,be,lp,le,var.ap=10,var.ae=10,
         Pfixed=fixP,Zfixed=FALSE,Thetafixed=FALSE,Afixed=FALSE,
         keep_par=keep_param)
     if(keep_param){
-        Zs <- Samples[[1]] 
-        if (!fixP){
-            Aps <- Samples[[5]] 
-            Bps <- Samples[[6]] 
-        }
+        Zs <- Samples[[1]]
+        Aps <- Samples[[5]]
+        Bps <- Samples[[6]]
         Aes <- Samples[[7]]
         Bes <- Samples[[8]]
     }

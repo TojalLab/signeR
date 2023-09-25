@@ -73,4 +73,4 @@ Each row contain the sample ID and the counts for each trinucleotide contexts.
 
 ## Example file
 
-[21 breast cancer](https://raw.githubusercontent.com/rvalieris/signeR/master/inst/extdata/21_breast_cancers.mutations.txt)
+[21 breast cancer](https://raw.githubusercontent.com/TojalLab/signeR/devel/inst/extdata/21_breast_cancers.mutations.txt)

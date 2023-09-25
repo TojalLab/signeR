@@ -72,4 +72,4 @@ Each row contains clinical information for one sample: its ID and all other data
 
 ## Example file
 
-[21 breast cancer](https://raw.githubusercontent.com/rvalieris/signeR/dev2.0/inst/extdata/clinical-test-signerflow.tsv)
+[21 breast cancer](https://raw.githubusercontent.com/TojalLab/signeR/devel/inst/extdata/clinical-test-signerflow.tsv)

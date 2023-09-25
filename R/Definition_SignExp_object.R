@@ -385,8 +385,8 @@ setMethod("AddSamples",signature(Signatures="ANY", originalCounts="ANY",
               }
               Fit0 <- nloptr(x0=rep(1,n), eval_f = RSS0, lb=rep(0,n), 
                              opts = list(algorithm = "NLOPT_LN_SBPLX", 
-                                         xtol_rel=1e-200, xtol_abs=1e-200, 
-                                         maxeval = 1e10))
+                                         xtol_rel=1e-100, xtol_abs=1e-100, 
+                                         maxeval = 1e6))
               NewExp[,k]<-as.vector(Fit0$solution)
             }
             #proceed with sampler, keeping or changing P according to updateSigs

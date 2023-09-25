@@ -72,4 +72,4 @@ Each row contains the expected frequency of the given mutation in the apponted t
 
 ## Example file
 
-[21 breast cancer](https://raw.githubusercontent.com/rvalieris/signeR/dev2.0/inst/extdata/Cosmic_signatures_BRC.txt)
+[21 breast cancer](https://raw.githubusercontent.com/TojalLab/signeR/devel/inst/extdata/Cosmic_signatures_BRC.txt)

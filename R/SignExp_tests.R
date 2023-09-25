@@ -293,8 +293,8 @@ setMethod("SignLRT",signature(Signatures="matrix",Counts="matrix",Opp="matrix"),
                 
             }
             Fit0 <- nloptr(x0=rep(1,nsig), eval_f = RSS0, lb=rep(0,nsig), 
-                opts = list(algorithm = "NLOPT_LN_SBPLX", xtol_rel=1e-200, 
-                    xtol_abs=1e-200, maxeval = 1e10))
+                opts = list(algorithm = "NLOPT_LN_SBPLX", xtol_rel=1e-100, 
+                    xtol_abs=1e-100, maxeval = 1e7))
             llh0<-Fit0$objective #-1 x log(lh0)
             llhs<-rep(0,nsig)
             for(s in 1:nsig){
@@ -305,7 +305,7 @@ setMethod("SignLRT",signature(Signatures="matrix",Counts="matrix",Opp="matrix"),
                 }
                 Fit1 <- nloptr(x0=rep(1,nsig-1), eval_f = RSS1, 
                      lb=rep(0,nsig-1), opts = list(algorithm = "NLOPT_LN_SBPLX", 
-                     xtol_rel=1e-200, xtol_abs=1e-200, maxeval = 1e10))
+                     xtol_rel=1e-100, xtol_abs=1e-100, maxeval = 1e7))
                 llhs[s]<-Fit1$objective
             }
             llratios<-llh0-llhs # log(lhs/lh0)=log(lhs)-log(lh0)=llh0-llhs
@@ -340,8 +340,8 @@ setMethod("SignLRT",signature(Signatures="SignExp",
                     
                 }
                 Fit0 <- nloptr(x0=rep(1,nsig), eval_f = RSS0, lb=rep(0,nsig), 
-                    opts = list(algorithm = "NLOPT_LN_SBPLX", xtol_rel=1e-200, 
-                        xtol_abs=1e-200, maxeval = 1e10))
+                    opts = list(algorithm = "NLOPT_LN_SBPLX", xtol_rel=1e-100, 
+                        xtol_abs=1e-100, maxeval = 1e7))
                 llh0<-Fit0$objective #-1 x log(lh0)
                 llhs<-rep(0,nsig)
                 for(s in 1:nsig){
@@ -353,7 +353,7 @@ setMethod("SignLRT",signature(Signatures="SignExp",
                     Fit1 <- nloptr(x0=rep(1,nsig-1), eval_f = RSS1, 
                         lb=rep(0,nsig-1),
                         opts = list(algorithm = "NLOPT_LN_SBPLX",  
-                            xtol_rel=1e-200, xtol_abs=1e-200, maxeval = 1e10))
+                            xtol_rel=1e-100, xtol_abs=1e-100, maxeval = 1e7))
                     llhs[s]<-Fit1$objective
                 }
                 llratios<-llh0-llhs # log(lhs/lh0)=log(lhs)-log(lh0)=llh0-llhs

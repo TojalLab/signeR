@@ -1,4 +1,10 @@
 
+Changes in signeR 2.3.1:
+
+    * Moved the source repository to TojalLab
+    * Fixed issue when running with fixed signatures matrix
+    * Reduced the maxeval time in rare cases when there is no convergence
+
 Changes in signeR 2.1.1:
 
     * Fixed doc issues

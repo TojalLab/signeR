@@ -148,7 +148,7 @@ Each row contain the sample ID and the counts for each trinucleotide contexts.
 
 **Example file:**
 
-[21 breast cancer](https://raw.githubusercontent.com/rvalieris/signeR/master/inst/extdata/21_breast_cancers.mutations.txt)
+[21 breast cancer](https://raw.githubusercontent.com/TojalLab/signeR/devel/inst/extdata/21_breast_cancers.mutations.txt)
 
 #### Opportunity matrix
 
@@ -235,7 +235,7 @@ Each row contains the count frequency of the trinucleotides in the whole analyze
 
 **Example file:**
 
-[21 breast cancer](https://raw.githubusercontent.com/rvalieris/signeR/master/inst/extdata/21_breast_cancers.opportunity.txt)
+[21 breast cancer](https://raw.githubusercontent.com/TojalLab/signeR/devel/inst/extdata/21_breast_cancers.opportunity.txt)
 
 ### de novo analysis
 
@@ -371,7 +371,7 @@ Each row contains the expected frequency of the given mutation in the appointed 
 
 **Example file:**
 
-[21 breast cancer](https://raw.githubusercontent.com/rvalieris/signeR/dev2.0/inst/extdata/Cosmic_signatures_BRC.txt)
+[21 breast cancer](https://raw.githubusercontent.com/TojalLab/signeR/devel/inst/extdata/Cosmic_signatures_BRC.txt)
 
 ### Fitting analysis
 
@@ -517,7 +517,7 @@ Each row contains clinical information for one sample: its ID and all other data
 
 **Example file:**
 
-[21 breast cancer](https://raw.githubusercontent.com/rvalieris/signeR/dev2.0/inst/extdata/clinical-test-signerflow.tsv)
+[21 breast cancer](https://raw.githubusercontent.com/TojalLab/signeR/devel/inst/extdata/clinical-test-signerflow.tsv)
 
 After the upload, a description table summarizes the data with all the features in rows, and the class, counts and missing for each feature.
 By selecting a feature (row) at the table, a small panel is shown next to the table summarizing the values, categorical or continuous, for the selected feature:
