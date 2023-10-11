@@ -10,7 +10,7 @@ exportMethods(setSamples, setMutations, Normalize,
     ExposureCorrelation, ExposureGLM,
     ExposureSurvival, ExposureSurvModel,
     FuzzyClustExp, HClustExp)
-export(genOpportunityFromGenome, genCountMatrixFromVcf, signeR,
+export(genOpportunityFromGenome, genCountMatrixFromVcf, genCountMatrixFromMAF, signeR,
     BICboxplot)
 export(signeRFlow)
 
@@ -31,7 +31,7 @@ importFrom("shiny", "wellPanel", "fluidRow", "column", "p", "span", "strong",
     "modalDialog", "reactive", "renderPlot", "renderPrint", "renderTable",
     "showModal", "withProgress", "req", "downloadHandler")
 importFrom("shinydashboard", "dashboardPage", "tabBox", "box",
-    "dashboardHeader", "dashboardSidebar", sidebarMenu, menuItem,
+    "dashboardHeader", "dashboardSidebar", "sidebarMenu", "menuItem",
     "menuSubItem", "dashboardBody", "tabItems", "tabItem",
     "infoBox")
 importFrom("shinycssloaders", "withSpinner")
@@ -43,7 +43,7 @@ importFrom("BiocFileCache", "BiocFileCache", "bfcrpath",
     "bfcquery", "bfcadd", "bfcneedsupdate", "bfcdownload")
 importFrom("magrittr","%>%")
 importFrom("tidyr", "gather")
-importFrom(tibble, "column_to_rownames", "rownames_to_column")
+importFrom("tibble", "column_to_rownames", "rownames_to_column")
 importFrom("pheatmap", "pheatmap")
 importFrom("cowplot","theme_cowplot")
 importFrom("parallel", "detectCores", "makeCluster", "clusterExport", "parLapply", "stopCluster")
@@ -74,4 +74,4 @@ importFrom("clue", "solve_LSAP")
 importFrom("ggpubr","ggarrange")
 importFrom("rtracklayer", "import")
 importFrom("BSgenome", "installed.genomes")
-
+importFrom("kknn", "kknn")

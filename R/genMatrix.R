@@ -16,6 +16,10 @@ change_triplet <- c(
     "T>G:GTT","T>G:TTA","T>G:TTC","T>G:TTG","T>G:TTT"
 )
 
+maf_req_columns <- c("Reference_Allele","Tumor_Seq_Allele1","Tumor_Seq_Allele2",
+  "Variant_Type","Chromosome","Start_Position","End_Position","Strand",
+  "Tumor_Sample_Barcode")
+
 revcomp <- function(s) {
     return(as.character(reverseComplement(DNAString(s))))
 }
@@ -136,3 +140,66 @@ genCountMatrixFromVcf <- function(bsgenome, vcfobj) {
     return(count_matrix)
 }
 
+genCountMatrixFromMAF <- function(bsgenome, maf_file) {
+    
+    maf <- readr::read_tsv(maf_file, col_types='')
+
+    # assert all required columns are present
+    if(!all(maf_req_columns %in% colnames(maf))) {
+        dc <- paste(collapse = ',',setdiff(maf_req_columns, colnames(maf)))
+        stop(paste("Error: Missing columns in input file: ",dc))
+    }
+
+    # keep only SNVs
+    maf <- dplyr::filter(maf, Variant_Type == 'SNP')
+
+    maf <- dplyr::mutate(maf,
+        ref=Reference_Allele,
+        alt=ifelse(Tumor_Seq_Allele2=="", Tumor_Seq_Allele1, Tumor_Seq_Allele2))
+    maf <- dplyr::filter(maf, ref!=alt)
+
+    # assert all chrom from maf are present on the genome
+    # attempt to add or remove "chr" if the names dont match
+    si <- seqinfo(bsgenome)
+    if(!all(unique(maf$Chromosome) %in% si@seqnames)) {
+        if(all(paste0("chr",unique(maf$Chromosome)) %in% si@seqnames)) {
+            warning("Warning: sequence names from MAF don't match genome sequence names, trying to continue by adding the chr prefix.")
+            maf <- dplyr::mutate(maf, Chromosome=paste0("chr",Chromosome))
+        } else if(all(gsub("^chr","",unique(maf$Chromosome)) %in% si@seqnames)) {
+            warning("Warning: sequence names from MAF don't match genome sequence names, trying to continue by removing the chr prefix.")
+            maf <- dplyr::mutate(maf, Chromosome=gsub("^chr","",Chromosome))
+        } else {
+            error("Error: sequence names from MAF don't match genome sequence names, please check the genome parameter.")
+        }
+    }
+
+    mut_ranges <- GRanges(maf$Chromosome, IRanges(maf$Start_Position, maf$End_Position), maf$Strand)
+    contexts <- getSeq(bsgenome, resize(mut_ranges, 3, fix='center'))
+    sample_names <- sort(unique(maf$Tumor_Sample_Barcode))
+
+    refs <- DNAStringSet(maf$ref)
+    alts <- DNAStringSet(maf$alt)
+    count_matrix <- matrix(0, ncol=length(change_triplet), nrow=length(sample_names))
+    rownames(count_matrix) = sample_names
+    colnames(count_matrix) = change_triplet
+    for(i in 1:nrow(maf)) {
+        rb <- DNAString(maf[[i, "Reference_Allele"]])
+        cc <- contexts[i]
+   
+        if(rb == DNAString("C") || rb == DNAString("T")) {
+            ct <- sapply(alts[i], function(ab){paste0(rb,">",ab,":",cc)})
+   
+        } else {
+            ct <- sapply(alts[i], function(ab) {
+                paste0(reverseComplement(rb),">",
+                       reverseComplement(ab),":",
+                       reverseComplement(cc))})
+        }
+   
+        j <- match(maf[[i, "Tumor_Sample_Barcode"]], sample_names)
+        cx <- match(ct, change_triplet)
+        count_matrix[j, cx] = 1 + count_matrix[j,cx]
+    }
+
+    return(count_matrix)
+}
