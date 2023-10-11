@@ -718,9 +718,12 @@ Rcpp FAQ, section 2.16</a>.</p>
 <p>Some packages that signeR depends on requires that 3rd party library headers be installed. If you see errors like:</p>
 <pre><code>Error: checking for curl-config... no
          Cannot find curl-config</code></pre>
+or
+<pre><code>libopenblas.so.0 not found</code></pre>
+
 
 <p>It means you need to install these headers with your package manager. For example on ubuntu:</p>
-<pre><code>$ sudo apt-get install libcurl4-openssl-dev</code></pre>
+<pre><code>$ sudo apt-get install libcurl4-openssl-dev libopenblas-dev</code></pre>
 
 <h2 id="toc10">10: References</h2>
 
