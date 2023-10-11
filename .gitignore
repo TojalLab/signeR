@@ -1,6 +1,9 @@
 *.so
 *.o
 .Rproj.user
+.Rbuildignore
+.Rhistory
+vignettes/signeR-vignette.html
 inst/doc
 /doc/
 /Meta/
