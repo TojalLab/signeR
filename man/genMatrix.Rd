@@ -1,17 +1,20 @@
 \name{generateMatrix}
 \alias{genCountMatrixFromVcf}
+\alias{genCountMatrixFromMAF}
 \alias{genOpportunityFromGenome}
 
 \title{count matrix and opportinity matrix generators}
 
 \description{
     genCountMatrixFromVcf    : generate count matrix from a VCF file.\cr
+    genCountMatrixFromMAF    : generate count matrix from a MAF file.\cr
     genOpportunityFromGenome : generate opportunity matrix from a target
 regions set.
 }
 
 \usage{
     genCountMatrixFromVcf(bsgenome, vcfobj)
+    genCountMatrixFromMAF(bsgenome, maf_file)
     genOpportunityFromGenome(bsgenome, target_regions, nsamples=1)
 }
 
@@ -20,6 +23,7 @@ regions set.
 the variant call.}
     \item{vcfobj}{A VCF object. See VCF-class from the VariantAnnotation
 package.}
+    \item{maf_file}{Path to a MAF file.}
     \item{target_regions}{A GRanges object, describing the target region
 analyzed by the variant caller.}
     \item{nsamples}{Number of samples to generate the matrix, should be the
