@@ -44,18 +44,23 @@ denovo_UI <- function(id) {
               box(
                 width = 6, background = "orange",
                 tags$head(tags$script(src = "message-handler.js")),
-                  actionButton(ns("snvhelp"),
-                    "SNV matrix help",
-                    icon = icon("info-circle")
-                  ),
-                hr(),
-                prettyRadioButtons(
-                  inputId = ns("genbuild"), label = "Genome build :", 
-                  choiceNames = c("hg19/GRCh37", "hg38/GRCh38"),
-                  choiceValues = c("hg19", "hg38"),
-                  inline = TRUE, status = "primary", selected = "hg19",
-                  fill=TRUE, 
+                actionButton(ns("snvhelp"),
+                  "SNV matrix help",
+                  icon = icon("info-circle")
                 ),
+                actionButton(ns("genomehelp"),
+                  "Genome installation help",
+                  icon = icon("info-circle")
+                ),
+                hr(),
+                # prettyRadioButtons(
+                #   inputId = ns("genbuild"), label = "Genome build :", 
+                #   choiceNames = c("hg19/GRCh37", "hg38/GRCh38"),
+                #   choiceValues = c("hg19", "hg38"),
+                #   inline = TRUE, status = "primary", selected = "hg19",
+                #   fill=TRUE, 
+                # ),
+                uiOutput(ns("genomes")),
                 fileInput(ns("mutfile"),
                   "VCF file or SNV matrix*",
                   multiple = FALSE,
@@ -263,6 +268,30 @@ denovo <- function(input,
     reactive(signatures_denovo())
   )
 
+  output$genomes <- renderUI({
+
+    genomes_available <- installed.genomes()
+
+    if(length(genomes_available)==0){
+      messageBox(
+        title = "Warning:",
+        solidHeader = TRUE,
+        width = 12,
+        paste0(
+          "There is no genome installed. ",
+          "If you need, install a genome using BSGenome (see help above)."
+        )
+      )
+    }else{
+      pickerInput(
+        inputId = ns("genbuild"),
+        label = "Genome build: ",
+        choices = genomes_available,
+        multiple = FALSE
+      )
+    }
+  })
+
   mut <- reactive({
     # req(input$mutfile)
     if (is.null(input$mutfile)) {
@@ -293,7 +322,7 @@ denovo <- function(input,
           ))
           return(NULL)
         } 
-        mygenome <- BSgenome.Hsapiens.UCSC.hg19
+        mygenome <- getBSgenome("BSgenome.Hsapiens.UCSC.hg19")
       } else {
         if (!"BSgenome.Hsapiens.UCSC.hg38" %in% installed.genomes()) {
           showModal(modalDialog(
@@ -308,7 +337,7 @@ denovo <- function(input,
           ))
           return(NULL)
         } 
-        mygenome <- BSgenome.Hsapiens.UCSC.hg38
+        mygenome <- getBSgenome("BSgenome.Hsapiens.UCSC.hg38")
       }
 
       vcfobj <- VariantAnnotation::readVcf(input$mutfile$datapath, build)
@@ -706,6 +735,16 @@ denovo <- function(input,
     }
   })
 
+  observeEvent(input$genomehelp, {
+    showModal(modalDialog(
+      title = "Genome installation help",
+      includeMarkdown(
+        system.file("extdata", "genome_help.md", package = "signeR")
+      ),
+      size = "l", easyClose = TRUE
+    ))
+  })
+
   observeEvent(input$snvhelp, {
     showModal(modalDialog(
       title = "SNV matrix help",
@@ -740,18 +779,22 @@ denovo <- function(input,
 
   output$uigenopp <- renderUI({
     req(input$genbuild)
-    build = "hg19"
-    if (input$genbuild == "hg38") {
+    build = NULL
+    if (stringr::str_detect(input$genbuild, "hg19")) {
+      build = "hg19"
+    }else if (stringr::str_detect(input$genbuild, "hg38")) {
       build = "hg38"
     }
     
-    prettyRadioButtons(
-      inputId = ns("genopp"), label = paste0("Use already built genome opportunity (",build,")?"), 
-      choiceNames = c("Yes", "No"),
-      choiceValues = c("yes", "no"),
-      inline = TRUE, status = "primary", selected = "no",
-      fill=TRUE, 
-    )
+    if (!is.null(build)){
+      prettyRadioButtons(
+        inputId = ns("genopp"), label = paste0("Use already built genome opportunity (",build,")?"), 
+        choiceNames = c("Yes", "No"),
+        choiceValues = c("yes", "no"),
+        inline = TRUE, status = "primary", selected = "no",
+        fill=TRUE, 
+      )
+    }
 
   })
 

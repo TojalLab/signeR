@@ -385,7 +385,7 @@ covariate <- function(input,
   })
 
   check_samples <- function(df, sigs) {
-    if(!validade_samples(df, sigs)){
+    if(!validate_samples(df, sigs)){
       showModal(modalDialog(
         title = "Oh no!",
         paste0("Signatures samples and clinical data samples must be the same."),
