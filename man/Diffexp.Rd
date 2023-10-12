@@ -21,21 +21,21 @@ among sample groups.
     \item{signexp_obj}{a SignExp object returned by signeR function.}
     \item{labels}{sample labels used to define sample groups.}
     \item{max_instances}{Maximum number of the exposure matrix instances to be 
-    analyzed. If the number of available E instances is bigger then this 
+    analyzed. If the number of available E instances is bigger than this 
     parameter, a subset of those will be randomly selected for analysis.}
-    \item{method}{algorithm used to compare each signature exposures among
+    \item{method}{algorithm used to compare each signature exposure among
 sample groups. Default is kruskal.test, which leads to the use of
 Kruskal-Wallis Rank Sum Test.}
     \item{contrast}{defines which sample groups will be considered in the
-analysis. Default is "all", which leads the algorithm to evaluates the null
-hypothesis of exposure levels beeing constant in all groups. Instead, if this
+analysis. Default is "all", which leads the algorithm to evaluate the null
+hypothesis of exposure levels being constant in all groups. Instead, if this
 parameter contains a list of group labels, the algorithm will evaluate the
-null hypothesis of exposure levels beeing constant among those groups.}
+null hypothesis of exposure levels being constant among those groups.}
     \item{quant}{the p-values quantile which, after log-transform, will be
-used as DES (Differental Exposure Score). Deafult is 0.5, which means the
+used as DES (Differential Exposure Score). Default is 0.5, which means the
 median log-transformed p-value will be considered as DES.}
     \item{p.adj}{correction method for p-values adjust at the post-hoc tests
-    performed when there are more then two group labels. See p.adjust for
+    performed when there are more than two group labels. See p.adjust for
     options.}
     \item{cutoff}{threshold for p-values quantile for signatures to be
 considered as showing differential exposure.}
@@ -47,7 +47,7 @@ exposed signatures will be colored in green, cutoff line will be colored in
 red and line segments showing the transformed p-value quantile used for DE
 evaluation will be colored in blue. Otherwise the plot will be black & white.}
     \item{relative}{Whether tests should be performed on absolute or relative
-    signature contributions to each sample mutations.
+    signature contributions to each sample mutation.
     Default is FALSE (absolute contributions will be tested).}
     \item{...}{additional parameters for test algorithm defined by the method
 parameter.}

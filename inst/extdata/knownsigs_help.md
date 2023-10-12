@@ -1,6 +1,6 @@
 # Previous signatures matrix
 
-Previous signatures is a tab-delimited text file with a matrix of previously known signatures. It must contain one column for each signature and one row for each of the 96 SNV types (considering trinucleotide contexts). Mutation types should be contained on the first column, in the same form as the column names of the SNV matrix. The table below shows a example of the previous signatures matrix structure.
+Previous signatures is a tab-delimited text file with a matrix of previously known signatures. It must contain one column for each signature and one row for each of the 96 SNV types (considering trinucleotide contexts). Mutation types should be contained in the first column, in the same form as the column names of the SNV matrix. The table below shows an example of the previous signatures matrix structure.
 
 <table class="table table-striped table-hover" style="margin-left: auto; margin-right: auto;">
  <thead>
@@ -65,10 +65,10 @@ Previous signatures is a tab-delimited text file with a matrix of previously kno
 
 
 ## Columns
-The first columnn needs to contain the trinucleotide contexts and other columns contain the known signatures.
+The first column needs to contain the trinucleotide contexts and the other columns contain the known signatures.
 
 ## Rows
-Each row contains the expected frequency of the given mutation in the apponted trinucleotide context.
+Each row contains the expected frequency of the given mutation in the appointed trinucleotide context.
 
 ## Example file
 

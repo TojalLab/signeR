@@ -1,6 +1,6 @@
 ## SNV matrix
 
-SNV matrix is a text file with a (tab-delimited) matrix of SNV counts found on analysed genomes. It must contain one row for each genome sample and 97 columns, the first one with sample ids and, after that, one column for each mutation type. Mutations should be specified in the column names (headers), by both the base change and the trinucleotide context were it occurs (for example: C>A:ACA). The table below shows a example of the SNV matrix structure.
+SNV matrix is a text file with a (tab-delimited) matrix of SNV counts found on analyzed genomes. It must contain one row for each genome sample and 97 columns, the first one with sample IDs and, after that, one column for each mutation type. Mutations should be specified in the column names (headers), by both the base change and the trinucleotide context where it occurs (for example: C>A:ACA). The table below shows an example of the SNV matrix structure.
 
 <table class="table table-striped table-hover" style="margin-left: auto; margin-right: auto;">
  <thead>
@@ -59,17 +59,17 @@ SNV matrix is a text file with a (tab-delimited) matrix of SNV counts found on a
 </tbody>
 </table>
 
-You can create a SNV matrix from VCF using the method 
+You can create an SNV matrix from VCF using the method 
 ```R
 genCountMatrixFromVcf
 ```
 from signeR package. See the [documentation](https://bioconductor.org/packages/release/bioc/vignettes/signeR/inst/doc/signeR-vignette.html#toc3) for more details. 
 
 ## Columns
-The first columnn needs to contain the sample ID and other columns contain the 96 trinucleotide contexts.
+The first column needs to contain the sample ID and the other columns contain the 96 trinucleotide contexts.
 
 ## Rows
-Each row contain the sample ID and the counts for each trinucleotide contexts.
+Each row contains the sample ID and the counts for each trinucleotide context.
 
 ## Example file
 

@@ -1,6 +1,6 @@
 # Metadata matrix
 
-Clinical data is a tab-delimited text file with a matrix of available metadata (clinical and/or survival) for each sample. It must have a first column of sample ids, named as “SampleID”, whose entries match the row names of the **SNV matrix**. The number and title of the remaning columns are optional, however if *survival* data is included it must be organized in a column named **time** (in months) and another named **status** (which contains 1 for death events and 0 for censored samples). The table below shows a example of the clinical data matrix structure.
+Clinical data is a tab-delimited text file with a matrix of available metadata (clinical and/or survival) for each sample. It must have a first column of sample IDs, named “SampleID”, whose entries match the row names of the **SNV matrix**. The number and title of the remaining columns are optional, however if *survival* data is included it must be organized in a column named **time** (in months) and another named **status** (which contains 1 for death events and 0 for censored samples). The table below shows an example of the clinical data matrix structure.
 
 <table class="table table-striped table-hover" style="margin-left: auto; margin-right: auto;">
  <thead>
@@ -65,7 +65,7 @@ Clinical data is a tab-delimited text file with a matrix of available metadata (
 
 
 ## Columns
-The first columnn must contain the sample ID. Other columns may contain sample groupings or other features that you would like to co-analyze with exposure data.
+The first column must contain the sample ID. Other columns may contain sample groupings or other features that you would like to co-analyze with exposure data.
 
 ## Rows
 Each row contains clinical information for one sample: its ID and all other data of interest.

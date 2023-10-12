@@ -21,10 +21,10 @@
 \arguments{
     \item{signexp_obj}{a SignExp object returned by signeR function.}
     \item{max_instances}{Maximum number of the exposure matrix instances to be 
-    analyzed. If the number of available E instances is bigger then this 
+    analyzed. If the number of available E instances is bigger than this 
     parameter, a subset of those will be randomly selected for analysis.}
-    \item{Clim}{number of groups por a vector with mimum and maximum accepted 
-    number of groups. The algorithm will maximize the PBMF-index whithin this 
+    \item{Clim}{number of groups range, a vector with minimum and maximum accepted 
+    number of groups. The algorithm will maximize the PBMF-index within this 
     range.}
     \item{method.dist}{used distance metric}
     \item{method.clust}{clustering method. Either "fcm", default, for 
@@ -62,7 +62,7 @@ Meanfuzzy=Meanfuzzy,
     signatures <- signeR(M=muts, Mheader=FALSE, nsig=2, EMit_lim=10, EM_eval=10, 
     main_eval=10, main_burn=10)
 }
-# Limits to number of goups:
+# Limits to number of groups:
 cl <- c(2,4)
 
 FuzClust <- FuzzyClustExp(signatures$SignExposures, Clim = cl)

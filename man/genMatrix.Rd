@@ -3,12 +3,12 @@
 \alias{genCountMatrixFromMAF}
 \alias{genOpportunityFromGenome}
 
-\title{count matrix and opportinity matrix generators}
+\title{count matrix and opportunity matrix generators}
 
 \description{
-    genCountMatrixFromVcf    : generate count matrix from a VCF file.\cr
-    genCountMatrixFromMAF    : generate count matrix from a MAF file.\cr
-    genOpportunityFromGenome : generate opportunity matrix from a target
+    genCountMatrixFromVcf    : generate a count matrix from a VCF file.\cr
+    genCountMatrixFromMAF    : generate a count matrix from an MAF file.\cr
+    genOpportunityFromGenome : generate an opportunity matrix from a target
 regions set.
 }
 
@@ -32,7 +32,7 @@ same number as rows of the count matrix.}
 
 \value{
 A matrix of samples x (96 features).\cr
-Each feature is a SNV change with a 3bp context.
+Each feature is an SNV change with a 3bp context.
 }
 
 \examples{

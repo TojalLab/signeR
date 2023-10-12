@@ -32,7 +32,7 @@ feature per column;
           an array of labels, with one entry for each labeled sample.\cr
         Output: an array of assigned labels, one for each unlabeled sample.}
     \item{max_instances}{Maximum number of the exposure matrix instances to be 
-    analyzed. If the number of available E instances is bigger then this 
+    analyzed. If the number of available E instances is bigger than this 
     parameter, a subset of those will be randomly selected for analysis.}
     \item{k}{Number of nearest neighbors considered for classification,
 used only if method="kNN". Default is 3.}

@@ -158,21 +158,21 @@ Renan Valieris, Rafael Rosales and Israel Tojal da Silva</em></h4>
 
 <p>Motivation: Cancer is an evolutionary process driven by continuous
 acquisition of genetic variations in individual cells. The diversity and
-complexity of somatic mutational processes is a conspicuous feature
+the complexity of somatic mutational processes is a conspicuous feature
 orchestrated by DNA damage agents and repair processes, including exogenous or
 endogenous mutagen exposures, defects in DNA mismatch repair and enzymatic
 modification of DNA. The identification of the underlying mutational processes
-is central to understanding of cancer origin and evolution.</p>
+are central to the understanding of cancer origin and evolution.</p>
 <p>The <b>signeR</b> package focuses on the estimation and further analysis of
 mutational signatures. The functionalities of this package can be divided into
 three categories. First, it provides tools to process VCF files and generate
 matrices of SNV mutation counts and mutational opportunities, both defined
-according to a 3bp context (mutation site and its neighbouring 3' and 5' bases).
+according to a 3bp context (mutation site and its neighboring 3' and 5' bases).
  Second, these count matrices are considered as input for the estimation of the
 underlying mutational signatures and the number of active mutational processes.
 Third, the package provides tools to correlate the activities of those
 signatures with other relevant information such as clinical data, in order to
-draw conclusions about the analysed genome samples, which can be useful for
+draw conclusions about the analyzed genome samples, which can be useful for
 clinical applications. These include the Differential Exposure Score and the a
 posteriori sample classification.</p>
 <p>Although signeR is intended for the estimation of mutational signatures, it
@@ -209,15 +209,15 @@ missing gfortran libraries. Please read <a href="#toc9.2">this section</a>.</p>
 <h2 id="toc3">3: Preparing the input</h2>
 
 <p><b>signeR</b> takes as input a count matrix of samples x features.
-Each feature is usually a SNV mutation within a 3bp context (96 features, 6
+Each feature is usually an SNV mutation within a 3bp context (96 features, 6
 types of SNV mutations and 4 possibilities for the bases at each side of the
 SNV change). Optionally, an opportunity matrix can also be provided containing
 the count frequency of the features in the whole analyzed region for each
 sample. Although not required, this argument is highly recommended because it
-allows <b>signeR</b> to normalize the features frequency over the analyzed
+allows <b>signeR</b> to normalize the feature frequency over the analyzed
 region.</p>
 
-<p>Input matrices can be read both from a VCF or a tab-delimited files, as
+<p>Input matrices can be read both from a VCF or a tab-delimited file, as
 described next.</p>
 
 <h3 id="toc3.1">3.1: Input from VCF</h3>
@@ -240,7 +240,7 @@ end.rcode-->
 
 <p>This function will generate a matrix of mutation counts for each sample in
 the provided VCF.</p>
-<p>If you have one vcf per sample you can combine the results into a single
+<p>If you have one VCF per sample you can combine the results into a single
 matrix like this:</p>
 <!--begin.rcode eval=FALSE
 mut = matrix(ncol=96,nrow=0)
@@ -285,7 +285,7 @@ end.rcode-->
 <h3 id="toc3.2">3.2: Input from tab-delimited file</h3>
 
 <p>By convention, the input file should be tab-delimited with sample names as
-row names and features as column names. Features should be refered in the
+row names and features as column names. Features should be referred to in the
 format "base change:triplet", e.g. "C&gt;A:TCG", as can be seen in the example
 below. Similarly, the opportunity matrix can be provided in a tab-delimited
 file with the same structure as the mutation counts file. An example of the
@@ -296,7 +296,7 @@ here</a>.</p>
 
 <p>This tutorial uses as input the 21 breast cancer dataset described in
 <a target="_blank" href="http://dx.doi.org/10.1016/j.cell.2012.04.023">
-Nik-Zainal et al 2012</a>. For the sake of convenience this dataset is
+Nik-Zainal et al 2012</a>. For the sake of convenience, this dataset is
 included with the package and can be accessed by using the
 <code>system.file</code> function:</p>
 
@@ -311,7 +311,7 @@ end.rcode-->
 
 <p>signeR analysis can incorporate any previous knowledge about the signatures present in the dataset. If signatures are known in advance, they can be provided as a matrix, which may be used by signeR in two different ways: a starting value that will be updated according to mutation patterns found on present data or a fixed set of parameters, kept unchanged during the estimation of exposures.</p>
 
-<p>Signatures matrix shall contain each signature in one colum. An example of the required matrix format can be seen
+<p>The signatures matrix shall contain each signature in one column. An example of the required matrix format can be seen
 <a target="_blank"
 href="https://github.com/TojalLab/signeR/blob/devel/inst/extdata/21_breast_cancers.mutations.txt">
 here</a>.</p>
@@ -337,7 +337,7 @@ assessment of the number of signatures by three options, as follows.</p>
 
 <ol type="i">
 <li>signeR detects the number of signatures at run time by considering the best
-NMF factorisation rank between 1 and min(G, K)-1, with G = number of genomes and
+NMF factorization rank between 1 and min(G, K)-1, with G = number of genomes and
 K = number of features (i.e. 96):
 <!--begin.rcode eval=FALSE
 signatures <- signeR(M=mut, Opport=opp)
@@ -389,7 +389,7 @@ end.rcode-->
 
 <h2 id="toc5">5: Estimating exposures to known signatures.</h2>
 
-<p><b>signeR</b> also offer the possibility to estimate exposures to known signatures as, for example, the ones described on <a target="_blank" href="https://cancer.sanger.ac.uk/cosmic/signatures_v2"> Cosmic database</a>. In this case, signatures should be provided in a matrix, as described in intem 3.3 above, and should be kept constant during analysis:</p>
+<p><b>signeR</b> also offers the possibility to estimate exposures to known signatures as, for example, the ones described on <a target="_blank" href="https://cancer.sanger.ac.uk/cosmic/signatures_v2"> Cosmic database</a>. In this case, signatures should be provided in a matrix, as described in item 3.3 above, and should be kept constant during analysis:</p>
 <!--begin.rcode
 Pmatrix <- as.matrix(read.table(system.file("extdata","Cosmic_signatures_BRC.txt",
     package="signeR"), sep="\t", check.names=FALSE))
@@ -408,12 +408,12 @@ end.rcode-->
 
 <h2 id="toc6">6: Results and plots</h2>
 
-<p><b>signeR</b> offer several plots to visualize estimated signatures and their exposures, as weel as the convergence of the MCMC used to estimate them.</p>
+<p><b>signeR</b> offers several plots to visualize estimated signatures and their exposures, as well as the convergence of the MCMC used to estimate them.</p>
 
 <h3 id="toc6.1">6.1: Plot the MCMC paths for the NMF parameters (P and E
 matrices)</h3>
 
-<p>The following instruction plots the MCMC samples paths for each entry of the
+<p>The following instruction plots the MCMC sample paths for each entry of the
 signature matrix P and their exposures, i.e. the E matrix. Only post-burnin
 paths are available for plotting. Those plots are useful for checking if
 entries have leveled off, reflecting the sampler convergence.</p>
@@ -499,13 +499,13 @@ signatures, as can be seen in the dendrogram on the left.</p>
 
 <h2 id="toc7">7: Supervised approaches to exposure analysis</h2>
 
-<p>If additional information is available for the samples analysed <b>signeR</b>
-is able to evaluate how those relate with the estimated exposures to mutational 
+<p>If additional information is available for the samples analyzed <b>signeR</b>
+is able to evaluate how those relate to the estimated exposures to mutational 
 signatures. When additional data is categorical, differences in exposures among 
-groups can be analysed and if some of the samples are unlabeled they can be 
+groups can be analyzed and if some of the samples are unlabeled they can be 
 labeled based on the similarity of their exposure profiles to those of labeled 
 samples. In the case of a continuous additional feature, its correlation to 
-estimated exposures can be evaluated. Survival data can also be analysed and 
+estimated exposures can be evaluated. Survival data can also be analyzed and 
 the relation of signatures to survival can be accessed. In every case, analyses 
 are repeated for all samples of the exposure matrix generated by <b>signeR</b> 
 sampler and results are considered significant if they are consistently found 
@@ -534,12 +534,12 @@ BRCA+ samples were significantly more exposed to signatures S3, S4 and S5.
 are compared against each other. These last plots are generated only when there
 are more than two groups in the analysis and any signature is found to be
 differentially active. Groups marked by the same letter are not significantly
-different for the corresponding signature.</p>
+different from the corresponding signature.</p>
 
 <p>The <code>Pvquant</code> vector holds the pvalues quantile of the test for
 each signature (by default, the 0.5 quantile, i.e. the median). The logarithms
 of those are considered the Differential Exposure Scores (DES). Signatures with
-<code>Pvquant</code> values below the cutoff, 0.05 by default, are considered as
+<code>Pvquant</code> values below the cutoff, 0.05 by default, are considered 
 differentially exposed.</p>
 
 <!--begin.rcode
@@ -561,8 +561,8 @@ end.rcode-->
 processes. In order to do this, a vector of target labels must be provided to the 
 function ExposureClassify. Samples corresponding to NA values in this vector will 
 be classified according to the similarity of their mutational profiles to the ones 
-of labeled samples. Several classification algorithms are available: k-nearst 
-neighbour (knn), linear vector quantization (lvq), Logistic regressin(logreg),
+of labeled samples. Several classification algorithms are available: k-nearest 
+neighbor (knn), linear vector quantization (lvq), Logistic regression (logreg),
 linear discriminant analysis (lda), least absolute shrinkage and selection operator 
 (lasso), naive bayes(nb), support vector machines (svm), random forests (rf) and 
 adaboost (ab). The following example uses the sample labels defined in the DES 
@@ -593,7 +593,7 @@ end.rcode-->
 
 <h3 id="toc7.3">7.3: Correlation Analysis</h3>
 
-<p> When a continuous feature is available for the samples being analysed, <b>signeR</b> can evaluate its correlation to exposures to mutational signatures. The following command applies the <code>cor.test</code> function to evaluate the correlation of the provided feature and the levels of exposure of each signature:</p>
+<p> When a continuous feature is available for the samples being analyzed, <b>signeR</b> can evaluate its correlation to exposures to mutational signatures. The following command applies the <code>cor.test</code> function to evaluate the correlation between the provided feature and the levels of exposure of each signature:</p>
 
 <!--begin.rcode eval=TRUE
 # feature values, respective to each row of the mutation count matrix. 
@@ -609,7 +609,7 @@ the provided feature.</p>
 
 <h3 id="toc7.4">7.4: Linear Regression</h3>
 
-<p> A continuous feature may also be modeled by its exposures to mutational signatures. The following command applies the <code>glm</code> function to fit a linear model with the provided feature as  output of the levels of exposures to mutational signatures:</p>
+<p> A continuous feature may also be modeled by its exposure to mutational signatures. The following command applies the <code>glm</code> function to fit a linear model with the provided feature as  output of the levels of exposures to mutational signatures:</p>
 
 <!--begin.rcode eval=TRUE
 ExpLM <- ExposureGLM(signatures$SignExposures, feature=myFeature)
@@ -618,7 +618,7 @@ end.rcode-->
 
 <h3 id="toc7.5">7.5: Survival Analysis</h3>
 
-<p> If survival data is available for the samples being analysed, <b>signeR</b> can evaluate the effect of exposure on survival. The folowing function performs an independent test for the exposures levels of each mutational signature, as opposed to the <code>Cox regression</code> described in next item. If <code>method = logrank</code> samples are separated according to their exposure and top and bottom groups are compared by the log-rank test. Otherwise, <code>method = cox</code> and a Cox's proportional hazards model is fitted to exposure levels and evaluates their effects upon survival.</p>
+<p> If survival data is available for the samples being analyzed, <b>signeR</b> can evaluate the effect of exposure on survival. The following function performs an independent test for the exposure levels of each mutational signature, as opposed to the <code>Cox regression</code> described in next item. If <code>method = logrank</code> samples are separated according to their exposure and top and bottom groups are compared by the log-rank test. Otherwise, <code>method = cox</code> and a Cox's proportional hazards model are fitted to exposure levels and evaluate their effects upon survival.</p>
 
 <!--begin.rcode eval=TRUE, message=FALSE
 # survival times and censoring, respective to each row of the mutation count matrix. 
@@ -631,17 +631,17 @@ su<-as.matrix(data.frame(time=sample(80:150,21,replace=T),
 ExpSurv <- ExposureSurvival(Exposures=signatures$SignExposures, 
                             surv=su, method="logrank")
 end.rcode-->
-<p class='legend'>P.values boxplots and plots of survival data comparing, for each signature, samples groups showing top or bottom exposure levels.</p>
+<p class='legend'>P.values boxplots and plots of survival data comparing, for each signature, sample groups showing top or bottom exposure levels.</p>
 
 <!--begin.rcode eval=TRUE, message=FALSE
 ExpSurv.cox <- ExposureSurvival(Exposures=signatures$SignExposures, 
                                 surv=su, method="cox")
 end.rcode-->
-<p class='legend'>P.values boxplots and forestplot showing the effect of each signature upon survival according to univariate Cox's proportional hazards model.</p>
+<p class='legend'>P.values boxplots and forest plot showing the effect of each signature upon survival according to univariate Cox's proportional hazards model.</p>
 
 <h3 id="toc7.6">7.6: Cox regression </h3>
 
-<p></b>signeR</b> can also evaluate the combined effect on survival of exposure levels to different signatures. The following command fits Cox's proportional hazards model on exposures. It generates a p-values boxplot and a forestplot (form package <b>forestplot</b>) to show the relevance of each mutational signature to survival.</p>
+<p></b>signeR</b> can also evaluate the combined effect on survival of exposure levels to different signatures. The following command fits Cox's proportional hazards model on exposures. It generates a p-values boxplot and a forest plot (from package <b>forestplot</b>) to show the relevance of each mutational signature to survival.</p>
 
 <!--begin.rcode eval=TRUE, message=FALSE
 BRCA_labels <- c("wt","BRCA+","BRCA+","BRCA+","BRCA+","BRCA+","BRCA+",
@@ -654,34 +654,34 @@ end.rcode-->
 
 <h2 id="toc8">8: Unsupervised approaches to exposure analysis</h2>
 
-<p>When no addtional information is available for the samples analysed, 
+<p>When no additional information is available for the samples analyzed, 
 <b>signeR</b> can search patterns on estimated exposures. Unsupervised analysis 
 can be performed on all generated samples of the exposure matrix and consistent 
 results are reported as significant.</p>
 
-<h3 id="toc8.1">8.1: Hierarquical Clustering</h3>
+<h3 id="toc8.1">8.1: Hierarchical Clustering</h3>
 
-<p>Samples can be hierarquicaly clustered according to their exposures to mutational signatures. The function <code>HClustExp</code> applies R function <code>hclust</code> to each sampled exposure matrix. Dendogram branches consistently found on most of the analyses are reported:</p>
+<p>Samples can be hierarchically clustered according to their exposures to mutational signatures. The function <code>HClustExp</code> applies the R function <code>hclust</code> to each sampled exposure matrix. Dendogram branches consistently found in most of the analyses are reported:</p>
 
 <!--begin.rcode eval=TRUE
 # feature values, respective to each row of the mutation count matrix
 HCE <- HClustExp(signatures$SignExposures,method.dist="euclidean", method.hclust="average")
 end.rcode-->
 
-<p class='legend'>Hierarquical structure found on data, each branch showing the frequency of its occurance in the analysis of sampled exposure matrices.</p>
+<p class='legend'>Hierarchical structure found on data, each branch showing the frequency of its occurrence in the analysis of sampled exposure matrices.</p>
 
 <h3 id="toc8.2">8.2: Fuzzy Clustering</h3>
 
-<p><b>signeR</b> can also perform a Fuzzy clustering of the samples according to their exposures to mutational signatures. The function <code>FuzzyClustExp</code> applies a clustering algorithm (hard or fuzzy) on each sampled exposure matrix and averages the fuzzy memberships degrees of samples to clusters. The number of cluster can be defined by the user (Clim parameter), otherwise different numbers of clusters are tested and the one that maximizes the PBMF index is used (the search algorithm used is similar to the one applied to estimate the number of signatures present in a dataset):</p> 
+<p><b>signeR</b> can also perform a Fuzzy clustering of the samples according to their exposures to mutational signatures. The function <code>FuzzyClustExp</code> applies a clustering algorithm (hard or fuzzy) to each sampled exposure matrix and averages the fuzzy membership degrees of samples to clusters. The number of clusters can be defined by the user (Clim parameter), otherwise different numbers of clusters are tested and the one that maximizes the PBMF index is used (the search algorithm used is similar to the one applied to estimate the number of signatures present in a dataset):</p> 
 
 <!--begin.rcode eval=TRUE
 FCE <- FuzzyClustExp(signatures$SignExposures, Clim=c(3,7))
 end.rcode-->
 
-<p class='legend'>Heatmap showing the mean fuzzy memberships degrees of 
+<p class='legend'>Heatmap showing the mean fuzzy membership degrees of 
 samples to clusters.</p>
 
-<p>The function's output is a list of three elements: the mean matrix of fuzzy memberships degrees of samples to clusters, the full array of all fuzzy memberships degrees found by the analysis of sampled exposure matrices and the matrix of memberships degrees found by the analysis of median exposures of samples to signatures.</p>
+<p>The function's output is a list of three elements: the mean matrix of fuzzy membership degrees of samples to clusters, the full array of all fuzzy membership degrees found by the analysis of sampled exposure matrices and the matrix of membership degrees found by the analysis of median exposures of samples to signatures.</p>
 
 
 <h2 id="toc9">9: Frequently Asked Questions</h2>
@@ -715,14 +715,14 @@ Rcpp FAQ, section 2.16</a>.</p>
 
 <h3 id="toc9.3">9.3: Missing library headers</h3>
 
-<p>Some packages that signeR depends on requires that 3rd party library headers be installed. If you see errors like:</p>
+<p>Some packages that signeR depends on require that 3rd party library headers be installed. If you see errors like:</p>
 <pre><code>Error: checking for curl-config... no
          Cannot find curl-config</code></pre>
 or
 <pre><code>libopenblas.so.0 not found</code></pre>
 
 
-<p>It means you need to install these headers with your package manager. For example on ubuntu:</p>
+<p>It means you need to install these headers with your package manager. For example on Ubuntu:</p>
 <pre><code>$ sudo apt-get install libcurl4-openssl-dev libopenblas-dev</code></pre>
 
 <h2 id="toc10">10: References</h2>
