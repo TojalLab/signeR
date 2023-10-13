@@ -12,12 +12,12 @@ fitting_UI <- function(id) {
             width = 12,
             p(
               "Please ", strong("Upload your data"),
-              " below. The counts of mutations are required, as a VCF file or a 
-              counts matrix. The counts of mutations should be
+              " below. The counts of mutations are required, as a VCF, MAF or a 
+              counts matrix file. The counts of mutations should be
               organized in a matrix with 96 columns (corresponding to mutations
-              types) and one line for each genome sample. 
+              types) and one line for each sample. 
               Opptionally, a matrix with matching opportunities can be
-              uploaded, build with a BED file or you can use a already built genome opportunity matrix 
+              uploaded, build with a BED file or you can use a already built genome opportunity matrix (hg19 or hg38 only)
               (",
               a(
                 "see signeR documentation for details",
@@ -38,34 +38,39 @@ fitting_UI <- function(id) {
             collapsible = T, status = "primary",
             messageBox(
               width = 12,
-              "Upload a VCF file or a SNV matrix file with your own samples
+              "Upload a VCF, MAF or a SNV matrix file with your own samples
               to use in signeR fitting module and previous known signatures
               (mandatories files).
-              You can upload an opportunity file as well or use a already built genome opportunity.
+              You can upload an opportunity file as well or use a already built genome opportunity (hg19 or hg38 only).
               Also, you can upload a BED file to build an opportunity matrix."
             ),
             fluidRow(
               box(
                 width = 4, background = "orange",
                 tags$head(tags$script(src = "message-handler.js")),
-                  actionButton(ns("snvhelp"),
-                    "SNV matrix help",
-                    icon = icon("info-circle")
-                  ),
-                hr(),
-                prettyRadioButtons(
-                  inputId = ns("genbuild_fit"), label = "Genome build :", 
-                  choiceNames = c("hg19/GRCh37", "hg38/GRCh38"),
-                  choiceValues = c("hg19", "hg38"),
-                  inline = TRUE, status = "primary", selected = "hg19",
-                  fill=TRUE, 
+                actionButton(ns("snvhelp"),
+                  "SNV matrix help",
+                  icon = icon("info-circle")
                 ),
+                actionButton(ns("genomehelp"),
+                  "Genome installation help",
+                  icon = icon("info-circle")
+                ),
+                hr(),
+                # prettyRadioButtons(
+                #   inputId = ns("genbuild_fit"), label = "Genome build :", 
+                #   choiceNames = c("hg19/GRCh37", "hg38/GRCh38"),
+                #   choiceValues = c("hg19", "hg38"),
+                #   inline = TRUE, status = "primary", selected = "hg19",
+                #   fill=TRUE, 
+                # ),
+                uiOutput(ns("genomes_fit")),
                 fileInput(ns("mutfile_fit"),
-                  "VCF file or SNV matrix*",
+                  "VCF, MAF or SNV matrix*",
                   multiple = FALSE,
                   accept = c(
-                    ".vcf",".vcf.gz","text/csv", "text/plain",
-                    "text/comma-separated-values",".csv"
+                    ".vcf",".vcf.gz","text/csv","text/plain",
+                    "text/comma-separated-values",".csv",".maf",".maf.gz"
                   )
                 )
               ),
@@ -251,6 +256,30 @@ fitting <- function(input,
     reactive(signatures_fitting())
   )
 
+  output$genomes_fit <- renderUI({
+
+    genomes_available <- installed.genomes()
+
+    if(length(genomes_available)==0){
+      messageBox(
+        title = "Warning:",
+        solidHeader = TRUE,
+        width = 12,
+        paste0(
+          "There is no genome installed. ",
+          "If you need, install a genome using BSGenome (see help above)."
+        )
+      )
+    }else{
+      pickerInput(
+        inputId = ns("genbuild_fit"),
+        label = "Genome: ",
+        choices = genomes_available,
+        multiple = FALSE
+      )
+    }
+  })
+
   mut_fit <- reactive({
     # req(input$mutfile_fit)
     if (is.null(input$mutfile_fit)) {
@@ -264,43 +293,33 @@ fitting <- function(input,
     }
     ext <- tools::file_ext(input$mutfile_fit$datapath)
     if (ext == "vcf" || ext == "vcf.gz") {
-      build <- input$genbuild_fit
-      if (build == "hg19"){
-        if (!"BSgenome.Hsapiens.UCSC.hg19" %in% installed.genomes()) {
-          showModal(modalDialog(
-            title = "Oh no!",
-            paste0(
-              "You must install the BSgenome.Hsapiens.UCSC.hg19 genome ",
-              "using the command: ",
-              "BiocManager::install('BSgenome.Hsapiens.UCSC.hg19')."
-            ),
-            easyClose = TRUE,
-            footer = NULL
-          ))
-          return(NULL)
-        }
-        mygenome <- BSgenome.Hsapiens.UCSC.hg19
-      } else {
-        if (!"BSgenome.Hsapiens.UCSC.hg38" %in% installed.genomes()) {
-          showModal(modalDialog(
-            title = "Oh no!",
-            paste0(
-              "You must install the BSgenome.Hsapiens.UCSC.hg38 genome ",
-              "using the command: ",
-              "BiocManager::install('BSgenome.Hsapiens.UCSC.hg38')."
-            ),
-            easyClose = TRUE,
-            footer = NULL
-          ))
-          return(NULL)
-        } 
-        mygenome <- BSgenome.Hsapiens.UCSC.hg38
-      }
+      req(input$genbuild_fit)
+
+      mygenome <- getBSgenome(input$genbuild_fit)
+      build <- unique(as.data.frame(GenomeInfoDb::seqinfo(mygenome))$genome)
 
       vcfobj <- VariantAnnotation::readVcf(input$mutfile_fit$datapath, build)
 
       df <- genCountMatrixFromVcf(mygenome, vcfobj)
       
+    } else if (ext == "maf" || ext == "maf.gz") {
+      req(input$genbuild_fit)
+
+      mygenome <- getBSgenome(input$genbuild_fit)
+      maf <- read_tsv(input$mutfile_fit$datapath)
+
+      if (!validate_maf(maf)) {
+        showModal(modalDialog(
+          title = "Oh no!",
+          paste0("You must upload a valid MAF file."),
+          easyClose = TRUE,
+          footer = NULL
+        ))
+        return(NULL)
+      }
+
+      df <- genCountMatrixFromMAF(mygenome, input$mutfile_fit$datapath)   
+
     } else {
       df <- read.table(input$mutfile_fit$datapath, header=T,sep="\t",row.names=1,check.names=F)
       if (!validate_cnv(df)) {
@@ -350,6 +369,9 @@ fitting <- function(input,
 
       mutation <- mut_fit()
 
+      mygenome <- getBSgenome(input$genbuild_fit)
+      build <- unique(as.data.frame(GenomeInfoDb::seqinfo(mygenome))$genome)
+
       nsamples = 1
       if (!is.null(mutation)){
         nsamples = nrow(mutation)
@@ -360,7 +382,7 @@ fitting <- function(input,
         detail = "This operation may take a while...",
         value = 0,
         {
-            data <- download_opp_file(input$genbuild_fit)
+            data <- download_opp_file(build)
         }
       )
 
@@ -389,39 +411,11 @@ fitting <- function(input,
 
       ext <- tools::file_ext(input$oppfile_fit$datapath)
       if (ext == "bed") {
-        build <- input$genbuild_fit
+        
         mutation <- mut_fit()
-        if (build == "hg19"){
-          if (!"BSgenome.Hsapiens.UCSC.hg19" %in% installed.genomes()) {
-            showModal(modalDialog(
-              title = "Oh no!",
-              paste0(
-                "You must install the BSgenome.Hsapiens.UCSC.hg19 genome ",
-                "using the command: ",
-                "BiocManager::install('BSgenome.Hsapiens.UCSC.hg19')."
-              ),
-              easyClose = TRUE,
-              footer = NULL
-            ))
-            return(NULL)
-          }
-          mygenome <- BSgenome.Hsapiens.UCSC.hg19
-        } else {
-          if (!"BSgenome.Hsapiens.UCSC.hg38" %in% installed.genomes()) {
-            showModal(modalDialog(
-              title = "Oh no!",
-              paste0(
-                "You must install the BSgenome.Hsapiens.UCSC.hg38 genome ",
-                "using the command: ",
-                "BiocManager::install('BSgenome.Hsapiens.UCSC.hg38')."
-              ),
-              easyClose = TRUE,
-              footer = NULL
-            ))
-            return(NULL)
-          }
-          mygenome <- BSgenome.Hsapiens.UCSC.hg38
-        }
+
+        mygenome <- getBSgenome(input$genbuild_fit)
+        build <- unique(as.data.frame(GenomeInfoDb::seqinfo(mygenome))$genome)
 
         target_regions <- tryCatch(
           {
@@ -503,24 +497,24 @@ fitting <- function(input,
       } else if (whichplot_fit() == "ExposureBoxplot") {
         p(
           strong("ExposureBoxplot help"), HTML("<br>"), HTML("<br>"),
-          "The levels of exposure to each signature in all genome samples."
+          "The levels of exposure to each signature in all samples."
         )
       } else if (whichplot_fit() == "ExposureBarplot") {
         p(
           strong("ExposureBarplot help"), HTML("<br>"), HTML("<br>"),
-          "Barplot showing the contributions of the signatures to genome
+          "Barplot showing the contributions of the signatures to 
           samples mutation counts."
         )
       } else if (whichplot_fit() == "ExposureBarplotRelative") {
         p(
           strong("ExposureBarplot relative help"), HTML("<br>"), HTML("<br>"),
-          "Barplot showing the relative contribution of signatures on each
-          genome samples mutation counts."
+          "Barplot showing the relative contribution of signatures on each 
+          samples mutation counts."
         )
       } else if (whichplot_fit() == "ExposureHeat") {
         p(
           strong("ExposureHeat help"), HTML("<br>"), HTML("<br>"),
-          "Heatmap showing the exposures for each genome sample.
+          "Heatmap showing the exposures for each sample.
           Samples are grouped according to their levels of exposure to the
           signatures, as can be seen in the dendrogram on the left."
         )
@@ -650,6 +644,16 @@ fitting <- function(input,
     ))
   })
 
+  observeEvent(input$genomehelp, {
+    showModal(modalDialog(
+      title = "Genome installation help",
+      includeMarkdown(
+        system.file("extdata", "genome_help.md", package = "signeR")
+      ),
+      size = "l", easyClose = TRUE
+    ))
+  })
+
   observeEvent(input$opphelp, {
     showModal(modalDialog(
       title = "Opportunity matrix help",
@@ -684,18 +688,19 @@ fitting <- function(input,
 
   output$uigenopp_fit <- renderUI({
     req(input$genbuild_fit)
-    build = "hg19"
-    if (input$genbuild_fit == "hg38") {
-      build = "hg38"
-    }
+
+    mygenome <- getBSgenome(input$genbuild_fit)
+    build <- unique(as.data.frame(GenomeInfoDb::seqinfo(mygenome))$genome)
     
-    prettyRadioButtons(
-      inputId = ns("genopp_fit"), label = paste0("Use already built genome opportunity (",build,")?"), 
-      choiceNames = c("Yes", "No"),
-      choiceValues = c("yes", "no"),
-      inline = TRUE, status = "primary", selected = "no",
-      fill=TRUE, 
-    )
+    if (build %in% c('hg19', 'hg38')){
+      prettyRadioButtons(
+        inputId = ns("genopp_fit"), label = paste0("Use already built genome opportunity (",build,")?"), 
+        choiceNames = c("Yes", "No"),
+        choiceValues = c("yes", "no"),
+        inline = TRUE, status = "primary", selected = "no",
+        fill=TRUE, 
+      )
+    }
 
   })
 
