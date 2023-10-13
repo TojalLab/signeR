@@ -54,11 +54,12 @@ importFrom("pROC","roc")
 importFrom("listenv", "listenv")
 importFrom("BiocGenerics", "Reduce")
 importFrom("Biostrings","getSeq", "oligonucleotideFrequency",
-    "reverseComplement", "DNAString", "DNAStringSetList")
+    "reverseComplement", "DNAString", "DNAStringSetList",
+    "DNAStringSet")
 importFrom("grDevices", "colorRampPalette", "dev.cur", "dev.new",
     "dev.off", "pdf", "png", "rainbow", "terrain.colors")
 importFrom("GenomicRanges", "resize", "granges", "reduce","GRanges")
-importFrom("IRanges","subsetByOverlaps")
+importFrom("IRanges","subsetByOverlaps", "IRanges")
 importFrom("nloptr", "nloptr")
 importFrom("NMF", "nmf", "basis", "coef")
 importFrom("VariantAnnotation", "readVcf", "isSNV", "alt", "ref", "geno")

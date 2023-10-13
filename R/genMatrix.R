@@ -169,7 +169,7 @@ genCountMatrixFromMAF <- function(bsgenome, maf_file) {
             warning("Warning: sequence names from MAF don't match genome sequence names, trying to continue by removing the chr prefix.")
             maf <- dplyr::mutate(maf, Chromosome=gsub("^chr","",Chromosome))
         } else {
-            error("Error: sequence names from MAF don't match genome sequence names, please check the genome parameter.")
+            stop("Error: sequence names from MAF don't match genome sequence names, please check the genome parameter.")
         }
     }
 
