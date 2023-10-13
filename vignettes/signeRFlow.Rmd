@@ -61,15 +61,15 @@ You can also provide a file with opportunities that are used as weights for the 
 
 ### Load data
 
-You can upload a VCF file or an SNV matrix file (mandatory) with your own samples to use in signeR **de novo** module. You can upload an opportunity file as well or use an already built genome opportunity. Also, you can upload a BED file to build an opportunity matrix.
+You can upload a VCF, MAF or an SNV matrix file (mandatory) with your own samples to use in signeR **de novo** module. You can upload an opportunity file as well or use an already built genome opportunity (hg19 or hg38 only). Also, you can upload a BED file to build an opportunity matrix.
 
-#### VCF or SNV Matrix
+#### VCF, MAF or SNV Matrix
 
-You can upload a VCF file or an SNV matrix file from your computer by clicking on the *Browse button*.
+You can upload a VCF, MAF or an SNV matrix file from your computer by clicking on the *Browse button*.
 
 ![](flow_snv_upload.png)
 
-SNV matrix is a text file with a (tab-delimited) matrix of SNV counts found on analyzed genomes. It must contain one row for each genome sample and 97 columns, the first one with sample IDs and, after that, one column for each mutation type. Mutations should be specified in the column names (headers), by both the base change and the trinucleotide context where it occurs (for example: C>A:ACA). The table below shows an example of the SNV matrix structure.
+SNV matrix is a text file with a (tab-delimited) matrix of SNV counts found on analyzed genomes. It must contain one row for each sample and 97 columns, the first one with sample IDs and, after that, one column for each mutation type. Mutations should be specified in the column names (headers), by both the base change and the trinucleotide context where it occurs (for example: C>A:ACA). The table below shows an example of the SNV matrix structure.
 
 <table class="table table-striped table-hover" style="margin-left: auto; margin-right: auto;">
  <thead>
@@ -128,15 +128,16 @@ SNV matrix is a text file with a (tab-delimited) matrix of SNV counts found on a
 </tbody>
 </table>
 
-If you want to upload a VCF file, you must select the genome build used on your variant calling analysis to allow signeR to generate an SNV matrix of counts. Also, you can generate an SNV matrix from a VCF file using the method: 
+If you want to upload a VCF or MAF file, you must select the genome build used on your variant calling analysis to allow signeR to generate an SNV matrix of counts. Also, you can generate an SNV matrix from a VCF or a MAF file using the methods: 
 ```r
 genCountMatrixFromVcf
+genCountMatrixFromMAF
 ```
 from signeR package. See the [documentation](https://bioconductor.org/packages/release/bioc/vignettes/signeR/inst/doc/signeR-vignette.html#toc3) for more details. 
 
 > **`Warning`**:
 >
-> You must have installed the genomes `BSgenome.Hsapiens.UCSC.hg19` or `BSgenome.Hsapiens.UCSC.hg38` from `BSgenome` package in order to use the VCF upload.
+> You must have installed the needed genomes from `BSgenome` package in order to use the VCF or MAF upload option.
 
 **Columns:**
 
@@ -149,10 +150,12 @@ Each row contains the sample ID and the counts for each trinucleotide contexts.
 **Example file:**
 
 [21 breast cancer](https://raw.githubusercontent.com/TojalLab/signeR/devel/inst/extdata/21_breast_cancers.mutations.txt)
+[VCF example](https://raw.githubusercontent.com/TojalLab/signeR/devel/inst/extdata/example.vcf)
+[MAF example](https://raw.githubusercontent.com/TojalLab/signeR/devel/inst/extdata/example.maf)
 
 #### Opportunity matrix
 
-You can upload an Opportunity matrix file or a BED file from your computer by clicking at the **Browse button**. Also, you can use an already built genome opportunity for human reference genomes. This is an optional file.
+You can upload an Opportunity matrix file or a BED file from your computer by clicking at the **Browse button**. Also, you can use an already built genome opportunity for human reference genomes hg19 or hg38. This is an optional file.
 
 ![](flow_opp_upload.png)
 
@@ -223,7 +226,7 @@ from signeR package. See the [documentation](https://bioconductor.org/packages/r
 
 > **`Warning`**:
 >
-> You must have installed the genomes `BSgenome.Hsapiens.UCSC.hg19` or `BSgenome.Hsapiens.UCSC.hg38` from `BSgenome` package in order to use the BED upload.
+> You must have installed the needed genomes from `BSgenome` package in order to use the BED upload.
 
 **Columns:**
 
@@ -272,14 +275,14 @@ A heatmap will be shown in the **COSMIC Comparison** section of *de novo* tab.
 
 ## signeR fitting
 
-In this module, you can upload a VCF file or an SNV matrix with counts of mutations, the same as used on *de novo* module, and a previous signatures file with known signatures to execute the signeR fitting algorithm, which computes a Bayesian approach to the fitting of mutation counts to known mutational signatures, thus estimating exposures to mutational processes. 
+In this module, you can upload a VCF, MAF or an SNV matrix file with counts of mutations, the same as used on *de novo* module, and a previous signatures file with known signatures to execute the signeR fitting algorithm, which computes a Bayesian approach to the fitting of mutation counts to known mutational signatures, thus estimating exposures to mutational processes. 
 
-You can also provide a file with opportunities or use an already built genome opportunity that is used as weights for the factorization. Further analysis parameters can be set and estimated exposures can be visualized on different plots interactively.
+You can also provide a file with opportunities or use an already built genome opportunity (hg19 or hg38 only) that is used as weights for the factorization. Further analysis parameters can be set and estimated exposures can be visualized on different plots interactively.
 
 ### Load data
 
-You can upload a VCF file or an SNV matrix file with your own samples to use in signeR fitting module and previous known signatures (mandatories files). You can upload an opportunity file as well.
-SNV or VCF and opportunity matrix are the same as used on *de novo* module.
+You can upload a VCF, MAF or an SNV matrix file with your own samples to use in signeR fitting module and previous known signatures (mandatories files). You can upload an opportunity file as well.
+SNV or VCF or MAF and opportunity matrix are the same as used on *de novo* module.
 
 #### SNV matrix
 
@@ -295,7 +298,6 @@ This is the same file used on **de novo** module.
 
 You can upload a Previous signatures matrix file from your computer by clicking at the *Browse button*.
 ![](flow_previous_sig.png)
-
 
 Previous signatures is a tab-delimited text file with a matrix of previously known signatures. It must contain one column for each signature and one row for each of the 96 SNV types (considering trinucleotide contexts). Mutation types should be contained in the first column, in the same form as the column names of the SNV matrix. The table below shows an example of the previous signatures matrix structure.
 
