@@ -90,22 +90,7 @@ covariate_UI <- function(id) {
             box(
               width = 12,
               uiOutput(ns("radio_buttons"))
-              # radioGroupButtons(
-              #   inputId = ns("plotid"),
-              #   label = NULL,
-              #   choices = c(
-              #     `<i class='bx-img'></i>` = "de",
-              #     `<i class='sc-img'></i>` = "sc",
-              #     `<i class='cor-img'></i>` = "cor",
-              #     `<i class='lr-img'></i>` = "lr",
-              #     `<i class='km-img'></i>` = "sv",
-              #     `<i class='cox-img'></i>` = "cx"
-              #   ),
-              #   direction = "vertical"
-              # )
-              # tooltip
-              # https://github.com/dreamRs/shinyWidgets/issues/12
-              # https://github.com/ijlyttle/bsplus
+             
             )
           )
         ),
@@ -124,253 +109,6 @@ covariate_UI <- function(id) {
         )
       )
     ),
-    # fluidRow(
-    #   box(
-    #     title = p("Differential Exposure Analysis"),
-    #     width = 12, solidHeader = T,
-    #     collapsible = T, status = "info", collapsed = T,
-    #     fluidRow(
-    #       box(
-    #         width = 12,
-    #         p("Differential...")
-    #       )
-    #     ),
-    #     column(
-    #       width = 2,
-    #       fluidRow(
-    #         box(
-    #           width = 12, solidHeader = T, collapsible = F, background = "aqua",
-    #           selectInput(
-    #             inputId = ns("diffexp_method"), label = "Method:",
-    #             choices = c("kruskal.test"),
-    #             selected = "kruskal.test", multiple = FALSE,
-    #             size = 4, selectize = FALSE
-    #           ),
-    #           selectInput(
-    #             inputId = ns("diffexp_padj"), label = "P-value adjust:",
-    #             choices = c("BH"),
-    #             selected = "BH", multiple = FALSE, size = 4, selectize = FALSE
-    #           ),
-    #           div(
-    #             style = "display: inline-block;width: 47%;",
-    #             numericInput(
-    #               ns("diffexp_quant"), "P-value quantile", 0.5,
-    #               min = 0, max = 1, step = 0.1
-    #             )
-    #           ),
-    #           div(
-    #             style = "display: inline-block;width: 47%;",
-    #             numericInput(
-    #               ns("diffexp_cutoff"), "P-value threshold", 0.5,
-    #               min = 0, max = 1, step = 0.1
-    #             )
-    #           ),
-    #         ),
-    #         box(
-    #           width = 12, solidHeader = T,
-    #           collapsible = F, background = "olive",
-    #           uiOutput(ns("plot_diffexp_help"))
-    #         )
-    #       )
-    #     ),
-    #     column(
-    #       width = 10,
-    #       fluidRow(
-    #         # box(
-    #         #   width = 12, solidHeader = T,
-    #         #   withSpinner(plotOutput(ns("diffexp_plot")), color = "#0dc5c1")
-    #         # )
-    #       )
-    #     )
-    #   )
-    # ),
-    # fluidRow(
-    #   box(
-    #     title = p("Sample Classification"), width = 12,
-    #     solidHeader = T, collapsible = T, status = "info", collapsed = T,
-    #     fluidRow(
-    #       box(
-    #         width = 12,
-    #         p("Sample...")
-    #       )
-    #     ),
-    #     column(
-    #       width = 4,
-    #       fluidRow(
-    #         box(
-    #           width = 12, solidHeader = T, collapsible = F, background = "aqua",
-    #           selectInput(
-    #             inputId = "sclassif_method", label = "Method:",
-    #             choices = c(
-    #               "knn", "lvq", "logreg", "lda",
-    #               "lasso", "nb", "svm", "rf", "ab"
-    #             ),
-    #             selected = "knn", multiple = FALSE, size = 4, selectize = FALSE
-    #           ),
-    #         ),
-    #         box(
-    #           width = 12, solidHeader = T, collapsible = F,
-    #           background = "olive", uiOutput(ns("plot_sampleclass_help"))
-    #         )
-    #       )
-    #     ),
-    #     column(
-    #       width = 8,
-    #       fluidRow(
-    #         box(
-    #           width = 12, solidHeader = T,
-    #           withSpinner(plotOutput(ns("sampleclass_plot")), color = "#0dc5c1")
-    #         )
-    #       )
-    #     )
-    #   )
-    # ),
-    # fluidRow(
-    #   box(
-    #     title = p("Correlation Analysis"), width = 12, solidHeader = T,
-    #     collapsible = T, status = "info", collapsed = T,
-    #     fluidRow(
-    #       box(
-    #         width = 12,
-    #         p("Correlation...")
-    #       )
-    #     ),
-    #     column(
-    #       width = 4,
-    #       fluidRow(
-    #         # box(
-    #         #   width = 12, solidHeader = T,
-    #         # collapsible = F, background = "aqua",
-    #         #   p("Parameters")
-    #         #   ),
-    #         box(
-    #           width = 12, solidHeader = T, collapsible = F,
-    #           background = "olive", uiOutput(ns("plot_correlation_help"))
-    #         )
-    #       )
-    #     ),
-    #     column(
-    #       width = 8,
-    #       fluidRow(
-    #         box(
-    #           width = 12, solidHeader = T,
-    #           withSpinner(plotOutput(ns("correlation_plot")), color = "#0dc5c1")
-    #         )
-    #       )
-    #     )
-    #   )
-    # ),
-    # fluidRow(
-    #   box(
-    #     title = p("Linear Regression"), width = 12, solidHeader = T,
-    #     collapsible = T, status = "info", collapsed = T,
-    #     fluidRow(
-    #       box(
-    #         width = 12,
-    #         p("Linear...")
-    #       )
-    #     ),
-    #     column(
-    #       width = 4,
-    #       fluidRow(
-    #         # box(
-    #         #   width = 12, solidHeader = T, collapsible = F,
-    #         # background = "aqua",
-    #         #   p("Parameters")
-    #         #   ),
-    #         box(
-    #           width = 12, solidHeader = T, collapsible = F,
-    #           background = "olive", uiOutput(ns("plot_regression_help"))
-    #         )
-    #       )
-    #     ),
-    #     column(
-    #       width = 8,
-    #       fluidRow(
-    #         box(
-    #           width = 12, solidHeader = T,
-    #           withSpinner(plotOutput(ns("regression_plot")), color = "#0dc5c1")
-    #         )
-    #       )
-    #     )
-    #   )
-    # ),
-    # fluidRow(
-    #   box(
-    #     title = p("Survival Analysis"), width = 12, solidHeader = T,
-    #     collapsible = T, status = "info", collapsed = T,
-    #     fluidRow(
-    #       box(
-    #         width = 12,
-    #         p("Survival...")
-    #       )
-    #     ),
-    #     column(
-    #       width = 4,
-    #       fluidRow(
-    #         box(
-    #           width = 12, solidHeader = T, collapsible = F, background = "aqua",
-    #           selectInput(
-    #             inputId = "survival_method", label = "Method:",
-    #             choices = c("logrank", "cox"),
-    #             selected = "logrank", multiple = FALSE,
-    #             size = 4, selectize = FALSE
-    #           ),
-    #         ),
-    #         box(
-    #           width = 12, solidHeader = T, collapsible = F,
-    #           background = "olive", uiOutput(ns("plot_survival_help"))
-    #         )
-    #       )
-    #     ),
-    #     column(
-    #       width = 8,
-    #       fluidRow(
-    #         box(
-    #           width = 12, solidHeader = T,
-    #           withSpinner(plotOutput(ns("survival_plot")), color = "#0dc5c1")
-    #         )
-    #       )
-    #     )
-    #   )
-    # ),
-    # fluidRow(
-    #   box(
-    #     title = p("Cox regression"), width = 12, solidHeader = T,
-    #     collapsible = T, status = "info", collapsed = T,
-    #     fluidRow(
-    #       box(
-    #         width = 12,
-    #         p("Cox...")
-    #       )
-    #     ),
-    #     column(
-    #       width = 4,
-    #       fluidRow(
-    #         # box(
-    #         #   width = 12, solidHeader = T, collapsible = F, background = "aqua",
-    #         #   p("Parameters")
-    #         #   ),
-    #         box(
-    #           width = 12, solidHeader = T, collapsible = F,
-    #           background = "olive", uiOutput(ns("plot_coxregression_help"))
-    #         )
-    #       )
-    #     ),
-    #     column(
-    #       width = 8,
-    #       fluidRow(
-    #         box(
-    #           width = 12, solidHeader = T,
-    #           withSpinner(
-    #             plotOutput(ns("coxregression_plot")),
-    #             color = "#0dc5c1"
-    #           )
-    #         )
-    #       )
-    #     )
-    #   )
-    # ),
   )
 }
 
@@ -428,10 +166,7 @@ covariate <- function(input,
   })
 
   user_data <- reactive({
-    # if (is.null(input$sample_data_file$datapath)) {
-    #   return(NA)
-    # }
-    # result <- try(readr::read_tsv(input$sample_data_file$datapath))
+
     result <- raw_user_data()
     if (is.data.frame(result)) {
       ff <- rownames(t(result))[-1]
@@ -452,7 +187,6 @@ covariate <- function(input,
           nrow()
         fq_na <- round(s_na / length(unique(result[[1]])) * 100, 3)
         class <- ifelse(
-          # class(result[[f]]) == "character", "categoric", "numeric"
           is.character(result[[f]]), "categoric", "numeric"
         )
         data <- data.frame(
@@ -519,7 +253,6 @@ covariate <- function(input,
   })
 
   df_clinical <- reactive({
-    # req(!is.na(user_data()), cancelOutput = T)
     user_data()
   })
 
@@ -584,37 +317,21 @@ covariate <- function(input,
     output$covariate_plot <- renderPlot({
       req(raw_user_data())
       feature_row <- input$user_data_rows_selected
-      # print(feature_row)
       if (!is.null(feature_row)) {
         data <- raw_user_data()
-        # print(head(data))
         col <- names(data[feature_row + 1])
-        # print(col)
         labels <- data[[col]]
-        # print(labels)
-        # if (class(labels) == "character") {
         if (is.character(labels)) {
-          # print("eh carac")
           sigs <- sigs_obj()
           if (is.null(sigs)) {
             return(NULL)
           }
-          # print(head(sigs))
           if (!is.null(sigs)) {
 
-            # if(!check_samples(data, sigs)){
-            #   return(NULL)
-            # }
-            
             difexp_method <- diffexp_method()
             diffexp.quant <- diffexp_quant()
             diffexp.cutoff <- diffexp_cutoff()
             diffexp.padj <- diffexp_padj()
-
-            # print(difexp_method)
-            # print(diffexp.quant)
-            # print(diffexp.cutoff)
-            # print(diffexp.padj)
 
             DiffExp(
               sigs$SignExposures,
@@ -639,7 +356,6 @@ covariate <- function(input,
         labels <- data[[col]]
         sclas_method <- sclassif_method()
         kfold <- sclassif_kfold()
-        # if (class(labels) == "character") {
         if (is.character(labels)) {
           sigs <- sigs_obj()
           if (is.null(sigs)) {
@@ -663,14 +379,6 @@ covariate <- function(input,
             
           }
         } 
-        # else {
-        #   sendSweetAlert(
-        #     session = session,
-        #     title = "Information",
-        #     text = "You must select a categoric feature.",
-        #     type = "info"
-        #   )
-        # }
       }
       return(NULL)
     })
@@ -684,7 +392,6 @@ covariate <- function(input,
         data <- raw_user_data()
         col <- names(data[feature_row + 1])
         feature <- data[[col]]
-        # if (class(feature) == "numeric") {
         if (is.numeric(feature)) {
           sigs <- sigs_obj()
           if (is.null(sigs)) {
@@ -710,7 +417,6 @@ covariate <- function(input,
         data <- raw_user_data()
         col <- names(data[feature_row + 1])
         feature <- data[[col]]
-        # if (class(feature) == "numeric") {
         if (is.numeric(feature)) {
           sigs <- sigs_obj()
           if (is.null(sigs)) {
@@ -887,7 +593,6 @@ covariate <- function(input,
   }
 
   observeEvent(input$plotid, {
-    # print(input$plotid)
     if (input$plotid == "de") {
       diffexpui()
       diffexpplot()
@@ -909,7 +614,7 @@ covariate <- function(input,
     }
   })
 
-  # isso para que o spinner nao fique rodando
+  # stpp spinner
   output$covariate_plot <- renderPlot({
     return(NULL)
   })
@@ -919,9 +624,7 @@ covariate <- function(input,
     feature_row <- input$user_data_rows_selected
     req(raw_user_data())
     data <- raw_user_data()
-    # print(head(data))
     col <- names(data[feature_row + 1])
-    # print(paste0('col ',col))
     t <- data %>%
       select(col) %>%
       rownames_to_column() %>%

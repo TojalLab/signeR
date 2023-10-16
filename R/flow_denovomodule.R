@@ -53,13 +53,6 @@ denovo_UI <- function(id) {
                   icon = icon("info-circle")
                 ),
                 hr(),
-                # prettyRadioButtons(
-                #   inputId = ns("genbuild"), label = "Genome build :", 
-                #   choiceNames = c("hg19/GRCh37", "hg38/GRCh38"),
-                #   choiceValues = c("hg19", "hg38"),
-                #   inline = TRUE, status = "primary", selected = "hg19",
-                #   fill=TRUE, 
-                # ),
                 uiOutput(ns("genomes")),
                 fileInput(ns("mutfile"),
                   "VCF, MAF or SNV matrix*",
@@ -152,7 +145,6 @@ denovo_UI <- function(id) {
                       )
                     )
                   ),
-                  # hr(),
                   actionButton(
                     ns("startdenovo"),
                     label = "Start de novo analysis", icon = NULL
@@ -293,7 +285,6 @@ denovo <- function(input,
   })
 
   mut <- reactive({
-    # req(input$mutfile)
     if (is.null(input$mutfile)) {
       showModal(modalDialog(
         title = "Oh no!",
@@ -304,7 +295,6 @@ denovo <- function(input,
       return(NULL)
     }
     
-    #df <- read.table(input$mutfile$datapath, header=T,sep="\t",row.names=1,check.names=F)
     ext <- tools::file_ext(input$mutfile$datapath)
     if (ext == "vcf" || ext == "vcf.gz") {
       req(input$genbuild)
@@ -351,8 +341,6 @@ denovo <- function(input,
   })
 
   opp <- reactive({
-    # isso torno o input obrigatorio
-    # req(input$oppfile)
 
     if (input$genopp == "yes" && is.null(input$oppfile)) {
 
@@ -384,7 +372,6 @@ denovo <- function(input,
 
       return(NULL)
     } else {
-      # read.table(input$oppfile$datapath)
 
       if(input$genopp == "yes") {
         showModal(modalDialog(
@@ -513,17 +500,12 @@ denovo <- function(input,
   signatures_denovo <- eventReactive(input$startdenovo, {
     req(mut())
     mutation <- mut()
-    # print(head(mutation))
     opportunity <- opp()
     if (is.null(opportunity)) {
       opportunity <- NA
     }
-    # print(opportunity)
     sigs <- NULL
-    # print(input$nsigs)
-    # print(input$warm)
-    # print(input$eval)
-    # print(input$em_iter)
+
     withProgress(
       message = "Running signeR...",
       detail = "This operation may take a while...",
@@ -670,15 +652,12 @@ denovo <- function(input,
       cosmic <- mutate(
         cosmic,
         t = paste0(
-          # gsub(">", ".", Substitution.Type), ".", Trinucleotide
           Substitution.Type, ":", Trinucleotide
         )
       ) %>%
         dplyr::select(t, contains("SBS")) %>%
         column_to_rownames("t")
       cosmic <- cosmic[colnames(signer), ]
-      # print(rownames(cosmic))
-      # print(colnames(signer))
       stopifnot(rownames(cosmic) == colnames(signer))
       # Calculating similarities signer vs cosmic
       dist <- as.matrix(1 - proxy::dist(signer, t(cosmic), method = "cosine"))

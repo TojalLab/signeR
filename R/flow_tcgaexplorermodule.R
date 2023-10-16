@@ -25,30 +25,7 @@ tcgaexplorer_UI <- function(id) {
           )
         ),
         uiOutput(ns("signplots")),
-        # fluidRow(
-        #   box(
-        #     width = 6,
-        #     withSpinner(
-        #       plotOutput(
-        #         ns("signplot"),
-        #         width = "auto",
-        #         height = "400px"
-        #       ),
-        #       color = "#0dc5c1"
-        #     )
-        #   ),
-        #   box(
-        #     width = 6,
-        #     withSpinner(
-        #       plotOutput(
-        #         ns("signheatplot"),
-        #         width = "auto",
-        #         height = "400px"
-        #       ),
-        #       color = "#0dc5c1"
-        #     )
-        #   )
-        # ),
+      
         fluidRow(
           box(
             title = "Data summary", width = 12, solidHeader = T,
@@ -309,7 +286,6 @@ tcgaexplorer <- function(input,
           nrow()
         fq_na <- round(s_na / length(unique(result[[1]])) * 100, 3)
         class <- ifelse(
-          # class(result[[f]]) == "character", "categoric", "numeric"
           is.character(result[[f]]), "categoric", "numeric"
         )
         data <- data.frame(
@@ -347,7 +323,6 @@ tcgaexplorer <- function(input,
           nrow()
         fq_na <- round(s_na / length(unique(result[[1]])) * 100, 3)
         class <- ifelse(
-          # class(result[[f]]) == "character", "categoric", "numeric"
           is.character(result[[f]]), "categoric", "numeric"
         )
         data <- data.frame(
@@ -725,7 +700,6 @@ tcgaexplorer <- function(input,
       if (!is.null(feature_row)) {
         col <- names(data[feature_row + 1])
         labels <- data[[col]]
-        # if (class(labels) == "character") {
         if (is.character(labels)) {
           sigs <- sigs_obj()
           if (is.null(sigs)) {
@@ -759,7 +733,6 @@ tcgaexplorer <- function(input,
         labels <- data[[col]]
         sclas_method <- sclassif_method()
         kfold <- sclassif_kfold()
-        # if (class(labels) == "character") {
         if (is.character(labels)) {
           sigs <- sigs_obj()
           if (is.null(sigs)) {
@@ -795,7 +768,6 @@ tcgaexplorer <- function(input,
       if (!is.null(feature_row)) {
         col <- names(data[feature_row + 1])
         feature <- data[[col]]
-        # if (class(feature) == "numeric") {
         if (is.numeric(feature)) {
           sigs <- sigs_obj()
           if (is.null(sigs)) {
@@ -821,7 +793,6 @@ tcgaexplorer <- function(input,
       if (!is.null(feature_row)) {
         col <- names(data[feature_row + 1])
         feature <- data[[col]]
-        # if (class(feature) == "numeric") {
         if (is.numeric(feature)) {
           sigs <- sigs_obj()
           if (is.null(sigs)) {
@@ -1023,7 +994,7 @@ tcgaexplorer <- function(input,
     }
   })
 
-  # isso para que o spinner nao fique rodando
+  # strop spinner 
   output$covariate_plot <- renderPlot({
     return(NULL)
   })

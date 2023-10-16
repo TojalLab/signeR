@@ -57,13 +57,6 @@ fitting_UI <- function(id) {
                   icon = icon("info-circle")
                 ),
                 hr(),
-                # prettyRadioButtons(
-                #   inputId = ns("genbuild_fit"), label = "Genome build :", 
-                #   choiceNames = c("hg19/GRCh37", "hg38/GRCh38"),
-                #   choiceValues = c("hg19", "hg38"),
-                #   inline = TRUE, status = "primary", selected = "hg19",
-                #   fill=TRUE, 
-                # ),
                 uiOutput(ns("genomes_fit")),
                 fileInput(ns("mutfile_fit"),
                   "VCF, MAF or SNV matrix*",
@@ -187,7 +180,6 @@ fitting_UI <- function(id) {
           )
         ),
         fluidRow(
-          # colocar uma minuatura dos gráficos ao invés de combobox
           box(
             title = "Plots", width = 12, solidHeader = T,
             collapsible = T, status = "primary", collapsed = F,
@@ -281,7 +273,6 @@ fitting <- function(input,
   })
 
   mut_fit <- reactive({
-    # req(input$mutfile_fit)
     if (is.null(input$mutfile_fit)) {
       showModal(modalDialog(
         title = "Oh no!",
@@ -337,7 +328,6 @@ fitting <- function(input,
   })
 
   kp <- reactive({
-    # req(input$kP)
     if (is.null(input$kP)) {
       showModal(modalDialog(
         title = "Oh no!",
@@ -347,7 +337,6 @@ fitting <- function(input,
       ))
       return(NULL)
     }
-    # read.table(input$kP$datapath, sep = "\t")
     df <- read.table(input$kP$datapath, header=T,sep="\t",row.names=1)
     if (!validate_knownsig(df)) {
       showModal(modalDialog(
@@ -362,8 +351,6 @@ fitting <- function(input,
   })
 
   opp_fit <- reactive({
-    # isso torno o input obrigatorio
-    # req(input$oppfile_fit)
 
     if (input$genopp_fit == "yes" && is.null(input$oppfile_fit)) {
 
@@ -395,7 +382,6 @@ fitting <- function(input,
 
       return(NULL)
     } else {
-      # read.table(input$oppfile$datapath)
 
       if(input$genopp_fit == "yes") {
         showModal(modalDialog(
@@ -527,16 +513,12 @@ fitting <- function(input,
     mutation <- mut_fit()
     req(kp())
     knownsigs <- kp()
-    # print(head(mutation))
     opportunity <- opp_fit()
     if (is.null(opportunity)) {
       opportunity <- NA
     }
-    # print(opportunity)
     sigs_fit <- NULL
-    # print(input$warm_fit)
-    # print(input$eval_fit)
-    # print(input$em_iter_fit)
+
     withProgress(
       message = "Running signeR fitting...",
       detail = "This operation may take a while...",
@@ -574,16 +556,7 @@ fitting <- function(input,
       return(NULL)
     }
     if (!is.null(whichplot_fit())) {
-      # if (whichplot_fit() == "SignPlot") {
-      #   withProgress(
-      #     message = "Generating the signature barplot...",
-      #     detail = "This operation may take a while...",
-      #     value = 0,
-      #     {
-      #       SignPlot(sigs_fit$SignExposures)
-      #     }
-      #   )
-      # } else 
+
       if (whichplot_fit() == "SignHeat") {
         withProgress(
           message = "Generating the signature heatmap...",

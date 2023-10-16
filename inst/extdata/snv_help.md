@@ -59,9 +59,13 @@ SNV matrix is a text file with a (tab-delimited) matrix of SNV counts found on a
 </tbody>
 </table>
 
-You can create an SNV matrix from VCF using the method 
+You can create an SNV matrix from a VCF file using the method 
 ```R
 genCountMatrixFromVcf
+```
+or from a MAF file using the method
+```R
+genCountMatrixFromMAF
 ```
 from signeR package. See the [documentation](https://bioconductor.org/packages/release/bioc/vignettes/signeR/inst/doc/signeR-vignette.html#toc3) for more details. 
 
@@ -74,3 +78,7 @@ Each row contains the sample ID and the counts for each trinucleotide context.
 ## Example file
 
 [21 breast cancer](https://raw.githubusercontent.com/TojalLab/signeR/devel/inst/extdata/21_breast_cancers.mutations.txt)
+
+[VCF example](https://raw.githubusercontent.com/TojalLab/signeR/devel/inst/extdata/example.vcf)
+
+[MAF example](https://raw.githubusercontent.com/TojalLab/signeR/devel/inst/extdata/example.maf)
