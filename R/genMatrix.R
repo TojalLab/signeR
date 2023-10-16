@@ -79,13 +79,19 @@ checkSeqLevels <- function(gr, bsgenome) {
     si <- seqinfo(bsgenome)
     if(!all(levels(gr@seqnames) %in% si@seqnames)) {
         mr1 <- gr
-        levels(mr1@seqnames) = paste0("chr", levels(mr1@seqnames))
+        levels(mr1@seqnames) = dplyr::case_when(
+                "MT" ~ "chrM",
+                .default = paste0("chr", levels(gr@seqnames))
+        )
         mr2 <- gr
-        levels(mr2@seqnames) = gsub("^chr", "", levels(mr2@seqnames))
+        levels(mr2@seqnames) = dplyr::case_when(
+                "chrM" ~ "MT",
+                .default = gsub("^chr", "", levels(gr@seqnames))
+        )
         if(all(levels(mr1@seqnames) %in% si@seqnames)) {
             warning("Warning: variant sequence names don't match genome sequence names, trying to continue by adding the chr prefix.")
             gr <- mr1
-        } else if(all(levels(mr2@seqname) %in% si@seqnames)) {
+        } else if(all(levels(mr2@seqnames) %in% si@seqnames)) {
             warning("Warning: variant sequence names don't match genome sequence names, trying to continue by removing the chr prefix.")
             gr <- mr2
         } else {
