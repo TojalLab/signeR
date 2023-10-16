@@ -452,7 +452,8 @@ covariate <- function(input,
           nrow()
         fq_na <- round(s_na / length(unique(result[[1]])) * 100, 3)
         class <- ifelse(
-          class(result[[f]]) == "character", "categoric", "numeric"
+          # class(result[[f]]) == "character", "categoric", "numeric"
+          is.character(result[[f]]), "categoric", "numeric"
         )
         data <- data.frame(
           "feature" = fn, "class" = class, "count" = paste0(s, " (", fq, "%)"),
@@ -591,7 +592,8 @@ covariate <- function(input,
         # print(col)
         labels <- data[[col]]
         # print(labels)
-        if (class(labels) == "character") {
+        # if (class(labels) == "character") {
+        if (is.character(labels)) {
           # print("eh carac")
           sigs <- sigs_obj()
           if (is.null(sigs)) {
@@ -637,7 +639,8 @@ covariate <- function(input,
         labels <- data[[col]]
         sclas_method <- sclassif_method()
         kfold <- sclassif_kfold()
-        if (class(labels) == "character") {
+        # if (class(labels) == "character") {
+        if (is.character(labels)) {
           sigs <- sigs_obj()
           if (is.null(sigs)) {
             return(NULL)
@@ -681,7 +684,8 @@ covariate <- function(input,
         data <- raw_user_data()
         col <- names(data[feature_row + 1])
         feature <- data[[col]]
-        if (class(feature) == "numeric") {
+        # if (class(feature) == "numeric") {
+        if (is.numeric(feature)) {
           sigs <- sigs_obj()
           if (is.null(sigs)) {
             return(NULL)
@@ -706,7 +710,8 @@ covariate <- function(input,
         data <- raw_user_data()
         col <- names(data[feature_row + 1])
         feature <- data[[col]]
-        if (class(feature) == "numeric") {
+        # if (class(feature) == "numeric") {
+        if (is.numeric(feature)) {
           sigs <- sigs_obj()
           if (is.null(sigs)) {
             return(NULL)

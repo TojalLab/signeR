@@ -28,7 +28,7 @@ knitr::opts_chunk$set(
 
 # Introduction
 
-signeRFlow is a shiny app that allows users to explore mutational signatures and exposures to related mutational processes embebbed into signeR package.
+signeRFlow is a shiny app that allows users to explore mutational signatures and exposures to related mutational processes embedded into signeR package.
 With the available modules, users are able to perform analysis on their own data by applying different approaches, such as *de novo* and fitting.
 Also, there is a module to explore public datasets from TCGA.
 
