@@ -28,14 +28,23 @@ knitr::opts_chunk$set(
 
 # Introduction
 
-signeRFlow is a shiny app that allows users to explore mutational signatures and exposures to related mutational processes.
+signeRFlow is a shiny app that allows users to explore mutational signatures and exposures to related mutational processes embebbed into signeR package.
 With the available modules, users are able to perform analysis on their own data by applying different approaches, such as *de novo* and fitting.
 Also, there is a module to explore public datasets from TCGA.
+
+## Install signeR
+
+In order to use signeRFlow app, you must have signeR package installed. To install **signeR**, open R and enter:
+```r
+install.packages("BiocManager")
+BiocManager::install("signeR")
+```
 
 ## Running shiny app
 
 Start the app using either RStudio or a terminal:
 ```r
+library(signeR)
 signeRFlow()
 ```
 
