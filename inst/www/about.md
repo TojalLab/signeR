@@ -28,7 +28,7 @@ The main feature of the signeRFlow shiny app is the signeR modules, which provid
                 analysis to find signatures in your data,
                 estimating both signatures and related exposures.
  - **signer fitting**: This module provides access to signeR fitting
-                analysis to find exposures to known signatures in your data, which can be uploaded or chosen from thethe  Cosmic database.
+                analysis to find exposures to known signatures in your data, which can be uploaded or chosen from the Cosmic database.
 
 ## TCGA Explorer
 

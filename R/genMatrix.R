@@ -73,6 +73,28 @@ genOpportunityFromGenome <- function(bsgenome, target_regions, nsamples=1) {
     return(m)
 }
 
+checkSeqLevels <- function(granges, bsgenome) {
+    # assert all chrom from maf are present on the genome
+    # attempt to add or remove "chr" if the names dont match
+    si <- seqinfo(bsgenome)
+    if(!all(levels(granges@seqnames) %in% si@seqnames)) {
+        mr1 <- granges
+        seqlevelsStyle(mr1) <- "UCSC"
+        mr2 <- granges
+        seqlevelsStyle(mr2) <- "NCBI"
+        if(all(levels(mr1@seqnames) %in% si@seqnames)) {
+            warning("Warning: variant sequence names don't match genome sequence names, trying to continue by adding the chr prefix.")
+            granges <- mr1
+        } else if(all(levels(mr2@seqname) %In% si@seqnames)) {
+            warning("Warning: variant sequence names don't match genome sequence names, trying to continue by removing the chr prefix.")
+            granges <- mr2
+        } else {
+            stop("Error: variant sequence names don't match genome sequence names, make sure the correct genome build was selected.")
+        }
+    }
+    return(granges)
+}
+
 genCountMatrixFromVcf <- function(bsgenome, vcfobj) {
 
     # keep only SNVs
@@ -94,7 +116,10 @@ genCountMatrixFromVcf <- function(bsgenome, vcfobj) {
         vcfobj = subsetByOverlaps(vcfobj, si, type='end', invert=T)
     }
 
-    contexts <- getSeq(bsgenome, resize(granges(vcfobj), 3, fix="center"))
+    mut_ranges <- granges(vcfobj)
+    mut_ranges <- checkSeqLevels(mut_ranges, bsgenome)
+
+    contexts <- getSeq(bsgenome, resize(mut_ranges, 3, fix="center"))
     alts <- alt(vcfobj)
     refs <- ref(vcfobj)
 
@@ -141,7 +166,7 @@ genCountMatrixFromVcf <- function(bsgenome, vcfobj) {
 }
 
 genCountMatrixFromMAF <- function(bsgenome, maf_file) {
-    
+
     maf <- readr::read_tsv(maf_file, col_types='')
 
     # assert all required columns are present
@@ -158,22 +183,10 @@ genCountMatrixFromMAF <- function(bsgenome, maf_file) {
         alt=ifelse(Tumor_Seq_Allele2=="", Tumor_Seq_Allele1, Tumor_Seq_Allele2))
     maf <- dplyr::filter(maf, ref!=alt)
 
-    # assert all chrom from maf are present on the genome
-    # attempt to add or remove "chr" if the names dont match
-    si <- seqinfo(bsgenome)
-    if(!all(unique(maf$Chromosome) %in% si@seqnames)) {
-        if(all(paste0("chr",unique(maf$Chromosome)) %in% si@seqnames)) {
-            warning("Warning: sequence names from MAF don't match genome sequence names, trying to continue by adding the chr prefix.")
-            maf <- dplyr::mutate(maf, Chromosome=paste0("chr",Chromosome))
-        } else if(all(gsub("^chr","",unique(maf$Chromosome)) %in% si@seqnames)) {
-            warning("Warning: sequence names from MAF don't match genome sequence names, trying to continue by removing the chr prefix.")
-            maf <- dplyr::mutate(maf, Chromosome=gsub("^chr","",Chromosome))
-        } else {
-            stop("Error: sequence names from MAF don't match genome sequence names, please check the genome parameter.")
-        }
-    }
-
     mut_ranges <- GRanges(maf$Chromosome, IRanges(maf$Start_Position, maf$End_Position), maf$Strand)
+    mut_ranges <- checkSeqLevels(mut_ranges, bsgenome)
+
+
     contexts <- getSeq(bsgenome, resize(mut_ranges, 3, fix='center'))
     sample_names <- sort(unique(maf$Tumor_Sample_Barcode))
 
@@ -183,7 +196,7 @@ genCountMatrixFromMAF <- function(bsgenome, maf_file) {
     rownames(count_matrix) = sample_names
     colnames(count_matrix) = change_triplet
     for(i in 1:nrow(maf)) {
-        rb <- DNAString(maf[[i, "Reference_Allele"]])
+        rb <- refs[[i]]
         cc <- contexts[i]
    
         if(rb == DNAString("C") || rb == DNAString("T")) {
