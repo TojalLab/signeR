@@ -78,8 +78,8 @@ checkSeqLevels <- function(gr, bsgenome) {
     # attempt to add or remove "chr" if the names dont match
     si <- seqinfo(bsgenome)
     if(!all(levels(gr@seqnames) %in% si@seqnames)) {
-        mr1 <- renameSeqLevels(gr, mapSeqLevels(seqlevels(gr), "UCSC"))
-        mr2 <- renameSeqLevels(gr, mapSeqLevels(seqlevels(gr), "NCBI"))
+        mr1 <- renameSeqlevels(gr, mapSeqlevels(seqlevels(gr), "UCSC"))
+        mr2 <- renameSeqlevels(gr, mapSeqlevels(seqlevels(gr), "NCBI"))
         if(all(levels(mr1@seqnames) %in% si@seqnames)) {
             warning("Warning: variant sequence names don't match genome sequence names, trying to continue by adding the chr prefix.")
             gr <- mr1
