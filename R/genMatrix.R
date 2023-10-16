@@ -73,26 +73,26 @@ genOpportunityFromGenome <- function(bsgenome, target_regions, nsamples=1) {
     return(m)
 }
 
-checkSeqLevels <- function(granges, bsgenome) {
+checkSeqLevels <- function(gr, bsgenome) {
     # assert all chrom from maf are present on the genome
     # attempt to add or remove "chr" if the names dont match
     si <- seqinfo(bsgenome)
-    if(!all(levels(granges@seqnames) %in% si@seqnames)) {
-        mr1 <- granges
-        seqlevelsStyle(mr1) <- "UCSC"
-        mr2 <- granges
-        seqlevelsStyle(mr2) <- "NCBI"
+    if(!all(levels(gr@seqnames) %in% si@seqnames)) {
+        mr1 <- gr
+        levels(mr1@seqnames) = paste0("chr", levels(mr1@seqnames))
+        mr2 <- gr
+        levels(mr2@seqnames) = gsub("^chr", "", levels(mr2@seqnames))
         if(all(levels(mr1@seqnames) %in% si@seqnames)) {
             warning("Warning: variant sequence names don't match genome sequence names, trying to continue by adding the chr prefix.")
-            granges <- mr1
-        } else if(all(levels(mr2@seqname) %In% si@seqnames)) {
+            gr <- mr1
+        } else if(all(levels(mr2@seqname) %in% si@seqnames)) {
             warning("Warning: variant sequence names don't match genome sequence names, trying to continue by removing the chr prefix.")
-            granges <- mr2
+            gr <- mr2
         } else {
             stop("Error: variant sequence names don't match genome sequence names, make sure the correct genome build was selected.")
         }
     }
-    return(granges)
+    return(gr)
 }
 
 genCountMatrixFromVcf <- function(bsgenome, vcfobj) {
