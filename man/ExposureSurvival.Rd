@@ -11,8 +11,8 @@
 \title{Exposure survival analysis}
 
 \description{
-    ExposureSurvival: Given survival data, identify signatures which are 
-    significantly related with differences in hazards.
+    ExposureSurvival: Given survival data, identify signatures that are 
+    significantly related to differences in hazards.
 }
 
 \usage{
@@ -28,13 +28,13 @@
     "time" and "status" (the last indicates whether 1:an event occurred or 
     0:there was a loss of follow up).}
     \item{max_instances}{Maximum number of the exposure matrix instances to be 
-    analyzed. If the number of available E instances is bigger then this 
+    analyzed. If the number of available E instances is bigger than this 
     parameter, a subset of those will be randomly selected for analysis.}
     \item{method}{a character string indicating which approach should be used 
     for the test. Options are "logrank" (default) or "cox" (fit a Cox 
     proportional hazards model to data).}
     \item{quant}{the quantile of p-values and hazard ratios which will 
-    be used for selecting survival significant signatures. Deafult 
+    be used for selecting survival significant signatures. Default 
     is 0.5, which means the median p-value and hazard ratio will be considered.}
     \item{cutoff_pvalue}{threshold for p-values quantile for signatures to be
     considered as significant.}
@@ -62,8 +62,8 @@ for each signature.}
 \item{limits}{vector containing one cut value for the exposures of each 
 signature, such that splitting the samples according to this value leads to 
 maximal differences in survival among generated groups.}
-\item{Groups}{matrix containing one line for each signature, definig a division 
-of the samples in two groups according to its exposures, such that survival 
+\item{Groups}{matrix containing one line for each signature, defining a division 
+of the samples into two groups according to their exposures, such that survival 
 differences between the groups are maximal.}
 }
 

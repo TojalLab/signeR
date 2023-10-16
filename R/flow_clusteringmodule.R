@@ -146,7 +146,6 @@ clustering <- function(input,
     method.dist <- mdist()
     method.hclust <- mhclust()
     sigs <- sigs_obj()
-    # print(sigs$SignExposures@samples)
     if (is.null(sigs)) {
       return(NULL)
     }
@@ -171,7 +170,6 @@ clustering <- function(input,
     liminf <- input$liminf
     limsup <- limsup()
     sigs <- sigs_obj()
-    # print(sigs$SignExposures@samples)
     if (is.null(sigs)) {
       return(NULL)
     }
@@ -186,8 +184,6 @@ clustering <- function(input,
       )
     } else {
       clim <- c(liminf, limsup)
-      # print(clim)
-      # FCE <- FuzzyClustExp(sigs$SignExposures, Clim = clim)
       withProgress(
         message = "Running Fuzzy...",
         detail = "This operation may take a while...",

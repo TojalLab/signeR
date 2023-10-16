@@ -22,7 +22,7 @@
     \item{signexp_obj}{a SignExp object returned by signeR function.}
     \item{Med_exp}{optional matrix with (median) exposures.}
     \item{max_instances}{Maximum number of the exposure matrix instances to be 
-    analyzed. If the number of available E instances is bigger then this 
+    analyzed. If the number of available E instances is bigger than this 
     parameter, a subset of those will be randomly selected for analysis.}
     \item{method.dist}{used distance metric}
     \item{method.hclust}{clustering method.}

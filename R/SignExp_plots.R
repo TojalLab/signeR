@@ -425,12 +425,20 @@ setMethod("SignHeat",signature(signexp_obj="SignExp", plot_to_file="ANY",
         rownames(mutannot)<-muttypes
         colnames(m) <- muts
         #clr=rev(colorRampPalette(brewer.pal(name="Spectral",n=11))(100))
-        pheatmap(m,border_color=NA, color=colors, 
-                 clustering_method='ward.D2',
-                 clustering_distance_rows='canberra',
-                 cluster_cols=F,annotation_col = mutannot,
-                 labels_col=triplets,
-                 fontsize_col=6)
+        if(length(signexp_obj@signames) >= 2){
+            pheatmap(m,border_color=NA, color=colors, 
+                    clustering_method='ward.D2',
+                    clustering_distance_rows='canberra',
+                    cluster_cols=F,annotation_col = mutannot,
+                    labels_col=triplets,
+                    fontsize_col=6)
+        } else {
+            pheatmap(m,border_color=NA, color=colors, 
+                    cluster_rows=F, cluster_cols=F,
+                    annotation_col = mutannot,
+                    labels_col=triplets,
+                    fontsize_col=6)
+        }
         ##########################
         if(plot_to_file){
             dev.off()
@@ -501,11 +509,19 @@ setMethod("ExposureHeat",signature(signexp_obj="SignExp", plot_to_file="ANY",
         colnames(m) = signexp_obj@samples
         rownames(m) = signexp_obj@signames
         #clr=rev(colorRampPalette(brewer.pal(name="Spectral",n=11))(100))
-        pheatmap(log(m), border_color=NA, color=colors, 
-                 clustering_method='ward.D2',
-                 clustering_distance_rows='canberra',
-                 clustering_distance_cols='canberra',
-                 show_colnames=show_samples)
+        if(length(signexp_obj@signames) >= 2){
+            pheatmap(log(m), border_color=NA, color=colors, 
+                    clustering_method='ward.D2',
+                    clustering_distance_rows='canberra',
+                    clustering_distance_cols='canberra',
+                    show_colnames=show_samples)
+        }else{
+            pheatmap(log(m), border_color=NA, color=colors, 
+                    clustering_method='ward.D2',
+                    cluster_rows=F,
+                    clustering_distance_cols='canberra',
+                    show_colnames=show_samples)
+        }
         ###########################
         # layout(matrix(1:2,1,2),widths=c(4,1),heights=1)
         # ##Dendrogram##

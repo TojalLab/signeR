@@ -1,13 +1,13 @@
 Package: signeR
 Type: Package
 Title: Empirical Bayesian approach to mutational signature discovery
-Version: 2.3.1
+Version: 2.3.2
 Author: Rafael Rosales, Rodrigo Drummond, Renan Valieris, Israel Tojal
         da Silva
 Maintainer: Renan Valieris <renan.valieris@accamargo.org.br>
 Description: The signeR package provides an empirical Bayesian approach
         to mutational signature discovery. It is designed to analyze
-        single nucleotide variaton (SNV) counts in cancer genomes, but
+        single nucleotide variation (SNV) counts in cancer genomes, but
         can also be applied to other features as well. Functionalities
         to characterize signatures or genome samples according to
         exposure patterns are also provided.
@@ -32,6 +32,6 @@ biocViews: GenomicVariation, SomaticMutation, StatisticalMethod,
         Visualization
 Suggests: knitr, BSgenome.Hsapiens.UCSC.hg19, BSgenome.Hsapiens.UCSC.hg38, rmarkdown
 VignetteBuilder: knitr
-RoxygenNote: 7.2.1
+RoxygenNote: 7.2.3
 Encoding: UTF-8
 Packaged: 2022-07-07 19:37:44 UTC; alexandre

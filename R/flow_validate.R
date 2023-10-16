@@ -9,6 +9,12 @@ trinucleotides <- c(
     "T>G:CTA", "T>G:CTC", "T>G:CTG", "T>G:CTT", "T>G:GTA", "T>G:GTC", "T>G:GTG", "T>G:GTT", "T>G:TTA", "T>G:TTC", "T>G:TTG", "T>G:TTT"
 )
 
+maf_req_columns <- c(
+    "Reference_Allele","Tumor_Seq_Allele1","Tumor_Seq_Allele2",
+    "Variant_Type","Chromosome","Start_Position","End_Position","Strand",
+    "Tumor_Sample_Barcode"
+)
+
 validate_cnv <- function(df) {
 
     if(is.null(df)){
@@ -54,8 +60,17 @@ validate_clinical <- function(df) {
     return(TRUE)
 }
 
-validade_samples <- function(df, sigs) {
+validate_samples <- function(df, sigs) {
     if(length(setdiff(sigs$SignExposures@samples, df$SampleID))!=0){
+        return(FALSE)
+    }
+    return(TRUE)
+}
+
+validate_maf <- function(df) {
+    # assert all required columns are present
+    if(!all(maf_req_columns %in% colnames(df))) {
+        dc <- paste(collapse = ',',setdiff(maf_req_columns, colnames(df)))
         return(FALSE)
     }
     return(TRUE)

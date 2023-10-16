@@ -12,12 +12,12 @@ denovo_UI <- function(id) {
             width = 12,
             p(
               "Please ", strong("upload your data"),
-              " below. The counts of mutations are required, as a VCF file or a 
-              counts matrix. The counts of mutations should be
+              " below. The counts of mutations are required, as a VCF, MAF or a 
+              counts matrix file. The counts of mutations should be
               organized in a matrix with 96 columns
-              (corresponding to mutations types) and one line for each genome sample. 
+              (corresponding to mutations types) and one line for each sample. 
               Opptionally, a matrix with matching opportunities can be
-              uploaded, build with a BED file or you can use a already built genome opportunity matrix 
+              uploaded, build with a BED file or you can use a already built genome opportunity matrix (hg19 or hg38 only) 
               (",
               a(
                 "see signeR documentation for details",
@@ -35,33 +35,31 @@ denovo_UI <- function(id) {
             collapsible = T, status = "primary",
             messageBox(
               width = 12,
-              "Upload a VCF file or a SNV matrix file (mandatory) with your own samples
+              "Upload a VCF, MAF or a SNV matrix file (mandatory) with your own samples
               to use in signeR de novo module.
-              You can upload an opportunity file as well or use a already built genome opportunity.
+              You can upload an opportunity file as well or use a already built genome opportunity (hg19 or hg38 only).
               Also, you can upload a BED file to build an opportunity matrix."
             ),
             fluidRow(
               box(
                 width = 6, background = "orange",
                 tags$head(tags$script(src = "message-handler.js")),
-                  actionButton(ns("snvhelp"),
-                    "SNV matrix help",
-                    icon = icon("info-circle")
-                  ),
-                hr(),
-                prettyRadioButtons(
-                  inputId = ns("genbuild"), label = "Genome build :", 
-                  choiceNames = c("hg19/GRCh37", "hg38/GRCh38"),
-                  choiceValues = c("hg19", "hg38"),
-                  inline = TRUE, status = "primary", selected = "hg19",
-                  fill=TRUE, 
+                actionButton(ns("snvhelp"),
+                  "SNV matrix help",
+                  icon = icon("info-circle")
                 ),
+                actionButton(ns("genomehelp"),
+                  "Genome installation help",
+                  icon = icon("info-circle")
+                ),
+                hr(),
+                uiOutput(ns("genomes")),
                 fileInput(ns("mutfile"),
-                  "VCF file or SNV matrix*",
+                  "VCF, MAF or SNV matrix*",
                   multiple = FALSE,
                   accept = c(
-                    ".vcf",".vcf.gz","text/csv", "text/plain",
-                    "text/comma-separated-values",".csv"
+                    ".vcf",".vcf.gz","text/csv","text/plain",
+                    "text/comma-separated-values",".csv",".maf",".maf.gz"
                   )
                 )
               ),
@@ -147,7 +145,6 @@ denovo_UI <- function(id) {
                       )
                     )
                   ),
-                  # hr(),
                   actionButton(
                     ns("startdenovo"),
                     label = "Start de novo analysis", icon = NULL
@@ -263,8 +260,31 @@ denovo <- function(input,
     reactive(signatures_denovo())
   )
 
+  output$genomes <- renderUI({
+
+    genomes_available <- installed.genomes()
+
+    if(length(genomes_available)==0){
+      messageBox(
+        title = "Warning:",
+        solidHeader = TRUE,
+        width = 12,
+        paste0(
+          "There is no genome installed. ",
+          "If you need, install a genome using BSGenome (see help above)."
+        )
+      )
+    }else{
+      pickerInput(
+        inputId = ns("genbuild"),
+        label = "Genome: ",
+        choices = genomes_available,
+        multiple = FALSE
+      )
+    }
+  })
+
   mut <- reactive({
-    # req(input$mutfile)
     if (is.null(input$mutfile)) {
       showModal(modalDialog(
         title = "Oh no!",
@@ -275,46 +295,61 @@ denovo <- function(input,
       return(NULL)
     }
     
-    #df <- read.table(input$mutfile$datapath, header=T,sep="\t",row.names=1,check.names=F)
     ext <- tools::file_ext(input$mutfile$datapath)
     if (ext == "vcf" || ext == "vcf.gz") {
-      build <- input$genbuild
-      if (build == "hg19"){
-        if (!"BSgenome.Hsapiens.UCSC.hg19" %in% installed.genomes()) {
-          showModal(modalDialog(
-            title = "Oh no!",
-            paste0(
-              "You must install the BSgenome.Hsapiens.UCSC.hg19 genome ",
-              "using the command: ",
-              "BiocManager::install('BSgenome.Hsapiens.UCSC.hg19')."
-            ),
-            easyClose = TRUE,
-            footer = NULL
-          ))
-          return(NULL)
-        } 
-        mygenome <- BSgenome.Hsapiens.UCSC.hg19
-      } else {
-        if (!"BSgenome.Hsapiens.UCSC.hg38" %in% installed.genomes()) {
-          showModal(modalDialog(
-            title = "Oh no!",
-            paste0(
-              "You must install the BSgenome.Hsapiens.UCSC.hg38 genome ",
-              "using the command: ",
-              "BiocManager::install('BSgenome.Hsapiens.UCSC.hg38')."
-            ),
-            easyClose = TRUE,
-            footer = NULL
-          ))
-          return(NULL)
-        } 
-        mygenome <- BSgenome.Hsapiens.UCSC.hg38
-      }
+      req(input$genbuild)
+
+      mygenome <- getBSgenome(input$genbuild)
+      build <- unique(as.data.frame(GenomeInfoDb::seqinfo(mygenome))$genome)
 
       vcfobj <- VariantAnnotation::readVcf(input$mutfile$datapath, build)
 
-      df <- genCountMatrixFromVcf(mygenome, vcfobj)
+      df <- tryCatch(
+        {
+          genCountMatrixFromVcf(mygenome, vcfobj)
+        },
+        error=function(cond){
+          showModal(modalDialog(
+            title = "Oh no!",
+            paste0(paste0("There was an error with the genCountMatrixFromVcf: ", cond)),
+            easyClose = TRUE,
+            footer = NULL
+          ))
+          return(NULL)
+        }
+      )
       
+    } else if (ext == "maf" || ext == "maf.gz") {
+      req(input$genbuild)
+      mygenome <- getBSgenome(input$genbuild)
+
+      maf <- read_tsv(input$mutfile$datapath)
+
+      if (!validate_maf(maf)) {
+        showModal(modalDialog(
+          title = "Oh no!",
+          paste0("You must upload a valid MAF file."),
+          easyClose = TRUE,
+          footer = NULL
+        ))
+        return(NULL)
+      }
+
+      df <- tryCatch(
+        {
+          genCountMatrixFromMAF(mygenome, input$mutfile$datapath)
+        },
+        error=function(cond){
+          showModal(modalDialog(
+            title = "Oh no!",
+            paste0(paste0("There was an error with the genCountMatrixFromMAF: ", cond)),
+            easyClose = TRUE,
+            footer = NULL
+          ))
+          return(NULL)
+        }
+      )
+
     } else {
       df <- read.table(input$mutfile$datapath, header=T,sep="\t",row.names=1,check.names=F)
       if (!validate_cnv(df)) {
@@ -332,12 +367,13 @@ denovo <- function(input,
   })
 
   opp <- reactive({
-    # isso torno o input obrigatorio
-    # req(input$oppfile)
 
     if (input$genopp == "yes" && is.null(input$oppfile)) {
 
       mutation <- mut()
+
+      mygenome <- getBSgenome(input$genbuild)
+      build <- unique(as.data.frame(GenomeInfoDb::seqinfo(mygenome))$genome)
 
       nsamples = 1
       if (!is.null(mutation)){
@@ -349,7 +385,7 @@ denovo <- function(input,
         detail = "This operation may take a while...",
         value = 0,
         {
-            data <- download_opp_file(input$genbuild)
+            data <- download_opp_file(build)
         }
       )
 
@@ -362,7 +398,6 @@ denovo <- function(input,
 
       return(NULL)
     } else {
-      # read.table(input$oppfile$datapath)
 
       if(input$genopp == "yes") {
         showModal(modalDialog(
@@ -378,39 +413,10 @@ denovo <- function(input,
 
       ext <- tools::file_ext(input$oppfile$datapath)
       if (ext == "bed") {
-        build <- input$genbuild
         mutation <- mut()
-        if (build == "hg19"){
-          if (!"BSgenome.Hsapiens.UCSC.hg19" %in% installed.genomes()) {
-            showModal(modalDialog(
-              title = "Oh no!",
-              paste0(
-                "You must install the BSgenome.Hsapiens.UCSC.hg19 genome ",
-                "using the command: ",
-                "BiocManager::install('BSgenome.Hsapiens.UCSC.hg19')."
-              ),
-              easyClose = TRUE,
-              footer = NULL
-            ))
-            return(NULL)
-          } 
-          mygenome <- BSgenome.Hsapiens.UCSC.hg19
-        } else {
-          if (!"BSgenome.Hsapiens.UCSC.hg38" %in% installed.genomes()) {
-            showModal(modalDialog(
-              title = "Oh no!",
-              paste0(
-                "You must install the BSgenome.Hsapiens.UCSC.hg38 genome ",
-                "using the command: ",
-                "BiocManager::install('BSgenome.Hsapiens.UCSC.hg38')."
-              ),
-              easyClose = TRUE,
-              footer = NULL
-            ))
-            return(NULL)
-          } 
-          mygenome <- BSgenome.Hsapiens.UCSC.hg38
-        }
+        
+        mygenome <- getBSgenome(input$genbuild)
+        build <- unique(as.data.frame(GenomeInfoDb::seqinfo(mygenome))$genome)
 
         target_regions <- tryCatch(
           {
@@ -520,17 +526,12 @@ denovo <- function(input,
   signatures_denovo <- eventReactive(input$startdenovo, {
     req(mut())
     mutation <- mut()
-    # print(head(mutation))
     opportunity <- opp()
     if (is.null(opportunity)) {
       opportunity <- NA
     }
-    # print(opportunity)
     sigs <- NULL
-    # print(input$nsigs)
-    # print(input$warm)
-    # print(input$eval)
-    # print(input$em_iter)
+
     withProgress(
       message = "Running signeR...",
       detail = "This operation may take a while...",
@@ -677,15 +678,12 @@ denovo <- function(input,
       cosmic <- mutate(
         cosmic,
         t = paste0(
-          # gsub(">", ".", Substitution.Type), ".", Trinucleotide
           Substitution.Type, ":", Trinucleotide
         )
       ) %>%
         dplyr::select(t, contains("SBS")) %>%
         column_to_rownames("t")
       cosmic <- cosmic[colnames(signer), ]
-      # print(rownames(cosmic))
-      # print(colnames(signer))
       stopifnot(rownames(cosmic) == colnames(signer))
       # Calculating similarities signer vs cosmic
       dist <- as.matrix(1 - proxy::dist(signer, t(cosmic), method = "cosine"))
@@ -704,6 +702,16 @@ denovo <- function(input,
         cluster_rows = F, cluster_cols = F
       )
     }
+  })
+
+  observeEvent(input$genomehelp, {
+    showModal(modalDialog(
+      title = "Genome installation help",
+      includeMarkdown(
+        system.file("extdata", "genome_help.md", package = "signeR")
+      ),
+      size = "l", easyClose = TRUE
+    ))
   })
 
   observeEvent(input$snvhelp, {
@@ -740,18 +748,19 @@ denovo <- function(input,
 
   output$uigenopp <- renderUI({
     req(input$genbuild)
-    build = "hg19"
-    if (input$genbuild == "hg38") {
-      build = "hg38"
+
+    mygenome <- getBSgenome(input$genbuild)
+    build <- unique(as.data.frame(GenomeInfoDb::seqinfo(mygenome))$genome)
+
+    if (build %in% c('hg19', 'hg38')){
+      prettyRadioButtons(
+        inputId = ns("genopp"), label = paste0("Use already built genome opportunity (",build,")?"), 
+        choiceNames = c("Yes", "No"),
+        choiceValues = c("yes", "no"),
+        inline = TRUE, status = "primary", selected = "no",
+        fill=TRUE, 
+      )
     }
-    
-    prettyRadioButtons(
-      inputId = ns("genopp"), label = paste0("Use already built genome opportunity (",build,")?"), 
-      choiceNames = c("Yes", "No"),
-      choiceValues = c("yes", "no"),
-      inline = TRUE, status = "primary", selected = "no",
-      fill=TRUE, 
-    )
 
   })
 

@@ -18,24 +18,24 @@
 }
 \arguments{
     \item{M}{mutation counts matrix of samples x features.}
-    \item{Mheader}{if M have colnames defined use TRUE, if FALSE a default
+    \item{Mheader}{if M has colnames defined use TRUE, if FALSE a default
 order will be assumed.}
     \item{samples}{if the samples are row-wise or column-wise in M, default
 is "row".}
     \item{Opport}{context count matrix of samples x features in the target
 genome or region.}
-    \item{Oppheader}{if Opport have header defined.}
+    \item{Oppheader}{if Opport has header defined.}
     \item{P}{Previously known matrix of signatures. If provided, can be fixed 
-    along algorithm iterations or just used as a initial value (see next parameter)}
+    along algorithm iterations or just used as an initial value (see next parameter)}
     \item{fixedP}{If TRUE, provided P matrix will be fixed along iterations.}
     \item{nsig}{number of signatures, which can be provided or estimated by
 the algorithm.}
-    \item{nlim}{define a interval to search for the optimal number of
+    \item{nlim}{define an interval to search for the optimal number of
 signatures.}
     \item{try_all}{if TRUE, all possible values for nsig will be tested}
     \item{BICsignificance}{if TRUE, BICs will be considered different 
     only if their distribution is significantly different. In case of ties in 
-    BICs comparison, signer will adopt the model with less signatures.}
+    BICs comparison, signer will adopt the model with fewer signatures.}
     \item{critical_p}{level of significance for BICs distribution to be 
     considered different}
     \item{ap}{shape parameter of the gamma distribution used to generate the
@@ -90,7 +90,7 @@ algorithm.}
 numbers of signatures.}
     \item{Phat}{Estimated signatures, median of P samples.}
     \item{Ehat}{Estimated exposures, median of E samples.}
-    \item{SignExposures}{SignExp object which contain the set of samples for
+    \item{SignExposures}{SignExp object which contains the set of samples for
 the model parameters.}
     \item{Bics}{measured BIC values on the final run of the sampler.}
     \item{HyperParam}{evolution of estimated hyperparameters when testing

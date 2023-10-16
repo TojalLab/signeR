@@ -34,22 +34,22 @@
         signature sum up to one.\cr
         
     Reorder_signatures: Change the order of the signatures in a SignExp object.
-        New signature order wil be defined by the "ord" argument.\cr
+        The new signature order will be defined by the "ord" argument.\cr
 
     Reorder_samples: Change samples order, according to ord parameter.\cr
 
     Reorder_mutations: Change mutations order, according to ord parameter.\cr
 
-    Average_sign: Exports an aproximation of the signatures obtained by the 
+    Average_sign: Exports an approximation of the signatures obtained by the 
         averages of the samples for the signature matrix P.\cr
         
-    Median_sign: Exports an aproximation of the signatures obtained by the 
+    Median_sign: Exports an approximation of the signatures obtained by the 
         medians of the samples for signature matrix P.\cr
         
-    Average_exp: Exports an aproximation of the exposures obtained by the 
+    Average_exp: Exports an approximation of the exposures obtained by the 
         averages of the samples for exposure matrix E.\cr
         
-    Median_exp: Exports an aproximation of the exposures obtained by the 
+    Median_exp: Exports an approximation of the exposures obtained by the 
         medians of the samples for exposure matrix E.
 }
 

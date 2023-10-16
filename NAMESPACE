@@ -10,7 +10,7 @@ exportMethods(setSamples, setMutations, Normalize,
     ExposureCorrelation, ExposureGLM,
     ExposureSurvival, ExposureSurvModel,
     FuzzyClustExp, HClustExp)
-export(genOpportunityFromGenome, genCountMatrixFromVcf, signeR,
+export(genOpportunityFromGenome, genCountMatrixFromVcf, genCountMatrixFromMAF, signeR,
     BICboxplot)
 export(signeRFlow)
 
@@ -31,7 +31,7 @@ importFrom("shiny", "wellPanel", "fluidRow", "column", "p", "span", "strong",
     "modalDialog", "reactive", "renderPlot", "renderPrint", "renderTable",
     "showModal", "withProgress", "req", "downloadHandler")
 importFrom("shinydashboard", "dashboardPage", "tabBox", "box",
-    "dashboardHeader", "dashboardSidebar", sidebarMenu, menuItem,
+    "dashboardHeader", "dashboardSidebar", "sidebarMenu", "menuItem",
     "menuSubItem", "dashboardBody", "tabItems", "tabItem",
     "infoBox")
 importFrom("shinycssloaders", "withSpinner")
@@ -43,7 +43,7 @@ importFrom("BiocFileCache", "BiocFileCache", "bfcrpath",
     "bfcquery", "bfcadd", "bfcneedsupdate", "bfcdownload")
 importFrom("magrittr","%>%")
 importFrom("tidyr", "gather")
-importFrom(tibble, "column_to_rownames", "rownames_to_column")
+importFrom("tibble", "column_to_rownames", "rownames_to_column")
 importFrom("pheatmap", "pheatmap")
 importFrom("cowplot","theme_cowplot")
 importFrom("parallel", "detectCores", "makeCluster", "clusterExport", "parLapply", "stopCluster")
@@ -54,16 +54,17 @@ importFrom("pROC","roc")
 importFrom("listenv", "listenv")
 importFrom("BiocGenerics", "Reduce")
 importFrom("Biostrings","getSeq", "oligonucleotideFrequency",
-    "reverseComplement", "DNAString", "DNAStringSetList")
+    "reverseComplement", "DNAString", "DNAStringSetList",
+    "DNAStringSet")
 importFrom("grDevices", "colorRampPalette", "dev.cur", "dev.new",
     "dev.off", "pdf", "png", "rainbow", "terrain.colors")
 importFrom("GenomicRanges", "resize", "granges", "reduce","GRanges")
-importFrom("IRanges","subsetByOverlaps")
+importFrom("IRanges","subsetByOverlaps", "IRanges")
 importFrom("nloptr", "nloptr")
 importFrom("NMF", "nmf", "basis", "coef")
 importFrom("VariantAnnotation", "readVcf", "isSNV", "alt", "ref", "geno")
 importFrom("PMCMRplus","kwAllPairsConoverTest")
-importFrom("GenomeInfoDb","seqinfo")
+importFrom("GenomeInfoDb", "seqinfo", "renameSeqlevels", "mapSeqlevels", "seqlevels")
 importFrom("survival", "Surv","is.Surv","survdiff", "survfit", "coxph", "cox.zph")
 importFrom("survivalAnalysis", "cox_as_data_frame")
 importFrom("survminer", "ggsurvplot", "ggforest")
@@ -73,5 +74,5 @@ importFrom("ppclust", "fcm", "pcm", "fpcm")
 importFrom("clue", "solve_LSAP")
 importFrom("ggpubr","ggarrange")
 importFrom("rtracklayer", "import")
-importFrom("BSgenome", "installed.genomes")
-
+importFrom("BSgenome", "installed.genomes", "getBSgenome")
+importFrom("kknn", "kknn")

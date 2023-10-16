@@ -23,18 +23,18 @@
     Paths: Plot the convergence of the Gibbs sampler for signatures and
         exposures on separate charts.\cr
 
-    SignPlot: Plot the mutational signatures in a barchart, with error bars 
-        according to the variation of individual entries along generated
+    SignPlot: Plot the mutational signatures in a bar chart, with error bars 
+        according to the variation of individual entries along the generated
         Gibbs samples.\cr
 
-    SignHeat: Plot the mutations signatures in a heatmap.\cr
+    SignHeat: Plot the mutation signatures in a heatmap.\cr
 
     ExposureBarplot: Barplot of estimated exposure values, showing the
         contribution of the signatures to the mutation counts of each genome
         sample.\cr
 
     ExposureBoxplot: Boxplot of exposure values, showing their variation
-        along generated Gibbs samples.\cr
+        along the generated Gibbs samples.\cr
         
     ExposureHeat: Plot a heatmap of the exposures, along with a dendrogram 
         of the samples grouped by exposure levels. 
@@ -76,7 +76,7 @@ BICboxplot(signeRout, plot_to_file=FALSE, file="Model_selection_BICs.pdf")
     \item{reord}{Order of signatures for plotting. Should be a permutation of
     1:nsig, where nsig is the number of signatures. By default, signatures are
     ordered by the total exposure, in decreasing order.}
-    \item{nbins}{The range of signature entries is divided in this number of
+    \item{nbins}{The range of signature entries is divided into this number of
     bins for plotting, each bin corresponding to a different color.}
     \item{file_suffix}{The suffix of the output file.}
     \item{col}{Single color name for boxplots.}
@@ -86,14 +86,14 @@ BICboxplot(signeRout, plot_to_file=FALSE, file="Model_selection_BICs.pdf")
     is "complete", see the documentation of the hclust function for other
     options.}
     \item{relative}{Whether to normalize exposures of each sample so that they
-    sum up to one. Default is FALSE, thus generating a plots of absolute
+    sum up to one. Default is FALSE, thus generating a plot of absolute
     contributions of signatures to mutation counts. Otherwise, relative
     contributions will be displayed.}
     \item{title}{Main title added to the plot. Default is no title.}
     \item{show_samples}{Whether sample names will be shown in the plot.
     Default is NA, which leads to sample names being displayed only when there 
     are less than 30 samples. However, even if show_samples=TRUE, due to display 
-    limitations sample names are not shown if there are more then 50 samples.}
+    limitations sample names are not shown if there are more than 50 samples.}
     \item{...}{.}
 }
 
@@ -108,7 +108,7 @@ plot_to_file=TRUE, the plot is saved in the file defined by the file argument.
     signatures <- signeR(M=mut, Mheader=FALSE, nsig=1, EMit_lim=10, EM_eval=10, main_eval=10, main_burn=10)
 }
 
-# each plot function need the SignExposures object
+# each plot function needs the SignExposures object
 # which is part of the result of the signeR() call
 SignPlot(signatures$SignExposures)
 Paths(signatures$SignExposures)

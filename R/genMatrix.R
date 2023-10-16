@@ -16,6 +16,10 @@ change_triplet <- c(
     "T>G:GTT","T>G:TTA","T>G:TTC","T>G:TTG","T>G:TTT"
 )
 
+maf_req_columns <- c("Reference_Allele","Tumor_Seq_Allele1","Tumor_Seq_Allele2",
+  "Variant_Type","Chromosome","Start_Position","End_Position","Strand",
+  "Tumor_Sample_Barcode")
+
 revcomp <- function(s) {
     return(as.character(reverseComplement(DNAString(s))))
 }
@@ -69,6 +73,26 @@ genOpportunityFromGenome <- function(bsgenome, target_regions, nsamples=1) {
     return(m)
 }
 
+checkSeqLevels <- function(gr, bsgenome) {
+    # assert all chrom from maf are present on the genome
+    # attempt to add or remove "chr" if the names dont match
+    si <- seqinfo(bsgenome)
+    if(!all(levels(gr@seqnames) %in% si@seqnames)) {
+        mr1 <- renameSeqlevels(gr, mapSeqlevels(seqlevels(gr), "UCSC"))
+        mr2 <- renameSeqlevels(gr, mapSeqlevels(seqlevels(gr), "NCBI"))
+        if(all(levels(mr1@seqnames) %in% si@seqnames)) {
+            warning("Warning: variant sequence names don't match genome sequence names, trying to continue by adding the chr prefix.")
+            gr <- mr1
+        } else if(all(levels(mr2@seqnames) %in% si@seqnames)) {
+            warning("Warning: variant sequence names don't match genome sequence names, trying to continue by removing the chr prefix.")
+            gr <- mr2
+        } else {
+            stop("Error: variant sequence names don't match genome sequence names, make sure the correct genome build was selected.")
+        }
+    }
+    return(gr)
+}
+
 genCountMatrixFromVcf <- function(bsgenome, vcfobj) {
 
     # keep only SNVs
@@ -90,7 +114,10 @@ genCountMatrixFromVcf <- function(bsgenome, vcfobj) {
         vcfobj = subsetByOverlaps(vcfobj, si, type='end', invert=T)
     }
 
-    contexts <- getSeq(bsgenome, resize(granges(vcfobj), 3, fix="center"))
+    mut_ranges <- granges(vcfobj)
+    mut_ranges <- checkSeqLevels(mut_ranges, bsgenome)
+
+    contexts <- getSeq(bsgenome, resize(mut_ranges, 3, fix="center"))
     alts <- alt(vcfobj)
     refs <- ref(vcfobj)
 
@@ -136,3 +163,54 @@ genCountMatrixFromVcf <- function(bsgenome, vcfobj) {
     return(count_matrix)
 }
 
+genCountMatrixFromMAF <- function(bsgenome, maf_file) {
+
+    maf <- readr::read_tsv(maf_file, col_types='')
+
+    # assert all required columns are present
+    if(!all(maf_req_columns %in% colnames(maf))) {
+        dc <- paste(collapse = ',',setdiff(maf_req_columns, colnames(maf)))
+        stop(paste("Error: Missing columns in input file: ",dc))
+    }
+
+    # keep only SNVs
+    maf <- dplyr::filter(maf, Variant_Type == 'SNP')
+
+    maf <- dplyr::mutate(maf,
+        ref=Reference_Allele,
+        alt=ifelse(Tumor_Seq_Allele2=="", Tumor_Seq_Allele1, Tumor_Seq_Allele2))
+    maf <- dplyr::filter(maf, ref!=alt)
+
+    mut_ranges <- GRanges(maf$Chromosome, IRanges(maf$Start_Position, maf$End_Position), maf$Strand)
+    mut_ranges <- checkSeqLevels(mut_ranges, bsgenome)
+
+
+    contexts <- getSeq(bsgenome, resize(mut_ranges, 3, fix='center'))
+    sample_names <- sort(unique(maf$Tumor_Sample_Barcode))
+
+    refs <- DNAStringSet(maf$ref)
+    alts <- DNAStringSet(maf$alt)
+    count_matrix <- matrix(0, ncol=length(change_triplet), nrow=length(sample_names))
+    rownames(count_matrix) = sample_names
+    colnames(count_matrix) = change_triplet
+    for(i in 1:nrow(maf)) {
+        rb <- refs[[i]]
+        cc <- contexts[i]
+   
+        if(rb == DNAString("C") || rb == DNAString("T")) {
+            ct <- sapply(alts[i], function(ab){paste0(rb,">",ab,":",cc)})
+   
+        } else {
+            ct <- sapply(alts[i], function(ab) {
+                paste0(reverseComplement(rb),">",
+                       reverseComplement(ab),":",
+                       reverseComplement(cc))})
+        }
+   
+        j <- match(maf[[i, "Tumor_Sample_Barcode"]], sample_names)
+        cx <- match(ct, change_triplet)
+        count_matrix[j, cx] = 1 + count_matrix[j,cx]
+    }
+
+    return(count_matrix)
+}

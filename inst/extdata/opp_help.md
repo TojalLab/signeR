@@ -1,6 +1,6 @@
 # Opportunity matrix
 
-Opportunity matrix is a tab-delimited text file with a matrix of counts of trinucleotide contexts found in studied genomes. It must structured as the SNV matrix, with mutations specified on the head line (for each SNV count, the Opportunity matrix shows the total number of genomic loci where the refered mutation could have occurred) . The Opportunity matrix can be generated from a VCF file, see signeR documentation. The table below shows a example of the opportunity matrix structure.
+The opportunity matrix is a tab-delimited text file matrix of counts of trinucleotide contexts found in the studied genomes. It must structured as the SNV matrix, with mutations specified on the columns (for each SNV count, the Opportunity matrix shows the total number of genomic loci where the referred mutation could have occurred). The Opportunity matrix can be generated from a BSgenome, see signeR documentation. The table below shows an example of the opportunity matrix structure.
 
 <table class="table table-striped table-hover" style="margin-left: auto; margin-right: auto;">
  <thead>
@@ -59,7 +59,7 @@ Opportunity matrix is a tab-delimited text file with a matrix of counts of trinu
 </tbody>
 </table>
 
-You can create a opportunity matrix from the reference genome using the method 
+You can create an opportunity matrix from the reference genome using the method 
 ```R
 genOpportunityFromGenome
 ```

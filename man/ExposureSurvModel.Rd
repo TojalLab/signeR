@@ -27,13 +27,13 @@
     \item{surv}{a Surv object from package survival or a matrix with columns 
     "time" and "status" (the last indicates whether 1:an event occurred or 
     0:there was a loss of follow up).}
-    \item{addata}{a data frame  withh additional data (one sample per row) that 
+    \item{addata}{a data frame with additional data (one sample per row) that 
     will be used in the Cox model along with exposure data.}
     \item{max_instances}{Maximum number of the exposure matrix instances to be 
-    analyzed. If the number of available E instances is bigger then this 
+    analyzed. If the number of available E instances is bigger than this 
     parameter, a subset of those will be randomly selected for analysis.}
     \item{quant}{the quantile of p-values and hazard ratios which will 
-    be used for selecting survival significant signatures. Deafult 
+    be used for selecting survival significant signatures. Default 
     is 0.5, which means the median p-value and hazard ratio will be considered.}
     \item{cutoff_pvalue}{threshold for p-values quantile for signatures to be
     considered as significant.}
