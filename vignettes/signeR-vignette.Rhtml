@@ -98,8 +98,9 @@ end.rcode-->
 <li><a href="#toc3">3: Preparing the input</a>
     <ul>
     <li><a href="#toc3.1">3.1: Input from VCF</a></li>
-    <li><a href="#toc3.2">3.2: Input from tab-delimited file</a></li>
-    <li><a href="#toc3.3">3.3: Known signatures</a></li>
+    <li><a href="#toc3.2">3.2: Input from MAF</a></li>
+    <li><a href="#toc3.3">3.3: Input from tab-delimited file</a></li>
+    <li><a href="#toc3.4">3.4: Known signatures</a></li>
     </ul>
 </li>
 <li><a href="#toc4">4: Estimating the number of mutational processes and their
@@ -217,7 +218,7 @@ sample. Although not required, this argument is highly recommended because it
 allows <b>signeR</b> to normalize the feature frequency over the analyzed
 region.</p>
 
-<p>Input matrices can be read both from a VCF or a tab-delimited file, as
+<p>Input matrices can be read both from a VCF, MAF or a tab-delimited file, as
 described next.</p>
 
 <h3 id="toc3.1">3.1: Input from VCF</h3>
@@ -282,7 +283,18 @@ opp <- genOpportunityFromGenome(mygenome, target_regions)
 
 end.rcode-->
 
-<h3 id="toc3.2">3.2: Input from tab-delimited file</h3>
+<h3 id="toc3.2">3.2: Input from MAF</h3>
+
+The <a target="_blank" 
+href="https://docs.gdc.cancer.gov/Encyclopedia/pages/Mutation_Annotation_Format/">MAF</a>
+file format is another popular format for storing somatic genetic variants,
+the signeR package also includes a function for generating a count matrix from the MAF:
+
+<!--begin.rcode eval=FALSE
+mut <- genCountMatrixFromMAF(mygenome, "my_file.maf")
+end.rcode-->
+
+<h3 id="toc3.3">3.3: Input from tab-delimited file</h3>
 
 <p>By convention, the input file should be tab-delimited with sample names as
 row names and features as column names. Features should be referred to in the
@@ -307,7 +319,7 @@ opp <- read.table(system.file("extdata","21_breast_cancers.opportunity.txt",
     package="signeR"))
 end.rcode-->
 
-<h3 id="toc3.3">3.3: Known signatures</h3>
+<h3 id="toc3.4">3.4: Known signatures</h3>
 
 <p>signeR analysis can incorporate any previous knowledge about the signatures present in the dataset. If signatures are known in advance, they can be provided as a matrix, which may be used by signeR in two different ways: a starting value that will be updated according to mutation patterns found on present data or a fixed set of parameters, kept unchanged during the estimation of exposures.</p>
 

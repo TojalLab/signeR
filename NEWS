@@ -2,6 +2,8 @@
 Changes in signeR 2.3.2:
 
     * New function: genCountMatrixFromMAF, to generate a count matrix from a MAF file
+    * support for reading MAF files on signeRFlow
+    * support for utilizing any BSgenome on signeRFlow
 
 Changes in signeR 2.3.1:
 
