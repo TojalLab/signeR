@@ -291,8 +291,21 @@ fitting <- function(input,
 
       vcfobj <- VariantAnnotation::readVcf(input$mutfile_fit$datapath, build)
 
-      df <- genCountMatrixFromVcf(mygenome, vcfobj)
-      
+      df <- tryCatch(
+        {
+          genCountMatrixFromVcf(mygenome, vcfobj)
+        },
+        error=function(cond){
+          showModal(modalDialog(
+            title = "Oh no!",
+            paste0(paste0("There was an error with the genCountMatrixFromVcf: ", cond)),
+            easyClose = TRUE,
+            footer = NULL
+          ))
+          return(NULL)
+        }
+      )
+
     } else if (ext == "maf" || ext == "maf.gz") {
       req(input$genbuild_fit)
 
@@ -309,7 +322,20 @@ fitting <- function(input,
         return(NULL)
       }
 
-      df <- genCountMatrixFromMAF(mygenome, input$mutfile_fit$datapath)   
+      df <- tryCatch(
+        {
+          genCountMatrixFromMAF(mygenome, input$mutfile_fit$datapath)
+        },
+        error=function(cond){
+          showModal(modalDialog(
+            title = "Oh no!",
+            paste0(paste0("There was an error with the genCountMatrixFromMAF: ", cond)),
+            easyClose = TRUE,
+            footer = NULL
+          ))
+          return(NULL)
+        }
+      )
 
     } else {
       df <- read.table(input$mutfile_fit$datapath, header=T,sep="\t",row.names=1,check.names=F)
