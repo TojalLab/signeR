@@ -42,6 +42,7 @@ library(VariantAnnotation)
 # input files, variant call and target
 vcf_file <- system.file("extdata","example.vcf", package="signeR")
 bed_file <- system.file("extdata","example.bed", package="signeR")
+maf_file <- system.file("extdata","example.maf", package="signeR")
 
 # BSgenome, will depend on your variant call
 library(BSgenome.Hsapiens.UCSC.hg19)
@@ -53,6 +54,7 @@ target_regions <- import(con=bed_file, format="bed")
 opp <- genOpportunityFromGenome(BSgenome.Hsapiens.UCSC.hg19,
     target_regions, nsamples=nrow(mut))
 
+mut <- genCountMatrixFromMAF(BSgenome.Hsapiens.UCSC.hg19, maf_file)
 
 # see also
 vignette(package="signeR")

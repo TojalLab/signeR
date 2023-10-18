@@ -325,7 +325,7 @@ end.rcode-->
 
 <p>The signatures matrix shall contain each signature in one column. An example of the required matrix format can be seen
 <a target="_blank"
-href="https://github.com/TojalLab/signeR/blob/devel/inst/extdata/21_breast_cancers.mutations.txt">
+href="https://github.com/TojalLab/signeR/blob/devel/inst/extdata/Cosmic_signatures_BRC.txt">
 here</a>.</p>
 
 <p>Along this tutorial a matrix of signatures found in breast cancer, as described in 
@@ -371,7 +371,7 @@ signatures <- signeR(M=mut, Opport=opp, nsig=3, main_eval=100, EM_eval=50, EMit_
 end.rcode-->
 </li>
 <li>Finally, when signatures are known in advance, <b>signeR</b> can use them as 
-a starting point for the estimation of signatures in the present dataset. To this end, signatures must be provided in a matrix, as described in item 3.3 above. For example,
+a starting point for the estimation of signatures in the present dataset. To this end, signatures must be provided in a matrix, as described in item 3.4 above. For example,
 the following command will make <b>signeR</b> use six Cosmic signatures found on breast cancer as a starting point:
 <!--begin.rcode eval=FALSE
 signatures.Pstart <- signeR(M=mut, Opport=opp, P=Pmatrix, fixedP=FALSE, main_eval=100, EM_eval=50, EMit_lim=20)
@@ -401,7 +401,7 @@ end.rcode-->
 
 <h2 id="toc5">5: Estimating exposures to known signatures.</h2>
 
-<p><b>signeR</b> also offers the possibility to estimate exposures to known signatures as, for example, the ones described on <a target="_blank" href="https://cancer.sanger.ac.uk/cosmic/signatures_v2"> Cosmic database</a>. In this case, signatures should be provided in a matrix, as described in item 3.3 above, and should be kept constant during analysis:</p>
+<p><b>signeR</b> also offers the possibility to estimate exposures to known signatures as, for example, the ones described on <a target="_blank" href="https://cancer.sanger.ac.uk/cosmic/signatures_v2"> Cosmic database</a>. In this case, signatures should be provided in a matrix, as described in item 3.4 above, and should be kept constant during analysis:</p>
 <!--begin.rcode
 Pmatrix <- as.matrix(read.table(system.file("extdata","Cosmic_signatures_BRC.txt",
     package="signeR"), sep="\t", check.names=FALSE))
@@ -412,7 +412,7 @@ end.rcode-->
 exposures.known.sigs <- signeR(M=mut, Opport=opp, P=Pmatrix, fixedP=TRUE, main_eval=100, EM_eval=50, EMit_lim=20)
 end.rcode-->
 
-<p>Exposures can then be recovered from the signer output by the following command (as in any signer analysis):</p>
+<p>Exposures can then be recovered from the signeR output by the following command (as in any signeR analysis):</p>
 
 <!--begin.rcode eval=FALSE
 exposures <- Median_exp(exposures.known.sigs$SignExposures)

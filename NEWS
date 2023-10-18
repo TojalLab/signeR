@@ -1,4 +1,8 @@
 
+Changes in signeR 2.3.3:
+
+    * Minor documentation fixes
+
 Changes in signeR 2.3.2:
 
     * New function: genCountMatrixFromMAF, to generate a count matrix from a MAF file
